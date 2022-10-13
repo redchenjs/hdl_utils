@@ -1,11 +1,11 @@
 /*
- * fir32.sv
+ * fir_32s.sv
  *
  *  Created on: 2022-10-13 12:53
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
-module fir32 #(
+module fir_32s #(
     parameter D_BITS = 16,
     parameter M_BITS = 16
 ) (
