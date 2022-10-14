@@ -36,7 +36,6 @@ logic signed [15:0] [M_BITS-1:0] a_i = {
   16'd070,	16'd078,  16'd084,  16'd087
 };
 
-logic signed      [D_BITS*2-1:0] x_t;
 logic signed [D_BITS+M_BITS-1:0] y_o;
 
 initial begin
@@ -56,12 +55,14 @@ always begin
     #100 clk_s_i <= ~clk_s_i;
 end
 
-logic         [7:0] cnt_s;
-logic         [5:0] addr_s;
-logic signed [15:0] data_s;
+logic                 [7:0] cnt_s;
+logic                 [5:0] addr_s;
+logic signed   [D_BITS-1:0] data_s;
 
-logic         [5:0] addr_c;
-logic signed [15:0] data_c;
+logic                 [5:0] addr_c;
+logic signed   [D_BITS-1:0] data_c;
+
+logic signed [D_BITS*2-1:0] data_t;
 
 always @(posedge clk_i or negedge rst_n_i) begin
     if (!rst_n_i) begin
@@ -71,6 +72,8 @@ always @(posedge clk_i or negedge rst_n_i) begin
 
         addr_c <= 'b0;
         data_c <= 'b0;
+
+        data_t <= 'b0;
     end else begin
         cnt_s  <= cnt_s + 'b1;
         addr_s <= addr_s + (cnt_s == 8'hff);
@@ -78,16 +81,16 @@ always @(posedge clk_i or negedge rst_n_i) begin
 
         addr_c <= addr_c + 'b1;
         data_c <= tbl_sin[addr_c];
+
+        data_t <= (data_s + 2 ** (D_BITS - 1)) * data_c;
     end
 end
-
-assign x_t = (data_s + 2 ** (D_BITS / 2)) * data_c;
 
 always @(posedge clk_s_i or negedge rst_n_i) begin
     if (!rst_n_i) begin
         x_i <= 'b0;
     end else begin
-        x_i <= x_t[D_BITS-1] ? -x_t[D_BITS*2-1:D_BITS] : x_t[D_BITS*2-1:D_BITS];
+        x_i <= data_t[D_BITS*2-1] ? -data_t[D_BITS*2-1:D_BITS] : data_t[D_BITS*2-1:D_BITS];
     end
 end
 
