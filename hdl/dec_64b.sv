@@ -7,7 +7,9 @@
 
 `timescale 1 ns / 1 ps
 
-module dec_64b(
+module dec_64b #(
+    parameter logic OUT_REG = 1'b1
+) (
     input logic clk_i,
     input logic rst_n_i,
 
@@ -23,7 +25,7 @@ logic [7:0] [7:0] dec_8b_lsb;
 
 logic [63:0] data_r;
 
-dec_8b enc_8b_msb_dec(
+dec_8b dec_8b_msb_i(
     .rst_n_i(init_i),
 
     .data_i(data_i[5:3]),
@@ -32,7 +34,7 @@ dec_8b enc_8b_msb_dec(
 
 generate
     for (genvar i = 0; i < 8; i++) begin
-        dec_8b dec_8b_lsb_dec(
+        dec_8b dec_8b_lsb_i(
             .rst_n_i(dec_8b_msb[i]),
 
             .data_i(data_i[2:0]),
@@ -43,14 +45,19 @@ generate
     end
 endgenerate
 
-always_ff @(posedge clk_i or negedge rst_n_i)
-begin
-    if (!rst_n_i) begin
-        done_o <= 'b0;
-        data_o <= 'b0;
-    end else begin
-        done_o <= init_i;
-        data_o <= init_i ? data_r : 'b0;
+if (!OUT_REG) begin
+    assign done_o = init_i;
+    assign data_o = rst_n_i ? data_r : 'b0;
+end else begin
+    always_ff @(posedge clk_i or negedge rst_n_i)
+    begin
+        if (!rst_n_i) begin
+            done_o <= 'b0;
+            data_o <= 'b0;
+        end else begin
+            done_o <= init_i;
+            data_o <= init_i ? data_r : 'b0;
+        end
     end
 end
 
