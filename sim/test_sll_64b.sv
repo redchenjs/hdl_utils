@@ -62,6 +62,13 @@ always begin
         #5 shift_i = 1'b1 << i;
     end
 
+    #5 data_i = {63'b0, 1'b1};
+
+    // DATA
+    for (int i = 0; i < 64; i++) begin
+        #5 shift_i = 1'b1 << i;
+    end
+
     #5 init_i = 1'b0;
 
     #75 rst_n_i = 1'b0;

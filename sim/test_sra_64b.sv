@@ -65,6 +65,13 @@ always begin
         #5 shift_i = 1'b1 << i;
     end
 
+    #15 data_i = {1'b1, 63'b0};
+
+    // DATA
+    for (int i = 0; i < 64; i++) begin
+        #5 shift_i = 1'b1 << i;
+    end
+
     #5 arith_i = 1'b1;
 
     #15 data_i = 64'haaaa_5555_aaaa_5555;
@@ -75,6 +82,20 @@ always begin
     end
 
     #15 data_i = 64'h5555_aaaa_5555_aaaa;
+
+    // DATA
+    for (int i = 0; i < 64; i++) begin
+        #5 shift_i = 1'b1 << i;
+    end
+
+    #15 data_i = {1'b1, 63'b0};
+
+    // DATA
+    for (int i = 0; i < 64; i++) begin
+        #5 shift_i = 1'b1 << i;
+    end
+
+    #15 data_i = {1'b0, 1'b1, 62'b0};
 
     // DATA
     for (int i = 0; i < 64; i++) begin

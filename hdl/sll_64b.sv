@@ -23,16 +23,16 @@ module sll_64b #(
 );
 
 logic        [63:0] data_r;
-logic [63:1] [63:0] data_mux;
+logic [63:0] [63:0] data_mux;
 
 always_comb begin
-    for (int i = 1; i < 64; i++) begin
+    for (int i = 0; i < 64; i++) begin
         for (int j = 0; j < i; j++) begin
             data_mux[i][j] = 1'b0;
         end
 
         for (int j = i; j < 64; j++) begin
-            data_mux[i][j] = data_i[j];
+            data_mux[i][j] = data_i[j - i];
         end
     end
 
