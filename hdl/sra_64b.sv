@@ -32,7 +32,7 @@ wire [63:0] data_5 = shift_i[5] ? {{32{arith_i ? data_i[63] : 1'b0}}, data_4[63:
 
 if (!OUT_REG) begin
     assign done_o = init_i;
-    assign data_o = rst_n_i ? data_5 : 'b0;
+    assign data_o = data_5;
 end else begin
     always_ff @(posedge clk_i or negedge rst_n_i)
     begin
@@ -41,7 +41,7 @@ end else begin
             data_o <= 'b0;
         end else begin
             done_o <= init_i;
-            data_o <= init_i ? data_5 : 'b0;
+            data_o <= init_i ? data_5 : data_o;
         end
     end
 end

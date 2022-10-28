@@ -52,7 +52,7 @@ endgenerate
 
 if (!OUT_REG) begin
     assign done_o = init_i;
-    assign data_o = rst_n_i ? data_r : 'b0;
+    assign data_o = data_r;
 end else begin
     always_ff @(posedge clk_i or negedge rst_n_i)
     begin
@@ -61,7 +61,7 @@ end else begin
             data_o <= 'b0;
         end else begin
             done_o <= init_i;
-            data_o <= init_i ? data_r : 'b0;
+            data_o <= init_i ? data_r : data_o;
         end
     end
 end

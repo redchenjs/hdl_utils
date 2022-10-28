@@ -23,9 +23,6 @@ module fir_32s #(
 logic signed [31:0]        [D_BITS-1:0] x_r;
 logic signed [15:0] [D_BITS+M_BITS-1:0] s_a;
 logic signed  [3:0] [D_BITS+M_BITS-1:0] s_b;
-logic signed        [D_BITS+M_BITS-1:0] y_r;
-
-assign y_o = y_r;
 
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
@@ -33,12 +30,12 @@ begin
         x_r <= 'b0;
         s_a <= 'b0;
         s_b <= 'b0;
-        y_r <= 'b0;
+        y_o <= 'b0;
     end else begin
         x_r <= {x_r[30:0], x_i};
 
         for (int i = 0; i < 16; i++) begin
-            s_a[i] <= (x_r[i] + x_r[31 - i]) * a_i[i];
+            s_a[i] <= {(x_r[i] + x_r[31 - i])} * a_i[i];
         end
 
         for (int i = 0; i < 4; i++) begin
@@ -46,7 +43,7 @@ begin
                     + s_a[i * 4 + 2] + s_a[i * 4 + 3];
         end
 
-        y_r <= s_b[0] + s_b[1] + s_b[2] + s_b[3];
+        y_o <= s_b[0] + s_b[1] + s_b[2] + s_b[3];
     end
 end
 

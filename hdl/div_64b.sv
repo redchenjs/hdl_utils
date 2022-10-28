@@ -35,13 +35,13 @@ logic [63:0] sll_div;
 
 logic [63:0] dec_sub;
 
-wire [5:0] enc_sub = enc_rem - enc_div;
-wire       cmp_sub = abs_rem >= abs_sll;
-wire       cmp_div = (abs_rem < abs_div) | (res_div == 'b0);
-
 wire [63:0] abs_rem = res_rem[63] ? -res_rem : res_rem;
 wire [63:0] abs_div = res_div[63] ? -res_div : res_div;
 wire [63:0] abs_sll = sll_div[63] ? -sll_div : sll_div;
+
+wire [5:0] enc_sub = enc_rem - enc_div;
+wire       cmp_sub = abs_rem >= abs_sll;
+wire       cmp_div = (abs_rem < abs_div) | (res_div == 'b0);
 
 pri_64b #(
     .OUT_REG(1'b0)
@@ -117,7 +117,7 @@ sll_64b #(
     .init_i(1'b1),
     .done_o(),
 
-    .shift_i(dec_sub),
+    .shift_i(enc_sub),
 
     .data_i(divisor_i),
     .data_o(sll_div)
