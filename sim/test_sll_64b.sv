@@ -17,7 +17,7 @@ logic rst_n_i;
 logic init_i;
 logic done_o;
 
-logic [63:0] shift_i;
+logic [5:0] shift_i;
 
 logic [63:0] data_i;
 logic [63:0] data_o;
@@ -59,14 +59,14 @@ always begin
 
     // DATA
     for (int i = 0; i < 64; i++) begin
-        #5 shift_i = 1'b1 << i;
+        #5 shift_i = i;
     end
 
     #5 data_i = {63'b0, 1'b1};
 
     // DATA
     for (int i = 0; i < 64; i++) begin
-        #5 shift_i = 1'b1 << i;
+        #5 shift_i = i;
     end
 
     #5 init_i = 1'b0;
