@@ -40,8 +40,10 @@ wire [63:0] abs_div = res_div[63] ? -res_div : res_div;
 wire [63:0] abs_sll = sll_div[63] ? -sll_div : sll_div;
 
 wire [5:0] enc_sub = enc_rem - enc_div;
-wire       cmp_sub = abs_rem >= abs_sll;
-wire       cmp_div = (abs_rem < abs_div) | (res_div == 'b0);
+
+wire res_upd = (abs_rem >= abs_sll);
+wire res_out = (abs_rem < abs_div);
+wire res_err = (res_div == 'b0);
 
 pri_64b #(
     .OUT_REG(1'b0)
@@ -119,7 +121,7 @@ sll_64b #(
 
     .shift_i(enc_sub),
 
-    .data_i(divisor_i),
+    .data_i(res_div),
     .data_o(sll_div)
 );
 
@@ -148,9 +150,9 @@ begin
                 res_div <= divisor_i;
             end
         end else begin
-            done_o <= cmp_div;
+            done_o <= res_out | res_err;
 
-            if (cmp_sub) begin
+            if (res_upd & ~res_err) begin
                 res_quo <= res_quo + (sig_quo ? -dec_sub : dec_sub);
                 res_rem <= res_rem - (sig_quo ? -sll_div : sll_div);
             end else begin
@@ -159,8 +161,8 @@ begin
             end
         end
 
-        quotient_o  <= cmp_div ? res_quo : quotient_o;
-        remainder_o <= cmp_div ? res_rem : remainder_o;
+        quotient_o  <= (res_out | res_err) ? res_quo : quotient_o;
+        remainder_o <= (res_out | res_err) ? res_rem : remainder_o;
     end
 end
 
