@@ -21,7 +21,6 @@ module pri_64b #(
 );
 
 logic [7:0] pri_8b_or;
-logic [7:0] pri_8b_ci;
 logic [7:0] pri_8b_ep;
 
 logic [63:0] data_r;
