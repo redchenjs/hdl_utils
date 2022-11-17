@@ -36,7 +36,7 @@ always begin
     #13 rst_n_i <= 1'b0;
     #13 rst_n_i <= 1'b1;
 
-    #25 $stop;
+    #25 $finish;
 end
 
 endmodule

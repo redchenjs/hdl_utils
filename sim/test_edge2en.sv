@@ -49,7 +49,7 @@ always begin
     #12 data_i <= 1'b0;
 
     #25 rst_n_i <= 1'b0;
-    #25 $stop;
+    #25 $finish;
 end
 
 endmodule

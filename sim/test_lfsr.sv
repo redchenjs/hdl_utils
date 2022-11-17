@@ -1,26 +1,26 @@
 /*
- * test_data_sync.sv
+ * test_lfsr.sv
  *
- *  Created on: 2021-06-09 16:40
+ *  Created on: 2020-07-09 22:59
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
 `timescale 1ns / 1ps
 
-module test_data_sync;
+module test_lfsr;
+
+parameter N = 4;
 
 logic clk_i;
 logic rst_n_i;
 
-logic data_i;
+logic [N-1:0] data_o;
 
-logic data_o;
-
-data_sync data_sync(
+lfsr #(
+    .N(N)
+) lfsr (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
-
-    .data_i(data_i),
 
     .data_o(data_o)
 );
@@ -28,8 +28,6 @@ data_sync data_sync(
 initial begin
     clk_i   <= 1'b1;
     rst_n_i <= 1'b0;
-
-    data_i <= 1'b0;
 
     #2 rst_n_i <= 1'b1;
 end
@@ -39,9 +37,8 @@ always begin
 end
 
 always begin
-    #3 data_i <= ~data_i;
+    #5120 rst_n_i <= 1'b0;
 
-    #100 rst_n_i <= 1'b1;
     #25 $finish;
 end
 
