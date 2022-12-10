@@ -38,7 +38,7 @@ wire [15:0] data_y = data_r * 77 + data_g * 150 + data_b * 29;
 
 if (!OUT_REG) begin
     assign done_o = init_i;
-    assign data_o = {3{data_y[15:8]}};
+    assign data_o = init_i ? {3{data_y[15:8]}} : data_i;
 end else begin
     always_ff @(posedge clk_i or negedge rst_n_i)
     begin

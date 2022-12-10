@@ -17,10 +17,10 @@ logic rst_n_t;
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        rst_n_t <= 1'b0;
-        rst_n_o <= 1'b0;
+        rst_n_t <= 'b0;
+        rst_n_o <= 'b0;
     end else begin
-        rst_n_t <= 1'b1;
+        rst_n_t <= 'b1;
         rst_n_o <= rst_n_t;
     end
 end

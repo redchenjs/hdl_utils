@@ -25,8 +25,8 @@ assign any_edge_o =  data_a ^ data_b;
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        data_a <= 1'b0;
-        data_b <= 1'b0;
+        data_a <= 'b0;
+        data_b <= 'b0;
     end else begin
         data_a <= data_i;
         data_b <= data_a;

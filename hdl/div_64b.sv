@@ -159,10 +159,10 @@ begin
                 res_quo <= res_quo + (sig_quo ? -{dec_sub[63], dec_sub[63:1]} : {dec_sub[63], dec_sub[63:1]});
                 res_rem <= res_rem - (sig_quo ? -{sll_div[63], sll_div[63:1]} : {sll_div[63], sll_div[63:1]});
             end
-        end
 
-        quotient_o  <= (res_out | res_err) ? res_quo : quotient_o;
-        remainder_o <= (res_out | res_err) ? res_rem : remainder_o;
+            quotient_o  <= (res_out | res_err) ? res_quo : quotient_o;
+            remainder_o <= (res_out | res_err) ? res_rem : remainder_o;
+        end
     end
 end
 

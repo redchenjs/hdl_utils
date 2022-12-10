@@ -18,8 +18,8 @@ logic data_t;
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        data_t <= 1'b0;
-        data_o <= 1'b0;
+        data_t <= 'b0;
+        data_o <= 'b0;
     end else begin
         data_t <= data_i;
         data_o <= data_t;
