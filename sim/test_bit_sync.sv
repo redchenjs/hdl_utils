@@ -1,5 +1,5 @@
 /*
- * test_data_sync.sv
+ * test_bit_sync.sv
  *
  *  Created on: 2021-06-09 16:40
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,29 +7,27 @@
 
 `timescale 1ns / 1ps
 
-module test_data_sync;
+module test_bit_sync;
 
 logic clk_i;
 logic rst_n_i;
 
-logic data_i;
+logic bit_i;
+logic bit_o;
 
-logic data_o;
-
-data_sync data_sync(
+bit_sync bit_sync(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .data_i(data_i),
-
-    .data_o(data_o)
+    .bit_i(bit_i),
+    .bit_o(bit_o)
 );
 
 initial begin
     clk_i   <= 1'b1;
     rst_n_i <= 1'b0;
 
-    data_i <= 1'b0;
+    bit_i <= 1'b0;
 
     #2 rst_n_i <= 1'b1;
 end
@@ -39,7 +37,7 @@ always begin
 end
 
 always begin
-    #3 data_i <= ~data_i;
+    #3 bit_i <= ~bit_i;
 
     #100 rst_n_i <= 1'b1;
     #25 $finish;
