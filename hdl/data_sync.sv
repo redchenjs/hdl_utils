@@ -1,28 +1,30 @@
 /*
- * bit_sync.sv
+ * data_sync.sv
  *
  *  Created on: 2021-06-09 16:38
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
-module bit_sync(
+module data_sync #(
+    parameter WIDTH = 8
+) (
     input logic clk_i,
     input logic rst_n_i,
 
-    input  logic bit_i,
-    output logic bit_o
+    input  logic [WIDTH-1:0] data_i,
+    output logic [WIDTH-1:0] data_o
 );
 
-logic bit_t;
+logic [WIDTH-1:0] data_t;
 
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        bit_t <= 'b0;
-        bit_o <= 'b0;
+        data_t <= 'b0;
+        data_o <= 'b0;
     end else begin
-        bit_t <= bit_i;
-        bit_o <= bit_t;
+        data_t <= data_i;
+        data_o <= data_t;
     end
 end
 

@@ -22,13 +22,15 @@ module ram_dp #(
     input logic [WIDTH/8-1:0] [7:0] wr_b_data_i,
     input logic       [WIDTH/8-1:0] wr_b_byte_en_i,
 
+    input logic rd_a_clk_i,
+
     input  logic                     rd_a_en_i,
-    input  logic                     rd_a_clk_i,
     input  logic [$clog2(DEPTH)-1:0] rd_a_addr_i,
     output logic         [WIDTH-1:0] rd_a_data_o,
 
+    input logic rd_b_clk_i,
+
     input  logic                     rd_b_en_i,
-    input  logic                     rd_b_clk_i,
     input  logic [$clog2(DEPTH)-1:0] rd_b_addr_i,
     output logic         [WIDTH-1:0] rd_b_data_o
 );

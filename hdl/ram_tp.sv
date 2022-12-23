@@ -10,14 +10,16 @@ module ram_tp #(
     parameter DEPTH = 8,
     parameter logic OUT_REG = 1'b1
 ) (
+    input logic wr_clk_i,
+
     input logic                     wr_en_i,
-    input logic                     wr_clk_i,
     input logic [$clog2(DEPTH)-1:0] wr_addr_i,
     input logic [WIDTH/8-1:0] [7:0] wr_data_i,
     input logic       [WIDTH/8-1:0] wr_byte_en_i,
 
+    input logic rd_clk_i,
+
     input  logic                     rd_en_i,
-    input  logic                     rd_clk_i,
     input  logic [$clog2(DEPTH)-1:0] rd_addr_i,
     output logic         [WIDTH-1:0] rd_data_o
 );
