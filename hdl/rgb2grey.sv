@@ -35,10 +35,11 @@ wire [7:0] data_g = data_i[15:8];
 wire [7:0] data_b = data_i[7:0];
 
 wire [15:0] data_y = data_r * 77 + data_g * 150 + data_b * 29;
+wire [23:0] data_t = {3{data_y[15:8]}};
 
 if (!OUT_REG) begin
     assign done_o = init_i;
-    assign data_o = init_i ? {3{data_y[15:8]}} : data_i;
+    assign data_o = init_i ? data_t : data_i;
 end else begin
     always_ff @(posedge clk_i or negedge rst_n_i)
     begin
@@ -47,7 +48,7 @@ end else begin
             data_o <= 'b0;
         end else begin
             done_o <= init_i;
-            data_o <= init_i ? {3{data_y[15:8]}} : data_o;
+            data_o <= init_i ? data_t : data_o;
         end
     end
 end
