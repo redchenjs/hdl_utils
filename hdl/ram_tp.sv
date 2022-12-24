@@ -33,23 +33,21 @@ generate
     if (O_WIDTH >= I_WIDTH) begin
         logic [I_WIDTH/8-1:0] [7:0] ram[I_DEPTH];
 
-        always @(posedge wr_clk_i) begin
-            if (wr_en_i) begin
-                for (int i = 0; i < I_WIDTH/8; i++) begin
-                    if (wr_byte_en_i[i]) begin
-                        ram[wr_addr_i][i] <= wr_data_i[i];
-                    end
+        for (genvar k = 0; k < I_WIDTH/8; k++) begin
+            always @(posedge wr_clk_i) begin
+                if (wr_en_i & wr_byte_en_i[k]) begin
+                    ram[wr_addr_i][k] <= wr_data_i[k];
                 end
             end
         end
 
         for (genvar k = 0; k < O_WIDTH/I_WIDTH; k++) begin
             if (!OUT_REG) begin
-                assign rd_data_o[k * I_WIDTH + I_WIDTH - 1 :  k * I_WIDTH] = ram[rd_addr_ext + k];
+                assign rd_data_o[k*I_WIDTH+I_WIDTH-1:k*I_WIDTH] = ram[rd_addr_ext + k];
             end else begin
                 always @(posedge rd_clk_i) begin
                     if (rd_en_i) begin
-                        rd_data_o[k * I_WIDTH + I_WIDTH - 1 :  k * I_WIDTH] <= ram[rd_addr_ext + k];
+                        rd_data_o[k*I_WIDTH+I_WIDTH-1:k*I_WIDTH] <= ram[rd_addr_ext + k];
                     end
                 end
             end

@@ -37,23 +37,19 @@ module ram_dp #(
 
 logic [WIDTH/8-1:0] [7:0] ram[DEPTH];
 
-always @(posedge wr_clk_i) begin
-    if (wr_a_en_i) begin
-        for (int i = 0; i < WIDTH/8; i++) begin
-            if (wr_a_byte_en_i[i]) begin
-                ram[wr_a_addr_i][i] <= wr_a_data_i[i];
+generate
+    for (genvar k = 0; k < WIDTH/8; k++) begin
+        always @(posedge wr_clk_i) begin
+            if (wr_a_en_i & wr_a_byte_en_i[k]) begin
+                ram[wr_a_addr_i][k] <= wr_a_data_i[k];
             end
-        end
-    end
 
-    if (wr_b_en_i) begin
-        for (int i = 0; i < WIDTH/8; i++) begin
-            if (wr_b_byte_en_i[i]) begin
-                ram[wr_b_addr_i][i] <= wr_b_data_i[i];
+            if (wr_b_en_i & wr_b_byte_en_i[k]) begin
+                ram[wr_b_addr_i][k] <= wr_b_data_i[k];
             end
         end
     end
-end
+endgenerate
 
 if (!OUT_REG) begin
     assign rd_a_data_o = ram[rd_a_addr_i];

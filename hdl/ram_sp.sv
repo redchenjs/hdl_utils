@@ -26,15 +26,15 @@ module ram_sp #(
 
 logic [WIDTH/8-1:0] [7:0] ram[DEPTH];
 
-always @(posedge wr_clk_i) begin
-    if (wr_en_i) begin
-        for (int i = 0; i < WIDTH/8; i++) begin
-            if (wr_byte_en_i[i]) begin
-                ram[rw_addr_i][i] <= rw_data_i[i];
+generate
+    for (genvar k = 0; k < WIDTH/8; k++) begin
+        always @(posedge wr_clk_i) begin
+            if (wr_en_i & wr_byte_en_i[k]) begin
+                ram[rw_addr_i][k] <= rw_data_i[k];
             end
         end
     end
-end
+endgenerate
 
 if (!OUT_REG) begin
     assign rd_data_o = ram[rw_addr_i];
