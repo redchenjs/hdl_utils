@@ -26,7 +26,7 @@ logic [WIDTH-1:0] data_t;
 always_comb begin
     data_t[WIDTH-1] = data_i[WIDTH-1];
 
-    for (int i = WIDTH - 2; i >= 0; i--) begin
+    for (int i = WIDTH-2; i >= 0; i--) begin
         data_t[i] = data_i[i] ^ data_t[i + 1];
     end
 end
