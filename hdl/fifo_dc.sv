@@ -78,7 +78,7 @@ bin2gray #(
 
 data_sync #(
     .WIDTH($clog2(I_DEPTH)+1)
-) wr_addr_w2r (
+) data_sync_w2r (
     .clk_i(rd_clk_i),
     .rst_n_i(rd_rst_n_i),
 
@@ -116,7 +116,7 @@ bin2gray #(
 
 data_sync #(
     .WIDTH($clog2(O_DEPTH)+1)
-) rd_addr_r2w (
+) data_sync_r2w (
     .clk_i(wr_clk_i),
     .rst_n_i(wr_rst_n_i),
 
