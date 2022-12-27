@@ -5,6 +5,8 @@
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
+`timescale 1 ns / 1 ps
+
 module rst_sync(
     input logic clk_i,
 

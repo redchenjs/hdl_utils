@@ -16,7 +16,7 @@ module pri_8b(
 
 always_comb begin
     if (rst_n_i) begin
-        case (data_i) inside
+        casez (data_i)
             8'b1???_????:
                 data_o = 8'b1000_0000;
             8'b01??_????:

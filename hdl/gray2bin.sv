@@ -31,20 +31,22 @@ always_comb begin
     end
 end
 
-if (!OUT_REG) begin
-    assign done_o = init_i;
-    assign data_o = init_i ? data_t : 'b0;
-end else begin
-    always_ff @(posedge clk_i or negedge rst_n_i)
-    begin
-        if (!rst_n_i) begin
-            done_o <= 'b0;
-            data_o <= 'b0;
-        end else begin
-            done_o <= init_i;
-            data_o <= init_i ? data_t : data_o;
+generate
+    if (!OUT_REG) begin
+        assign done_o = init_i;
+        assign data_o = init_i ? data_t : 'b0;
+    end else begin
+        always_ff @(posedge clk_i or negedge rst_n_i)
+        begin
+            if (!rst_n_i) begin
+                done_o <= 'b0;
+                data_o <= 'b0;
+            end else begin
+                done_o <= init_i;
+                data_o <= init_i ? data_t : data_o;
+            end
         end
     end
-end
+endgenerate
 
 endmodule

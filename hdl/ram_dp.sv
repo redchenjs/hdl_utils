@@ -5,6 +5,8 @@
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
+`timescale 1 ns / 1 ps
+
 module ram_dp #(
     parameter WIDTH = 8,
     parameter DEPTH = 8,
@@ -38,7 +40,8 @@ module ram_dp #(
 logic [WIDTH-1:0] ram[DEPTH];
 
 generate
-    for (genvar i = 0; i < WIDTH/8; i++) begin
+    genvar i;
+    for (i = 0; i < WIDTH/8; i++) begin: gen_wr_be
         always_ff @(posedge wr_clk_i) begin
             if (wr_a_en_i & wr_a_byte_en_i[i]) begin
                 ram[wr_a_addr_i][i*8+7:i*8] <= wr_a_data_i[i*8+7:i*8];
@@ -49,23 +52,23 @@ generate
             end
         end
     end
+
+    if (!OUT_REG) begin
+        assign rd_a_data_o = ram[rd_a_addr_i];
+        assign rd_b_data_o = ram[rd_b_addr_i];
+    end else begin
+        always_ff @(posedge rd_a_clk_i) begin
+            if (rd_a_en_i) begin
+                rd_a_data_o <= ram[rd_a_addr_i];
+            end
+        end
+
+        always_ff @(posedge rd_b_clk_i) begin
+            if (rd_b_en_i) begin
+                rd_b_data_o <= ram[rd_b_addr_i];
+            end
+        end
+    end
 endgenerate
-
-if (!OUT_REG) begin
-    assign rd_a_data_o = ram[rd_a_addr_i];
-    assign rd_b_data_o = ram[rd_b_addr_i];
-end else begin
-    always_ff @(posedge rd_a_clk_i) begin
-        if (rd_a_en_i) begin
-            rd_a_data_o <= ram[rd_a_addr_i];
-        end
-    end
-
-    always_ff @(posedge rd_b_clk_i) begin
-        if (rd_b_en_i) begin
-            rd_b_data_o <= ram[rd_b_addr_i];
-        end
-    end
-end
 
 endmodule

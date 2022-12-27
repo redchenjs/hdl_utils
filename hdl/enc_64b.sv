@@ -24,44 +24,43 @@ logic       [7:0] enc_8b_or;
 logic       [2:0] enc_8b_msb;
 logic [7:0] [2:0] enc_8b_lsb;
 
-logic [5:0] data_r;
+wire [5:0] data_r = {enc_8b_msb, enc_8b_lsb[enc_8b_msb]};
 
-generate
-    for (genvar i = 0; i < 8; i++) begin
-        assign enc_8b_or[i] = |data_i[i * 8 + 7 : i * 8];
-
-        enc_8b enc_8b_lsb_i(
-            .rst_n_i(init_i),
-
-            .data_i(data_i[i * 8 + 7 : i * 8]),
-            .data_o(enc_8b_lsb[i])
-        );
-    end
-endgenerate
-
-enc_8b enc_8b_msb_i(
+enc_8b enc_8b_la(
     .rst_n_i(init_i),
 
     .data_i(enc_8b_or),
     .data_o(enc_8b_msb)
 );
 
-assign data_r = {enc_8b_msb, enc_8b_lsb[enc_8b_msb]};
+generate
+    genvar i;
+    for (i = 0; i < 8; i++) begin: gen_enc_ep
+        assign enc_8b_or[i] = |data_i[i * 8 + 7 : i * 8];
 
-if (!OUT_REG) begin
-    assign done_o = init_i;
-    assign data_o = init_i ? data_r : 'b0;
-end else begin
-    always_ff @(posedge clk_i or negedge rst_n_i)
-    begin
-        if (!rst_n_i) begin
-            done_o <= 'b0;
-            data_o <= 'b0;
-        end else begin
-            done_o <= init_i;
-            data_o <= init_i ? data_r : data_o;
+        enc_8b enc_8b_ep_i(
+            .rst_n_i(init_i),
+
+            .data_i(data_i[i * 8 + 7 : i * 8]),
+            .data_o(enc_8b_lsb[i])
+        );
+    end
+
+    if (!OUT_REG) begin
+        assign done_o = init_i;
+        assign data_o = init_i ? data_r : 'b0;
+    end else begin
+        always_ff @(posedge clk_i or negedge rst_n_i)
+        begin
+            if (!rst_n_i) begin
+                done_o <= 'b0;
+                data_o <= 'b0;
+            end else begin
+                done_o <= init_i;
+                data_o <= init_i ? data_r : data_o;
+            end
         end
     end
-end
+endgenerate
 
 endmodule

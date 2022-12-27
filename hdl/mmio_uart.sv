@@ -5,6 +5,8 @@
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
+`timescale 1 ns / 1 ps
+
 module mmio_uart #(
     parameter XLEN = 32,
     parameter BASE = 32'h4000_0000
@@ -148,6 +150,7 @@ begin
                     tx_data  <= wr_data_i[7:0];
                     tx_valid <= 'b1;
                 end
+                default;
             endcase
         end else begin
             tx_valid <= tx_ready ? 'b0 : tx_valid;

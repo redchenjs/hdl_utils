@@ -16,7 +16,7 @@ module enc_8b(
 
 always_comb begin
     if (rst_n_i) begin
-        case (data_i) inside
+        case (data_i)
             8'b1000_0000:
                 data_o = 3'b111;
             8'b0100_0000:

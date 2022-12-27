@@ -5,6 +5,8 @@
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
+`timescale 1 ns / 1 ps
+
 module ram_sp #(
     parameter WIDTH = 8,
     parameter DEPTH = 8,
@@ -27,23 +29,24 @@ module ram_sp #(
 logic [WIDTH-1:0] ram[DEPTH];
 
 generate
-    for (genvar i = 0; i < WIDTH/8; i++) begin
+    genvar i;
+    for (i = 0; i < WIDTH/8; i++) begin: gen_wr_be
         always_ff @(posedge wr_clk_i) begin
             if (wr_en_i & wr_byte_en_i[i]) begin
                 ram[rw_addr_i][i*8+7:i*8] <= rw_data_i[i*8+7:i*8];
             end
         end
     end
-endgenerate
 
-if (!OUT_REG) begin
-    assign rd_data_o = ram[rw_addr_i];
-end else begin
-    always_ff @(posedge rd_clk_i) begin
-        if (rd_en_i) begin
-            rd_data_o <= ram[rw_addr_i];
+    if (!OUT_REG) begin
+        assign rd_data_o = ram[rw_addr_i];
+    end else begin
+        always_ff @(posedge rd_clk_i) begin
+            if (rd_en_i) begin
+                rd_data_o <= ram[rw_addr_i];
+            end
         end
     end
-end
+endgenerate
 
 endmodule

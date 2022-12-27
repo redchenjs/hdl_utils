@@ -5,11 +5,13 @@
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
+`timescale 1 ns / 1 ps
+
 module fifo #(
-    parameter I_WIDTH = 8,
-    parameter I_DEPTH = 8,
-    parameter O_WIDTH = 8,
-    parameter O_DEPTH = 8
+    parameter I_WIDTH = 32,
+    parameter I_DEPTH = 64,
+    parameter O_WIDTH = 32,
+    parameter O_DEPTH = 64
 ) (
     input logic clk_i,
     input logic rst_n_i,
@@ -28,25 +30,27 @@ module fifo #(
 logic [$clog2(I_DEPTH):0] wr_addr;
 logic [$clog2(O_DEPTH):0] rd_addr;
 
-if (O_WIDTH >= I_WIDTH) begin
-    wire [$clog2(I_DEPTH):0] rd_addr_ext  = {rd_addr, {$clog2(I_DEPTH/O_DEPTH){1'b0}}};
-    wire [$clog2(I_DEPTH):0] rd_avail_ext = {wr_addr[$clog2(I_DEPTH)] ^ rd_addr_ext[$clog2(I_DEPTH)], wr_addr[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_ext[$clog2(I_DEPTH)-1:0]};
+generate
+    if (O_WIDTH >= I_WIDTH) begin
+        wire [$clog2(I_DEPTH):0] rd_addr_ext  = {rd_addr, {$clog2(I_DEPTH/O_DEPTH){1'b0}}};
+        wire [$clog2(I_DEPTH):0] rd_avail_ext = {wr_addr[$clog2(I_DEPTH)] ^ rd_addr_ext[$clog2(I_DEPTH)], wr_addr[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_ext[$clog2(I_DEPTH)-1:0]};
 
-    assign wr_full_o = (rd_addr_ext == {~wr_addr[$clog2(I_DEPTH)], wr_addr[$clog2(I_DEPTH)-1:0]});
-    assign wr_free_o = (I_DEPTH - ({wr_addr[$clog2(I_DEPTH)] ^ rd_addr_ext[$clog2(I_DEPTH)], wr_addr[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_ext[$clog2(I_DEPTH)-1:0]}));
+        assign wr_full_o = (rd_addr_ext == {~wr_addr[$clog2(I_DEPTH)], wr_addr[$clog2(I_DEPTH)-1:0]});
+        assign wr_free_o = (I_DEPTH - ({wr_addr[$clog2(I_DEPTH)] ^ rd_addr_ext[$clog2(I_DEPTH)], wr_addr[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_ext[$clog2(I_DEPTH)-1:0]}));
 
-    assign rd_empty_o = (rd_addr_ext == wr_addr);
-    assign rd_avail_o = ({{$clog2(I_DEPTH/O_DEPTH){1'b0}}, rd_avail_ext[$clog2(I_DEPTH):$clog2(I_DEPTH/O_DEPTH)]});
-end else begin
-    wire [$clog2(O_DEPTH):0] wr_addr_ext = {wr_addr, {$clog2(O_DEPTH/I_DEPTH){1'b0}}};
-    wire [$clog2(O_DEPTH):0] wr_free_ext = (O_DEPTH - ({wr_addr_ext[$clog2(O_DEPTH)] ^ rd_addr[$clog2(O_DEPTH)], wr_addr_ext[$clog2(O_DEPTH)-1:0]} - {1'b0, rd_addr[$clog2(O_DEPTH)-1:0]}));
+        assign rd_empty_o = (rd_addr_ext == wr_addr);
+        assign rd_avail_o = ({{$clog2(I_DEPTH/O_DEPTH){1'b0}}, rd_avail_ext[$clog2(I_DEPTH):$clog2(I_DEPTH/O_DEPTH)]});
+    end else begin
+        wire [$clog2(O_DEPTH):0] wr_addr_ext = {wr_addr, {$clog2(O_DEPTH/I_DEPTH){1'b0}}};
+        wire [$clog2(O_DEPTH):0] wr_free_ext = (O_DEPTH - ({wr_addr_ext[$clog2(O_DEPTH)] ^ rd_addr[$clog2(O_DEPTH)], wr_addr_ext[$clog2(O_DEPTH)-1:0]} - {1'b0, rd_addr[$clog2(O_DEPTH)-1:0]}));
 
-    assign wr_full_o = (rd_addr == {~wr_addr_ext[$clog2(O_DEPTH)], wr_addr_ext[$clog2(O_DEPTH)-1:0]});
-    assign wr_free_o = ({{$clog2(O_DEPTH/I_DEPTH){1'b0}}, wr_free_ext[$clog2(O_DEPTH):$clog2(O_DEPTH/I_DEPTH)]});
+        assign wr_full_o = (rd_addr == {~wr_addr_ext[$clog2(O_DEPTH)], wr_addr_ext[$clog2(O_DEPTH)-1:0]});
+        assign wr_free_o = ({{$clog2(O_DEPTH/I_DEPTH){1'b0}}, wr_free_ext[$clog2(O_DEPTH):$clog2(O_DEPTH/I_DEPTH)]});
 
-    assign rd_empty_o = (rd_addr == wr_addr_ext);
-    assign rd_avail_o = ({wr_addr_ext[$clog2(O_DEPTH)] ^ rd_addr[$clog2(O_DEPTH)], wr_addr_ext[$clog2(O_DEPTH)-1:0]} - {1'b0, rd_addr[$clog2(O_DEPTH)-1:0]});
-end
+        assign rd_empty_o = (rd_addr == wr_addr_ext);
+        assign rd_avail_o = ({wr_addr_ext[$clog2(O_DEPTH)] ^ rd_addr[$clog2(O_DEPTH)], wr_addr_ext[$clog2(O_DEPTH)-1:0]} - {1'b0, rd_addr[$clog2(O_DEPTH)-1:0]});
+    end
+endgenerate
 
 ram_tp #(
     .I_WIDTH(I_WIDTH),

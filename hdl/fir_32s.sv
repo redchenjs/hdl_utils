@@ -5,6 +5,8 @@
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
+`timescale 1 ns / 1 ps
+
 module fir_32s #(
     parameter D_BITS = 16,
     parameter M_BITS = 16

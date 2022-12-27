@@ -16,7 +16,7 @@ module dec_8b(
 
 always_comb begin
     if (rst_n_i) begin
-        case (data_i) inside
+        case (data_i)
             3'b111:
                 data_o = 8'b1000_0000;
             3'b110:

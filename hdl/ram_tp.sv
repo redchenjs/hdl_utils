@@ -5,6 +5,8 @@
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
+`timescale 1 ns / 1 ps
+
 module ram_tp #(
     parameter I_WIDTH = 8,
     parameter I_DEPTH = 8,
@@ -30,7 +32,8 @@ generate
     if (O_WIDTH >= I_WIDTH) begin
         logic [I_WIDTH-1:0] ram[I_DEPTH];
 
-        for (genvar i = 0; i < I_WIDTH/8; i++) begin
+        genvar i;
+        for (i = 0; i < I_WIDTH/8; i++) begin: gen_wr_be
             always_ff @(posedge wr_clk_i) begin
                 if (wr_en_i & wr_byte_en_i[i]) begin
                     ram[wr_addr_i][i*8+7:i*8] <= wr_data_i[i*8+7:i*8];
@@ -38,7 +41,8 @@ generate
             end
         end
 
-        for (genvar k = 0; k < O_WIDTH/I_WIDTH; k++) begin
+        genvar k;
+        for (k = 0; k < O_WIDTH/I_WIDTH; k++) begin: gen_rd_ext
             wire [$clog2(I_DEPTH)-1:0] rd_addr_ext = {rd_addr_i[$clog2(I_DEPTH)-$clog2(O_WIDTH/I_WIDTH)-1:0], {$clog2(O_WIDTH/I_WIDTH){1'b0}}} + k;
 
             if (!OUT_REG) begin
@@ -54,10 +58,12 @@ generate
     end else begin
         logic [O_WIDTH-1:0] ram[O_DEPTH];
 
-        for (genvar k = 0; k < I_WIDTH/O_WIDTH; k++) begin
+        genvar k;
+        for (k = 0; k < I_WIDTH/O_WIDTH; k++) begin: gen_wr_ext
             wire [$clog2(O_DEPTH)-1:0] wr_addr_ext = {wr_addr_i[$clog2(O_DEPTH)-$clog2(I_WIDTH/O_WIDTH)-1:0], {$clog2(I_WIDTH/O_WIDTH){1'b0}}} + k;
 
-            for (genvar i = 0; i < O_WIDTH/8; i++) begin
+            genvar i;
+            for (i = 0; i < O_WIDTH/8; i++) begin: gen_wr_be
                 always_ff @(posedge wr_clk_i) begin
                     if (wr_en_i & wr_byte_en_i[i]) begin
                         ram[wr_addr_ext][i*8+7:i*8] <= wr_data_i[k*O_WIDTH+i*8+7:k*O_WIDTH+i*8];
