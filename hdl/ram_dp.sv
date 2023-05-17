@@ -8,9 +8,11 @@
 `timescale 1 ns / 1 ps
 
 module ram_dp #(
+    parameter INIT = 0,
+    parameter FILE = "ram_init.txt",
     parameter WIDTH = 8,
     parameter DEPTH = 8,
-    parameter logic OUT_REG = 1'b1
+    parameter OUT_REG = 1
 ) (
     input logic wr_clk_i,
 
@@ -37,9 +39,15 @@ module ram_dp #(
     output logic         [WIDTH-1:0] rd_b_data_o
 );
 
-logic [WIDTH-1:0] ram[DEPTH];
-
 generate
+    logic [WIDTH-1:0] ram[DEPTH];
+
+    if (INIT) begin
+        initial begin
+            $readmemh(FILE, ram);
+        end
+    end
+
     genvar i;
     for (i = 0; i < WIDTH/8; i++) begin: gen_wr_be
         always_ff @(posedge wr_clk_i) begin

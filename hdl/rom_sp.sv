@@ -8,10 +8,10 @@
 `timescale 1 ns / 1 ps
 
 module rom_sp #(
-    parameter PATH = "rom_init.txt",
+    parameter FILE = "rom_init.txt",
     parameter WIDTH = 8,
     parameter DEPTH = 8,
-    parameter logic OUT_REG = 1'b1
+    parameter OUT_REG = 1
 ) (
     input logic rd_clk_i,
 
@@ -23,7 +23,7 @@ module rom_sp #(
 logic [WIDTH-1:0] rom[DEPTH];
 
 initial begin
-    $readmemh(PATH, rom);
+    $readmemh(FILE, rom);
 end
 
 generate

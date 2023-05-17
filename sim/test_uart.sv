@@ -9,7 +9,7 @@
 
 module test_uart;
 
-localparam BAUD_DIV = 32'd98;
+parameter BAUD_DIV = 32'd98;
 
 logic clk_i;
 logic rst_n_i;

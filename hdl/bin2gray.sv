@@ -9,7 +9,7 @@
 
 module bin2gray #(
     parameter WIDTH = 8,
-    parameter logic OUT_REG = 1'b1
+    parameter OUT_REG = 1
 ) (
     input logic clk_i,
     input logic rst_n_i,

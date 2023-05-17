@@ -8,7 +8,7 @@
 `timescale 1 ns / 1 ps
 
 module dec_64b #(
-    parameter logic OUT_REG = 1'b1
+    parameter OUT_REG = 1
 ) (
     input logic clk_i,
     input logic rst_n_i,

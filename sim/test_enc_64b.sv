@@ -9,7 +9,7 @@
 
 module test_enc_64b;
 
-parameter logic OUT_REG = 1'b1;
+parameter OUT_REG = 1;
 
 logic clk_i;
 logic rst_n_i;

@@ -8,11 +8,13 @@
 `timescale 1 ns / 1 ps
 
 module ram_tp #(
+    parameter INIT = 0,
+    parameter FILE = "ram_init.txt",
     parameter I_WIDTH = 8,
     parameter I_DEPTH = 8,
     parameter O_WIDTH = 8,
     parameter O_DEPTH = 8,
-    parameter logic OUT_REG = 1'b1
+    parameter OUT_REG = 1
 ) (
     input logic wr_clk_i,
 
@@ -31,6 +33,12 @@ module ram_tp #(
 generate
     if (O_WIDTH >= I_WIDTH) begin
         logic [I_WIDTH-1:0] ram[I_DEPTH];
+
+        if (INIT) begin
+            initial begin
+                $readmemh(FILE, ram);
+            end
+        end
 
         genvar i;
         for (i = 0; i < I_WIDTH/8; i++) begin: gen_wr_be
@@ -57,6 +65,12 @@ generate
         end
     end else begin
         logic [O_WIDTH-1:0] ram[O_DEPTH];
+
+        if (INIT) begin
+            initial begin
+                $readmemh(FILE, ram);
+            end
+        end
 
         genvar k;
         for (k = 0; k < I_WIDTH/O_WIDTH; k++) begin: gen_wr_ext

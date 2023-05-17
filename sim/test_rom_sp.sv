@@ -12,7 +12,7 @@ module test_rom_sp;
 parameter PATH = "rom_init.txt";
 parameter WIDTH = 32;
 parameter DEPTH = 65536;
-parameter logic OUT_REG = 1'b1;
+parameter OUT_REG = 1;
 
 logic rd_clk_i;
 
