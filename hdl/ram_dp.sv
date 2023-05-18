@@ -14,29 +14,27 @@ module ram_dp #(
     parameter DEPTH = 8,
     parameter OUT_REG = 1
 ) (
-    input logic wr_clk_i,
+    input logic rw_clk_a_i,
 
-    input logic                     wr_a_en_i,
-    input logic [$clog2(DEPTH)-1:0] wr_a_addr_i,
-    input logic         [WIDTH-1:0] wr_a_data_i,
-    input logic       [WIDTH/8-1:0] wr_a_byte_en_i,
+    input logic                     wr_en_a_i,
+    input logic [$clog2(DEPTH)-1:0] wr_addr_a_i,
+    input logic         [WIDTH-1:0] wr_data_a_i,
+    input logic       [WIDTH/8-1:0] wr_byte_en_a_i,
 
-    input logic                     wr_b_en_i,
-    input logic [$clog2(DEPTH)-1:0] wr_b_addr_i,
-    input logic         [WIDTH-1:0] wr_b_data_i,
-    input logic       [WIDTH/8-1:0] wr_b_byte_en_i,
+    input  logic                     rd_en_a_i,
+    input  logic [$clog2(DEPTH)-1:0] rd_addr_a_i,
+    output logic         [WIDTH-1:0] rd_data_a_o,
 
-    input logic rd_a_clk_i,
+    input logic rw_clk_b_i,
 
-    input  logic                     rd_a_en_i,
-    input  logic [$clog2(DEPTH)-1:0] rd_a_addr_i,
-    output logic         [WIDTH-1:0] rd_a_data_o,
+    input logic                     wr_en_b_i,
+    input logic [$clog2(DEPTH)-1:0] wr_addr_b_i,
+    input logic         [WIDTH-1:0] wr_data_b_i,
+    input logic       [WIDTH/8-1:0] wr_byte_en_b_i,
 
-    input logic rd_b_clk_i,
-
-    input  logic                     rd_b_en_i,
-    input  logic [$clog2(DEPTH)-1:0] rd_b_addr_i,
-    output logic         [WIDTH-1:0] rd_b_data_o
+    input  logic                     rd_en_b_i,
+    input  logic [$clog2(DEPTH)-1:0] rd_addr_b_i,
+    output logic         [WIDTH-1:0] rd_data_b_o
 );
 
 generate
@@ -50,30 +48,32 @@ generate
 
     genvar i;
     for (i = 0; i < WIDTH/8; i++) begin: gen_wr_be
-        always_ff @(posedge wr_clk_i) begin
-            if (wr_a_en_i & wr_a_byte_en_i[i]) begin
-                ram[wr_a_addr_i][i*8+7:i*8] <= wr_a_data_i[i*8+7:i*8];
+        always_ff @(posedge rw_clk_a_i) begin
+            if (wr_en_a_i & wr_byte_en_a_i[i]) begin
+                ram[wr_addr_a_i][i*8+7:i*8] <= wr_data_a_i[i*8+7:i*8];
             end
+        end
 
-            if (wr_b_en_i & wr_b_byte_en_i[i]) begin
-                ram[wr_b_addr_i][i*8+7:i*8] <= wr_b_data_i[i*8+7:i*8];
+        always_ff @(posedge rw_clk_b_i) begin
+            if (wr_en_b_i & wr_byte_en_b_i[i]) begin
+                ram[wr_addr_b_i][i*8+7:i*8] <= wr_data_b_i[i*8+7:i*8];
             end
         end
     end
 
     if (!OUT_REG) begin
-        assign rd_a_data_o = ram[rd_a_addr_i];
-        assign rd_b_data_o = ram[rd_b_addr_i];
+        assign rd_data_a_o = ram[rd_addr_a_i];
+        assign rd_data_b_o = ram[rd_addr_b_i];
     end else begin
-        always_ff @(posedge rd_a_clk_i) begin
-            if (rd_a_en_i) begin
-                rd_a_data_o <= ram[rd_a_addr_i];
+        always_ff @(posedge rw_clk_a_i) begin
+            if (rd_en_a_i) begin
+                rd_data_a_o <= ram[rd_addr_a_i];
             end
         end
 
-        always_ff @(posedge rd_b_clk_i) begin
-            if (rd_b_en_i) begin
-                rd_b_data_o <= ram[rd_b_addr_i];
+        always_ff @(posedge rw_clk_b_i) begin
+            if (rd_en_b_i) begin
+                rd_data_b_o <= ram[rd_addr_b_i];
             end
         end
     end

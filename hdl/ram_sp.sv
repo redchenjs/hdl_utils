@@ -14,16 +14,15 @@ module ram_sp #(
     parameter DEPTH = 8,
     parameter OUT_REG = 1
 ) (
-    input logic wr_clk_i,
+    input logic rw_clk_i,
 
     input logic               wr_en_i,
     input logic   [WIDTH-1:0] wr_data_i,
     input logic [WIDTH/8-1:0] wr_byte_en_i,
 
-    input logic rd_clk_i,
+    input logic [$clog2(DEPTH)-1:0] rw_addr_i,
 
     input  logic                     rd_en_i,
-    input  logic [$clog2(DEPTH)-1:0] rw_addr_i,
     output logic         [WIDTH-1:0] rd_data_o
 );
 
@@ -38,7 +37,7 @@ generate
 
     genvar i;
     for (i = 0; i < WIDTH/8; i++) begin: gen_wr_be
-        always_ff @(posedge wr_clk_i) begin
+        always_ff @(posedge rw_clk_i) begin
             if (wr_en_i & wr_byte_en_i[i]) begin
                 ram[rw_addr_i][i*8+7:i*8] <= wr_data_i[i*8+7:i*8];
             end
@@ -48,7 +47,7 @@ generate
     if (!OUT_REG) begin
         assign rd_data_o = ram[rw_addr_i];
     end else begin
-        always_ff @(posedge rd_clk_i) begin
+        always_ff @(posedge rw_clk_i) begin
             if (rd_en_i) begin
                 rd_data_o <= ram[rw_addr_i];
             end
