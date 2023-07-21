@@ -1,5 +1,5 @@
 /*
- * mmio_uart.sv
+ * uart_mmio.sv
  *
  *  Created on: 2021-08-22 18:36
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-module mmio_uart #(
+module uart_mmio #(
     parameter XLEN = 32,
     parameter BASE = 32'h4000_0000
 ) (
