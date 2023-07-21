@@ -8,7 +8,7 @@
 `timescale 1 ns / 1 ps
 
 module uart_core #(
-    parameter A_WIDTH = 8
+    parameter A_WIDTH = 8,
     parameter D_WIDTH = 32
 ) (
     input logic clk_i,
@@ -97,26 +97,26 @@ uart_tx uart_tx(
     .clk_i(clk_i),
     .rst_n_i(uart_ctrl_1.rst_n),
 
-    .tx_o(tx_o),
+    .baud_div_i(uart_ctrl_0.baud),
 
     .in_data_i(tx_data),
     .in_valid_i(tx_valid),
     .in_ready_o(tx_ready),
 
-    .baud_div_i(uart_ctrl_0.baud)
+    .tx_o(tx_o)
 );
 
 uart_rx uart_rx(
     .clk_i(clk_i),
     .rst_n_i(uart_ctrl_1.rst_n),
 
-    .rx_i(rx_i),
+    .baud_div_i(uart_ctrl_0.baud),
 
     .out_data_o(rx_data),
     .out_valid_o(rx_valid),
     .out_ready_i(rx_ready),
 
-    .baud_div_i(uart_ctrl_0.baud)
+    .rx_i(rx_i)
 );
 
 always_ff @(posedge clk_i or negedge rst_n_i)

@@ -15,24 +15,21 @@ logic rst_n_i;
 logic init_i;
 logic done_o;
 
-logic [63:0] dividend_i;
-logic [63:0] divisor_i;
+logic [63:0] num_i;
+logic [63:0] den_i;
 
-logic [63:0] quotient_o;
-logic [63:0] remainder_o;
+logic [63:0] quo_o;
+logic [63:0] rem_o;
 
 div_64b div_64b(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .init_i(init_i),
-    .done_o(done_o),
+    .in_data_i({num_i, den_i}),
+    .in_valid_i(init_i),
 
-    .dividend_i(dividend_i),
-    .divisor_i(divisor_i),
-
-    .quotient_o(quotient_o),
-    .remainder_o(remainder_o)
+    .out_data_o({quo_o, rem_o}),
+    .out_valid_o(done_o)
 );
 
 initial begin
@@ -41,11 +38,11 @@ initial begin
 
     init_i = 'b0;
 
-    dividend_i = 'b0;
-    divisor_i  = 'b0;
+    num_i = 'b0;
+    den_i = 'b0;
 
-    quotient_o  = 'b0;
-    remainder_o = 'b0;
+    quo_o = 'b0;
+    rem_o = 'b0;
 
     #2 rst_n_i = 1'b1;
 end
@@ -56,8 +53,8 @@ end
 
 always begin
     #5 init_i = 1'b1;
-       dividend_i = 'd1000001;
-       divisor_i  = 'd100;
+       num_i  = 'd1000001;
+       den_i  = 'd100;
 
     // DATA
     for (int i = 0; i < 64; i++) begin
@@ -65,8 +62,8 @@ always begin
     end
 
     #15 init_i = 1'b1;
-        dividend_i = -'d1000001;
-        divisor_i  =  'd100;
+        num_i  = -'d1000001;
+        den_i  =  'd100;
 
     // DATA
     for (int i = 0; i < 64; i++) begin
@@ -74,8 +71,8 @@ always begin
     end
 
     #15 init_i = 1'b1;
-        dividend_i =  'd1000001;
-        divisor_i  = -'d100;
+        num_i  =  'd1000001;
+        den_i  = -'d100;
 
     // DATA
     for (int i = 0; i < 64; i++) begin
@@ -83,8 +80,8 @@ always begin
     end
 
     #15 init_i = 1'b1;
-        dividend_i = -'d1000001;
-        divisor_i  = -'d100;
+        num_i  = -'d1000001;
+        den_i  = -'d100;
 
     // DATA
     for (int i = 0; i < 64; i++) begin

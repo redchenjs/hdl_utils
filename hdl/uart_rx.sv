@@ -11,13 +11,13 @@ module uart_rx(
     input logic clk_i,
     input logic rst_n_i,
 
-    input logic rx_i,
+    input logic [31:0] baud_div_i,
 
     output logic [7:0] out_data_o,
     output logic       out_valid_o,
     input  logic       out_ready_i,
 
-    input logic [31:0] baud_div_i
+    input logic rx_i
 );
 
 typedef enum logic [1:0] {

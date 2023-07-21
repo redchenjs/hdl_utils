@@ -27,16 +27,16 @@ spi_slave spi_slave(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
+    .in_data_i(data_i),
+    .in_valid_i(init_i),
+
+    .out_data_o(data_o),
+    .out_valid_o(done_o),
+
     .sclk_i(sclk_i),
     .mosi_i(mosi_i),
     .miso_o(miso_o),
-    .cs_n_i(cs_n_i),
-
-    .init_i(init_i),
-    .done_o(done_o),
-
-    .data_i(data_i),
-    .data_o(data_o)
+    .cs_n_i(cs_n_i)
 );
 
 initial begin

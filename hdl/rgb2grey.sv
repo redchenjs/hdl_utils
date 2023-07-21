@@ -13,11 +13,11 @@ module rgb2grey #(
     input logic clk_i,
     input logic rst_n_i,
 
-    input  logic init_i,
-    output logic done_o,
+    input logic [23:0] in_data_i,
+    input logic        in_valid_i,
 
-    input  logic [23:0] data_i,
-    output logic [23:0] data_o
+    output logic [23:0] out_data_o,
+    output logic        out_valid_o
 );
 
 // RGB => YUV
@@ -30,26 +30,26 @@ module rgb2grey #(
 // G = Y - 0.34414 (U - 128) - 0.71414 (V - 128)
 // B = Y + 1.772 (U - 128)
 
-wire [7:0] data_r = data_i[23:16];
-wire [7:0] data_g = data_i[15:8];
-wire [7:0] data_b = data_i[7:0];
+wire [7:0] data_r = in_data_i[23:16];
+wire [7:0] data_g = in_data_i[15: 8];
+wire [7:0] data_b = in_data_i[ 7: 0];
 
 wire [15:0] data_y = data_r * 77 + data_g * 150 + data_b * 29;
 wire [23:0] data_t = {3{data_y[15:8]}};
 
 generate
     if (!OUT_REG) begin
-        assign done_o = init_i;
-        assign data_o = init_i ? data_t : data_i;
+        assign out_data_o  = in_valid_i ? data_t : in_data_i;
+        assign out_valid_o = in_valid_i;
     end else begin
         always_ff @(posedge clk_i or negedge rst_n_i)
         begin
             if (!rst_n_i) begin
-                done_o <= 'b0;
-                data_o <= 'b0;
+                out_data_o  <= 'b0;
+                out_valid_o <= 'b0;
             end else begin
-                done_o <= init_i;
-                data_o <= init_i ? data_t : data_o;
+                out_data_o  <= in_valid_i ? data_t : out_data_o;
+                out_valid_o <= in_valid_i;
             end
         end
     end

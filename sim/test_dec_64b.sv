@@ -26,11 +26,11 @@ dec_64b #(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .init_i(init_i),
-    .done_o(done_o),
+    .in_data_i(data_i),
+    .in_valid_i(init_i),
 
-    .data_i(data_i),
-    .data_o(data_o)
+    .out_data_o(data_o),
+    .out_valid_o(done_o),
 );
 
 initial begin

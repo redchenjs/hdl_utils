@@ -14,9 +14,6 @@ module fir_32s #(
     input logic clk_i,
     input logic rst_n_i,
 
-    input  logic init_i,
-    output logic done_o,
-
     input  logic signed        [D_BITS-1:0] x_i,
     input  logic signed [15:0] [M_BITS-1:0] a_i,
     output logic signed [D_BITS+M_BITS-1:0] y_o

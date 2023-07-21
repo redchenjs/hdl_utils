@@ -34,7 +34,7 @@ wire wr_en = (wr_addr_i[31:8] == BASE[31:8]);
 assign rd_data_io = rd_en_r ? rd_data : {XLEN{1'bz}};
 
 uart_core #(
-    .A_WIDTH(XLEN)
+    .A_WIDTH(XLEN),
     .D_WIDTH(XLEN)
 ) uart_core (
     .clk_i(clk_i),

@@ -30,39 +30,39 @@ uart_tx uart_tx(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .tx_o(tx_o),
+    .baud_div_i(BAUD_DIV),
 
     .in_data_i(tx_data_i),
     .in_valid_i(tx_valid_i),
     .in_ready_o(tx_ready_o),
 
-    .baud_div_i(BAUD_DIV)
+    .tx_o(tx_o)
 );
 
 uart_rx uart_rx(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .rx_i(tx_o),
+    .baud_div_i(BAUD_DIV),
 
     .out_data_o(rx_data_o),
     .out_valid_o(rx_valid_o),
     .out_ready_i(rx_ready_i),
 
-    .baud_div_i(BAUD_DIV)
+    .rx_i(tx_o)
 );
 
 uart_tx uart_tx2(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .tx_o(tx2_o),
+    .baud_div_i(BAUD_DIV),
 
     .in_data_i(rx_data_o),
     .in_valid_i(rx_valid_o),
     .in_ready_o(rx_ready_i),
 
-    .baud_div_i(BAUD_DIV)
+    .tx_o(tx2_o)
 );
 
 always_ff @(posedge clk_i or negedge rst_n_i)

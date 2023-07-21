@@ -11,16 +11,16 @@ module spi_slave(
     input logic clk_i,
     input logic rst_n_i,
 
+    input logic [7:0] in_data_i,
+    input logic       in_valid_i,
+
+    output logic [7:0] out_data_o,
+    output logic       out_valid_o,
+
     input  logic sclk_i,
     input  logic mosi_i,
     output logic miso_o,
-    input  logic cs_n_i,
-
-    input  logic init_i,
-    output logic done_o,
-
-    input  logic [7:0] data_i,
-    output logic [7:0] data_o
+    input  logic cs_n_i
 );
 
 logic sclk_p;
@@ -32,14 +32,14 @@ logic       bit_mosi;
 logic [7:0] byte_mosi;
 logic [7:0] byte_miso;
 
-assign miso_o = byte_miso[7];
-assign data_o = byte_mosi;
+assign     miso_o = byte_miso[7];
+assign out_data_o = byte_mosi;
 
 edge2en sclk_en(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .data_i(sclk_i),
+    .in_data_i(sclk_i),
 
     .pos_edge_o(sclk_p),
     .neg_edge_o(sclk_n),
@@ -54,14 +54,14 @@ begin
         byte_mosi <= 'b0;
         byte_miso <= 'b0;
 
-        done_o <= 'b0;
+        out_valid_o <= 'b0;
     end else begin
         bit_sel <= cs_n_i ? 'b0 : (sclk_p ? bit_sel + 'b1 : bit_sel);
 
         byte_mosi <= sclk_p ? {byte_mosi[6:0], mosi_i} : byte_mosi;
-        byte_miso <= sclk_n ? ((bit_sel == 'b0) ? data_i : {byte_miso[6:0], 1'b0}) : byte_miso;
+        byte_miso <= sclk_n ? ((bit_sel == 'b0) ? in_data_i : {byte_miso[6:0], 1'b0}) : byte_miso;
 
-        done_o <= (done_o & init_i) ? 'b0 : (sclk_p & (bit_sel == 3'h7));
+        out_valid_o <= (out_valid_o & in_valid_i) ? 'b0 : (sclk_p & (bit_sel == 3'h7));
     end
 end
 

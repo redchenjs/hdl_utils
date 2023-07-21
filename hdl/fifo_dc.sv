@@ -68,16 +68,16 @@ endgenerate
 
 bin2gray #(
     .WIDTH($clog2(I_DEPTH)+1),
-    .OUT_REG(1'b0)
+    .OUT_REG('b0)
 ) bin2gray_w2r (
     .clk_i(wr_clk_i),
     .rst_n_i(wr_rst_n_i),
 
-    .init_i(1'b1),
-    .done_o(),
+    .in_data_i(wr_addr_w),
+    .in_valid_i('b1),
 
-    .data_i(wr_addr_w),
-    .data_o(wr_addr_g)
+    .out_data_o(wr_addr_g),
+    .out_valid_o()
 );
 
 data_sync #(
@@ -92,30 +92,30 @@ data_sync #(
 
 gray2bin #(
     .WIDTH($clog2(I_DEPTH)+1),
-    .OUT_REG(1'b0)
+    .OUT_REG('b0)
 ) gray2bin_w2r (
     .clk_i(rd_clk_i),
     .rst_n_i(rd_rst_n_i),
 
-    .init_i(1'b1),
-    .done_o(),
+    .in_data_i(wr_addr_s),
+    .in_valid_i('b1),
 
-    .data_i(wr_addr_s),
-    .data_o(wr_addr_r)
+    .out_data_o(wr_addr_r),
+    .out_valid_o()
 );
 
 bin2gray #(
     .WIDTH($clog2(O_DEPTH)+1),
-    .OUT_REG(1'b0)
+    .OUT_REG('b0)
 ) bin2gray_r2w (
     .clk_i(rd_clk_i),
     .rst_n_i(rd_rst_n_i),
 
-    .init_i(1'b1),
-    .done_o(),
+    .in_data_i(rd_addr_r),
+    .in_valid_i('b1),
 
-    .data_i(rd_addr_r),
-    .data_o(rd_addr_g)
+    .out_data_o(rd_addr_g),
+    .out_valid_o()
 );
 
 data_sync #(
@@ -130,16 +130,16 @@ data_sync #(
 
 gray2bin #(
     .WIDTH($clog2(O_DEPTH)+1),
-    .OUT_REG(1'b0)
+    .OUT_REG('b0)
 ) gray2bin_r2w (
     .clk_i(wr_clk_i),
     .rst_n_i(wr_rst_n_i),
 
-    .init_i(1'b1),
-    .done_o(),
+    .in_data_i(rd_addr_s),
+    .in_valid_i('b1),
 
-    .data_i(rd_addr_s),
-    .data_o(rd_addr_w)
+    .out_data_o(rd_addr_w),
+    .out_valid_o()
 );
 
 ram_tp #(
