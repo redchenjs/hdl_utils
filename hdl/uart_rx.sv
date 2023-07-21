@@ -11,11 +11,11 @@ module uart_rx(
     input logic clk_i,
     input logic rst_n_i,
 
-    input  logic init_i,
-    output logic done_o,
+    input logic rx_i,
 
-    input  logic       data_i,
-    output logic [7:0] data_o,
+    output logic [7:0] out_data_o,
+    output logic       out_valid_o,
+    input  logic       out_ready_i,
 
     input logic [31:0] baud_div_i
 );
@@ -37,13 +37,13 @@ logic [7:0] bit_sft;
 
 logic rx_n;
 
-assign data_o = bit_sft;
+assign out_data_o = bit_sft;
 
 edge2en rx_en(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .data_i(data_i),
+    .data_i(rx_i),
 
     .pos_edge_o(),
     .neg_edge_o(rx_n),
@@ -64,9 +64,9 @@ end
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        done_o <= 'b0;
+        out_valid_o <= 'b0;
     end else begin
-        done_o <= clk_s & (bit_sel == 3'h7) ? 'b1 : (init_i ? 'b0 : done_o);
+        out_valid_o <= clk_s & (bit_sel == 3'h7) ? 'b1 : (out_ready_i ? 'b0 : out_valid_o);
     end
 end
 
@@ -86,7 +86,7 @@ begin
             DATA:
                 ctl_sta <= clk_s & (bit_sel == 3'h7) ? STOP : ctl_sta;
             STOP:
-                ctl_sta <= init_i ? IDLE : ctl_sta;
+                ctl_sta <= out_ready_i ? IDLE : ctl_sta;
             default:
                 ctl_sta <= IDLE;
         endcase
@@ -98,7 +98,7 @@ begin
             end
             DATA: begin
                 bit_sel <= clk_s ? bit_sel + 'b1 : bit_sel;
-                bit_sft <= clk_s ? {data_i, bit_sft[7:1]} : bit_sft;
+                bit_sft <= clk_s ? {rx_i, bit_sft[7:1]} : bit_sft;
             end
             default: begin
                 bit_sel <= bit_sel;

@@ -11,11 +11,11 @@ module uart_tx(
     input logic clk_i,
     input logic rst_n_i,
 
-    input  logic init_i,
-    output logic done_o,
+    output logic tx_o,
 
-    input  logic [7:0] data_i,
-    output logic       data_o,
+    input  logic [7:0] in_data_i,
+    input  logic       in_valid_i,
+    output logic       in_ready_o,
 
     input logic [31:0] baud_div_i
 );
@@ -49,9 +49,9 @@ end
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        done_o <= 'b1;
+        in_ready_o <= 'b1;
     end else begin
-        done_o <= init_i & done_o ? 'b0 : (clk_s & (ctl_sta == STOP) ? 'b1 : done_o);
+        in_ready_o <= in_valid_i & in_ready_o ? 'b0 : (clk_s & (ctl_sta == STOP) ? 'b1 : in_ready_o);
     end
 end
 
@@ -63,11 +63,11 @@ begin
         bit_sel <= 'b0;
         bit_sft <= 'b0;
 
-        data_o <= 'b1;
+        tx_o <= 'b1;
     end else begin
         case (ctl_sta)
             IDLE:
-                ctl_sta <= init_i ? START : ctl_sta;
+                ctl_sta <= in_valid_i ? START : ctl_sta;
             START:
                 ctl_sta <= clk_s ? DATA : ctl_sta;
             DATA:
@@ -81,7 +81,7 @@ begin
         case (ctl_sta)
             START: begin
                 bit_sel <= clk_s ? 'b0 : bit_sel;
-                bit_sft <= clk_s ? data_i : bit_sft;
+                bit_sft <= clk_s ? in_data_i : bit_sft;
             end
             DATA: begin
                 bit_sel <= clk_s ? bit_sel + 'b1 : bit_sel;
@@ -93,7 +93,7 @@ begin
             end
         endcase
 
-        data_o <= bit_sft[0] | (ctl_sta == IDLE) | (ctl_sta == STOP);
+        tx_o <= bit_sft[0] | (ctl_sta == IDLE) | (ctl_sta == STOP);
     end
 end
 

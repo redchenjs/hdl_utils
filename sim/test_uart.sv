@@ -24,17 +24,17 @@ logic [7:0] rx_data_o;
 logic       rx_valid_o;
 logic       rx_ready_i;
 
-logic tx_2_o;
+logic tx2_o;
 
 uart_tx uart_tx(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .init_i(tx_valid_i),
-    .done_o(tx_ready_o),
+    .tx_o(tx_o),
 
-    .data_i(tx_data_i),
-    .data_o(tx_o),
+    .in_data_i(tx_data_i),
+    .in_valid_i(tx_valid_i),
+    .in_ready_o(tx_ready_o),
 
     .baud_div_i(BAUD_DIV)
 );
@@ -43,24 +43,24 @@ uart_rx uart_rx(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .init_i(rx_ready_i),
-    .done_o(rx_valid_o),
+    .rx_i(tx_o),
 
-    .data_i(tx_o),
-    .data_o(rx_data_o),
+    .out_data_o(rx_data_o),
+    .out_valid_o(rx_valid_o),
+    .out_ready_i(rx_ready_i),
 
     .baud_div_i(BAUD_DIV)
 );
 
-uart_tx uart_tx_2(
+uart_tx uart_tx2(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .init_i(rx_valid_o),
-    .done_o(rx_ready_i),
+    .tx_o(tx2_o),
 
-    .data_i(rx_data_o),
-    .data_o(tx_2_o),
+    .in_data_i(rx_data_o),
+    .in_valid_i(rx_valid_o),
+    .in_ready_o(rx_ready_i),
 
     .baud_div_i(BAUD_DIV)
 );
