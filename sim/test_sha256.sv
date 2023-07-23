@@ -9,18 +9,31 @@
 
 module test_sha256;
 
-parameter I_WIDTH = 512;
-parameter O_WIDTH = 256;
+parameter I_BYTES = 16;
+parameter D_ITERS = 64;
+parameter D_WIDTH = 32;
+parameter O_BYTES = 8;
 
 logic clk_i;
 logic rst_n_i;
 
 logic init_i;
 logic last_i;
+logic next_i;
+logic null_o;
 logic done_o;
 
-logic [I_WIDTH-1:0] data_i;
-logic [O_WIDTH-1:0] data_o;
+logic [D_WIDTH-1:0] data_i;
+logic [D_WIDTH-1:0] data_o;
+
+logic [$clog2(I_BYTES)-1:0] data_cnt;
+
+logic [I_BYTES-1:0] [D_WIDTH-1:0] data_blk_0 = {
+    32'h2000_0000, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
+    32'h0000_0000, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
+    32'h0000_0000, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
+    32'h0000_0000, 32'h0000_0000, 32'h0000_0080, 32'h0a11_2001
+};
 
 sha256 sha256(
     .clk_i(clk_i),
@@ -29,18 +42,16 @@ sha256 sha256(
     .in_data_i(data_i),
     .in_last_i(last_i),
     .in_valid_i(init_i),
+    .in_ready_o(null_o),
 
     .out_data_o(data_o),
-    .out_valid_o(done_o)
+    .out_valid_o(done_o),
+    .out_ready_i(next_i)
 );
 
 initial begin
     clk_i   = 'b0;
     rst_n_i = 'b0;
-
-    init_i = 'b0;
-    last_i = 'b0;
-    data_i = 'b0;
 
     #2 rst_n_i = 'b1;
 end
@@ -49,25 +60,27 @@ always begin
     #2.5 clk_i = ~clk_i;
 end
 
+always_ff @(posedge clk_i or negedge rst_n_i)
+begin
+    if (!rst_n_i) begin
+        init_i <= 'b0;
+        last_i <= 'b0;
+        next_i <= 'b0;
+        data_i <= 'b0;
+
+        data_cnt <= 'b0;
+    end else begin
+        init_i <= null_o;
+        last_i <= 'b1;
+        next_i <= 'b1;
+        data_i <= data_blk_0[data_cnt];
+
+        data_cnt <= null_o ? data_cnt + 'b1 : data_cnt;
+    end
+end
+
 always begin
-    #5 init_i = 'b1;
-       last_i = 'b1;
-
-       data_i[I_WIDTH-8*0-1:I_WIDTH-8*1] = 'h01;
-       data_i[I_WIDTH-8*1-1:I_WIDTH-8*2] = 'h20;
-       data_i[I_WIDTH-8*2-1:I_WIDTH-8*3] = 'h11;
-       data_i[I_WIDTH-8*3-1:I_WIDTH-8*4] = 'h0a;
-       data_i[I_WIDTH-8*4-1:I_WIDTH-8*5] = 'h80;
-
-       data_i[31:24] = 'h00;
-       data_i[23:16] = 'h00;
-       data_i[15: 8] = 'h00;
-       data_i[ 7: 0] = 'h20;
-
-    #5000 init_i = 'b0;
-          last_i = 'b0;
-
-    #75 rst_n_i = 'b0;
+    #7500 rst_n_i = 'b0;
     #25 $finish;
 end
 

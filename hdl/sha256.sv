@@ -7,37 +7,33 @@
 
 `timescale 1 ns / 1 ps
 
-module sha256 #(
-    parameter D_WIDTH = 32,
-    parameter I_WIDTH = 512,
-    parameter O_WIDTH = 256
-) (
+parameter I_BYTES = 16;
+parameter D_ITERS = 64;
+parameter D_WIDTH = 32;
+parameter O_BYTES = 8;
+
+module sha256(
     input logic clk_i,
     input logic rst_n_i,
 
-    input  logic [I_WIDTH-1:0] in_data_i,
-    input  logic               in_last_i,
-    input  logic               in_valid_i,
-    output logic               in_ready_o,
+    input  logic [D_WIDTH/8-1:0] [7:0] in_data_i,
+    input  logic                       in_last_i,
+    input  logic                       in_valid_i,
+    output logic                       in_ready_o,
 
-    output logic [O_WIDTH-1:0] out_data_o,
-    output logic               out_valid_o
+    output logic [D_WIDTH/8-1:0] [7:0] out_data_o,
+    output logic                       out_valid_o,
+    input  logic                       out_ready_i
 );
 
 typedef enum logic [1:0] {
     IDLE = 'h0,
-    INIT = 'h1,
+    LOAD = 'h1,
     NEXT = 'h2,
-    LOAD = 'h3
+    LAST = 'h3
 } state_t;
 
 state_t ctl_sta;
-
-logic [5:0] iter;
-logic [6:0] iter_w;
-logic       iter_next;
-logic       iter_last;
-logic       iter_done;
 
 logic [D_WIDTH-1:0] a;
 logic [D_WIDTH-1:0] b;
@@ -48,37 +44,56 @@ logic [D_WIDTH-1:0] f;
 logic [D_WIDTH-1:0] g;
 logic [D_WIDTH-1:0] h;
 
-logic [15:0] [D_WIDTH-1:0] w;
-logic        [D_WIDTH-1:0] wk;
+logic [I_BYTES-1:0] [D_WIDTH-1:0] w;
+logic               [D_WIDTH-1:0] wk;
 
-wire [7:0] [D_WIDTH-1:0] n = {
-    'h5be0_cd19,    // a
-    'h1f83_d9ab,    // b
-    'h9b05_688c,    // c
-    'h510e_527f,    // d
-    'ha54f_f53a,    // e
-    'h3c6e_f372,    // f
-    'hbb67_ae85,    // g
-    'h6a09_e667     // h
+logic       [$clog2(I_BYTES)-1:0] din_cnt;
+logic [I_BYTES-1:0] [D_WIDTH-1:0] din_data;
+
+logic                             din_next;
+logic                             din_done;
+logic                             din_last;
+
+logic       [$clog2(O_BYTES)-1:0] dout_cnt;
+logic [O_BYTES-1:0] [D_WIDTH-1:0] dout_data;
+
+logic                             dout_next;
+logic                             dout_done;
+logic                             dout_keep;
+
+logic       [$clog2(D_ITERS)-1:0] iter_cnt;
+
+logic                             iter_next;
+logic                             iter_done;
+logic                             iter_last;
+
+wire [O_BYTES-1:0] [D_WIDTH-1:0] n = {
+    32'h5be0_cd19,    // h
+    32'h1f83_d9ab,    // g
+    32'h9b05_688c,    // f
+    32'h510e_527f,    // e
+    32'ha54f_f53a,    // d
+    32'h3c6e_f372,    // c
+    32'hbb67_ae85,    // b
+    32'h6a09_e667     // a
 };
-wire [15:0] [D_WIDTH-1:0] m;
-wire [63:0] [D_WIDTH-1:0] k = {
-    'hc671_78f2, 'hbef9_a3f7, 'ha450_6ceb, 'h90be_fffa,
-    'h8cc7_0208, 'h84c8_7814, 'h78a5_636f, 'h748f_82ee,
-    'h682e_6ff3, 'h5b9c_ca4f, 'h4ed8_aa4a, 'h391c_0cb3,
-    'h34b0_bcb5, 'h2748_774c, 'h1e37_6c08, 'h19a4_c116,
-    'h106a_a070, 'hf40e_3585, 'hd699_0624, 'hd192_e819,
-    'hc76c_51a3, 'hc24b_8b70, 'ha81a_664b, 'ha2bf_e8a1,
-    'h9272_2c85, 'h81c2_c92e, 'h766a_0abb, 'h650a_7354,
-    'h5338_0d13, 'h4d2c_6dfc, 'h2e1b_2138, 'h27b7_0a85,
-    'h1429_2967, 'h06ca_6351, 'hd5a7_9147, 'hc6e0_0bf3,
-    'hbf59_7fc7, 'hb003_27c8, 'ha831_c66d, 'h983e_5152,
-    'h76f9_88da, 'h5cb0_a9dc, 'h4a74_84aa, 'h2de9_2c6f,
-    'h240c_a1cc, 'h0fc1_9dc6, 'hefbe_4786, 'he49b_69c1,
-    'hc19b_f174, 'h9bdc_06a7, 'h80de_b1fe, 'h72be_5d74,
-    'h550c_7dc3, 'h2431_85be, 'h1283_5b01, 'hd807_aa98,
-    'hab1c_5ed5, 'h923f_82a4, 'h59f1_11f1, 'h3956_c25b,
-    'he9b5_dba5, 'hb5c0_fbcf, 'h7137_4491, 'h428a_2f98
+wire [D_ITERS-1:0] [D_WIDTH-1:0] k = {
+    32'hc671_78f2, 32'hbef9_a3f7, 32'ha450_6ceb, 32'h90be_fffa,
+    32'h8cc7_0208, 32'h84c8_7814, 32'h78a5_636f, 32'h748f_82ee,
+    32'h682e_6ff3, 32'h5b9c_ca4f, 32'h4ed8_aa4a, 32'h391c_0cb3,
+    32'h34b0_bcb5, 32'h2748_774c, 32'h1e37_6c08, 32'h19a4_c116,
+    32'h106a_a070, 32'hf40e_3585, 32'hd699_0624, 32'hd192_e819,
+    32'hc76c_51a3, 32'hc24b_8b70, 32'ha81a_664b, 32'ha2bf_e8a1,
+    32'h9272_2c85, 32'h81c2_c92e, 32'h766a_0abb, 32'h650a_7354,
+    32'h5338_0d13, 32'h4d2c_6dfc, 32'h2e1b_2138, 32'h27b7_0a85,
+    32'h1429_2967, 32'h06ca_6351, 32'hd5a7_9147, 32'hc6e0_0bf3,
+    32'hbf59_7fc7, 32'hb003_27c8, 32'ha831_c66d, 32'h983e_5152,
+    32'h76f9_88da, 32'h5cb0_a9dc, 32'h4a74_84aa, 32'h2de9_2c6f,
+    32'h240c_a1cc, 32'h0fc1_9dc6, 32'hefbe_4786, 32'he49b_69c1,
+    32'hc19b_f174, 32'h9bdc_06a7, 32'h80de_b1fe, 32'h72be_5d74,
+    32'h550c_7dc3, 32'h2431_85be, 32'h1283_5b01, 32'hd807_aa98,
+    32'hab1c_5ed5, 32'h923f_82a4, 32'h59f1_11f1, 32'h3956_c25b,
+    32'he9b5_dba5, 32'hb5c0_fbcf, 32'h7137_4491, 32'h428a_2f98
 };
 
 wire [D_WIDTH-1:0] x = w[14];
@@ -96,30 +111,51 @@ wire [D_WIDTH-1:0] sigma_1 = {y[16:0], y[31:17]} ^ {y[18:0], y[31:19]} ^ {10'b0,
 wire [D_WIDTH-1:0] big_sigma_0 = {a[1:0], a[31:2]} ^ {a[12:0], a[31:13]} ^ {a[21:0], a[31:22]};
 wire [D_WIDTH-1:0] big_sigma_1 = {e[5:0], e[31:6]} ^ {e[10:0], e[31:11]} ^ {e[24:0], e[31:25]};
 
-generate
-    genvar i;
-    for (i = 0; i < 16; i++) begin: gen_m
-        assign m[15-i] = in_data_i[D_WIDTH*(i+1)-1:D_WIDTH*i];
-    end
-endgenerate
-
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        in_ready_o <= 'b0;
+        din_cnt  <= 'b0;
+        din_data <= 'b0;
+
+        din_next <= 'b0;
+        din_done <= 'b0;
+        din_last <= 'b0;
+
+        in_ready_o <= 'b1;
     end else begin
-        in_ready_o <= in_valid_i & (ctl_sta != LOAD) & iter_next;
+        din_cnt           <= din_done ? 'b0 : (in_valid_i & in_ready_o ? din_cnt + 'b1 : din_cnt);
+        din_data[din_cnt] <= (in_valid_i & ~din_done) ? {in_data_i[0], in_data_i[1], in_data_i[2], in_data_i[3]} : din_data[din_cnt];
+
+        din_next <= (ctl_sta == NEXT) & (iter_cnt == 'd15);
+        din_done <= (din_cnt == 'd15) ? 'b1 : (din_next ? 'b0 : din_done);
+        din_last <= (in_valid_i & in_ready_o & in_last_i) ? 'b1 : (din_next ? 'b0 : din_last);
+
+        in_ready_o <= (din_cnt == 'd14) ? 'b0 : (din_next ? 'b1 : in_ready_o);
     end
 end
 
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
+        dout_cnt  <= 'b0;
+        dout_data <= 'b0;
+
+        dout_next <= 'b0;
+        dout_done <= 'b0;
+        dout_keep <= 'b0;
+
         out_data_o  <= 'b0;
         out_valid_o <= 'b0;
     end else begin
-        out_data_o  <= iter_done ? {a, b, c, d, e, f, g, h} : out_data_o;
-        out_valid_o <= iter_done;
+        dout_cnt  <= dout_done ? 'b0 : (dout_keep & out_ready_i ? dout_cnt + 'b1 : dout_cnt);
+        dout_data <= dout_next ? {a, b, c, d, e, f, g, h} : dout_data;
+
+        dout_next <= iter_done;
+        dout_done <= (dout_cnt == 'd6) ? 'b1 : (dout_next ? 'b0 : dout_done);
+        dout_keep <= dout_next & ~dout_done ? 'b1 : (dout_done ? 'b0 : dout_keep);
+
+        out_data_o  <= dout_data[dout_cnt];
+        out_valid_o <= dout_keep;
     end
 end
 
@@ -140,27 +176,24 @@ begin
 
         ctl_sta <= IDLE;
 
-        iter      <= 'b0;
-        iter_w    <= 'b0;
+        iter_cnt  <= 'b0;
         iter_next <= 'b0;
-        iter_last <= 'b0;
         iter_done <= 'b0;
+        iter_last <= 'b0;
     end else begin
         case (ctl_sta)
-            IDLE:
-                ctl_sta <= in_valid_i ? INIT : ctl_sta;
-            INIT:
-                ctl_sta <= NEXT;
-            NEXT:
-                ctl_sta <= iter_next ? LOAD : ctl_sta;
+            IDLE, LAST:
+                ctl_sta <= din_done ? LOAD : IDLE;
             LOAD:
-                ctl_sta <= iter_last ? IDLE : NEXT;
+                ctl_sta <= iter_last ? LAST : NEXT;
+            NEXT:
+                ctl_sta <= iter_next ? LOAD : NEXT;
             default:
                 ctl_sta <= IDLE;
         endcase
 
         case (ctl_sta)
-            IDLE: begin
+            IDLE, LAST: begin
                 a <= 'b0;
                 b <= 'b0;
                 c <= 'b0;
@@ -170,50 +203,10 @@ begin
                 g <= 'b0;
                 h <= 'b0;
 
-                w[0] <= m[0];
+                wk   <= 'b0;
+                w[0] <= din_data[0];
 
-                iter   <= 'b0;
-                iter_w <= 'b0;
-            end
-            INIT: begin
-                a <= a + n[0];
-                b <= b + n[1];
-                c <= c + n[2];
-                d <= d + n[3];
-                e <= e + n[4];
-                f <= f + n[5];
-                g <= g + n[6];
-                h <= h + n[7];
-
-                w[0] <= m[1];
-                wk   <= k[0] + w[0];
-
-                iter   <= 'b0;
-                iter_w <= 'd2;
-            end
-            NEXT: begin
-                a <= t_1 + t_2;
-                b <= a;
-                c <= b;
-                d <= c;
-                e <= d + t_1;
-                f <= e;
-                g <= f;
-                h <= g;
-
-                if (iter_w <= 15) begin
-                    w[0] <= m[iter_w];
-
-                    iter_w <= iter_w + 'b1;
-                end else if (iter_w <= 63) begin
-                    w[0] <= sigma_1 + w[6] + sigma_0 + w[15];
-
-                    iter_w <= iter_w + 'b1;
-                end
-
-                wk <= k[iter_w-1] + w[0];
-
-                iter <= iter + 'b1;
+                iter_cnt <= 'b0;
             end
             LOAD: begin
                 a <= a + n[0];
@@ -225,11 +218,30 @@ begin
                 g <= g + n[6];
                 h <= h + n[7];
 
-                w  <= 'b0;
-                wk <= 'b0;
+                wk   <= k[0] + w[0];
+                w[0] <= din_data[1];
 
-                iter   <= 'b0;
-                iter_w <= 'b0;
+                iter_cnt <= 'b0;
+            end
+            NEXT: begin
+                a <= t_1 + t_2;
+                b <= a;
+                c <= b;
+                d <= c;
+                e <= t_1 + d;
+                f <= e;
+                g <= f;
+                h <= g;
+
+                wk <= k[iter_cnt + 1] + w[0];
+
+                if ((iter_cnt + 2) <= 15) begin
+                    w[0] <= din_data[iter_cnt + 2];
+                end else if ((iter_cnt + 2) <= 63) begin
+                    w[0] <= sigma_1 + w[6] + sigma_0 + w[15];
+                end
+
+                iter_cnt <= iter_cnt + 'b1;
             end
         endcase
 
@@ -237,9 +249,9 @@ begin
             w[i] <= w[i-1];
         end
 
-        iter_next <= (iter == 'd62);
-        iter_last <= (in_valid_i & in_last_i) ? 'b1 : (ctl_sta == LOAD) ? 'b0 : iter_last;
-        iter_done <= (ctl_sta == LOAD);
+        iter_next <= (iter_cnt == 'd62);
+        iter_done <= (iter_cnt == 'd63);
+        iter_last <= ((ctl_sta == LOAD) & din_last) ? 'b1 : (ctl_sta == LAST) ? 'b0 : iter_last;
     end
 end
 
