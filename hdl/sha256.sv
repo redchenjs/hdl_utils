@@ -16,14 +16,14 @@ module sha256(
     input logic clk_i,
     input logic rst_n_i,
 
-    input  logic [D_WIDTH/8-1:0] [7:0] in_data_i,
-    input  logic                       in_last_i,
-    input  logic                       in_valid_i,
-    output logic                       in_ready_o,
+    input  logic [D_WIDTH-1:0] in_data_i,
+    input  logic               in_last_i,
+    input  logic               in_valid_i,
+    output logic               in_ready_o,
 
-    output logic [D_WIDTH/8-1:0] [7:0] out_data_o,
-    output logic                       out_valid_o,
-    input  logic                       out_ready_i
+    output logic [D_WIDTH-1:0] out_data_o,
+    output logic               out_valid_o,
+    input  logic               out_ready_i
 );
 
 typedef enum logic [1:0] {
@@ -183,7 +183,7 @@ begin
     end else begin
         case (ctl_sta)
             IDLE, LAST:
-                ctl_sta <= din_done ? LOAD : IDLE;
+                ctl_sta <= in_valid_i ? LOAD : IDLE;
             LOAD:
                 ctl_sta <= iter_last ? LAST : NEXT;
             NEXT:
@@ -204,7 +204,7 @@ begin
                 h <= 'b0;
 
                 wk   <= 'b0;
-                w[0] <= din_data[0];
+                w[0] <= in_data_i;
 
                 iter_cnt <= 'b0;
             end
@@ -219,7 +219,8 @@ begin
                 h <= h + n[7];
 
                 wk   <= k[0] + w[0];
-                w[0] <= din_data[1];
+                w[0] <= in_data_i;
+                w[1] <= w[0];
 
                 iter_cnt <= 'b0;
             end
@@ -236,22 +237,29 @@ begin
                 wk <= k[iter_cnt + 1] + w[0];
 
                 if ((iter_cnt + 2) <= 15) begin
-                    w[0] <= din_data[iter_cnt + 2];
+                    w[0] <= in_valid_i ? in_data_i : w[0];
+
+                    for (int i = 1; i < 16; i++) begin
+                        w[i] <= in_valid_i ? w[i-1] : w[i];
+                    end
+
+                    iter_cnt <= in_valid_i ? iter_cnt + 'b1 : iter_cnt;
                 end else if ((iter_cnt + 2) <= 63) begin
                     w[0] <= sigma_1 + w[6] + sigma_0 + w[15];
+
+                    for (int i = 1; i < 16; i++) begin
+                        w[i] <= w[i-1];
+                    end
+
+                    iter_cnt <= iter_cnt + 'b1;
                 end
 
-                iter_cnt <= iter_cnt + 'b1;
             end
         endcase
 
-        for (int i = 1; i < 16; i++) begin
-            w[i] <= w[i-1];
-        end
-
         iter_next <= (iter_cnt == 'd62);
         iter_done <= (iter_cnt == 'd63);
-        iter_last <= ((ctl_sta == LOAD) & din_last) ? 'b1 : (ctl_sta == LAST) ? 'b0 : iter_last;
+        iter_last <= ((ctl_sta == LOAD) & in_last_i) ? 'b1 : (ctl_sta == LAST) ? 'b0 : iter_last;
     end
 end
 
