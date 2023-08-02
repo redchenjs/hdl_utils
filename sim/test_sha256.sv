@@ -9,10 +9,10 @@
 
 module test_sha256;
 
-parameter I_BYTES = 16;
+parameter I_COUNT = 16;
 parameter D_ITERS = 64;
 parameter D_WIDTH = 32;
-parameter O_BYTES = 8;
+parameter O_COUNT = 8;
 
 logic clk_i;
 logic rst_n_i;
@@ -26,13 +26,20 @@ logic done_o;
 logic [D_WIDTH-1:0] data_i;
 logic [D_WIDTH-1:0] data_o;
 
-logic [$clog2(I_BYTES)-1:0] data_cnt;
+logic [$clog2(I_COUNT)-1:0] data_cnt;
 
-logic [I_BYTES-1:0] [D_WIDTH-1:0] data_blk_0 = {
-    32'h2000_0000, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
+logic [I_COUNT-1:0] [D_WIDTH-1:0] data_blk_0 = {
+    32'h0000_0020, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
     32'h0000_0000, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
     32'h0000_0000, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
-    32'h0000_0000, 32'h0000_0000, 32'h0000_0080, 32'h0a11_2001
+    32'h0000_0000, 32'h0000_0000, 32'h8000_0000, 32'h0120_110a
+};
+
+logic [I_COUNT-1:0] [D_WIDTH-1:0] data_blk_1 = {
+    32'h0000_0020, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
+    32'h0000_0000, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
+    32'h0000_0000, 32'h0000_0000, 32'h0000_0000, 32'h0000_0000,
+    32'h0000_0000, 32'h0000_0000, 32'h8000_0000, 32'h0120_110a
 };
 
 sha256 sha256(

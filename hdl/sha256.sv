@@ -7,10 +7,10 @@
 
 `timescale 1 ns / 1 ps
 
-parameter I_BYTES = 16;
+parameter I_COUNT = 16;
 parameter D_ITERS = 64;
 parameter D_WIDTH = 32;
-parameter O_BYTES = 8;
+parameter O_COUNT = 8;
 
 module sha256(
     input logic clk_i,
@@ -44,18 +44,11 @@ logic [D_WIDTH-1:0] f;
 logic [D_WIDTH-1:0] g;
 logic [D_WIDTH-1:0] h;
 
-logic [I_BYTES-1:0] [D_WIDTH-1:0] w;
+logic [I_COUNT-1:0] [D_WIDTH-1:0] w;
 logic               [D_WIDTH-1:0] wk;
 
-logic       [$clog2(I_BYTES)-1:0] din_cnt;
-logic [I_BYTES-1:0] [D_WIDTH-1:0] din_data;
-
-logic                             din_next;
-logic                             din_done;
-logic                             din_last;
-
-logic       [$clog2(O_BYTES)-1:0] dout_cnt;
-logic [O_BYTES-1:0] [D_WIDTH-1:0] dout_data;
+logic       [$clog2(O_COUNT)-1:0] dout_cnt;
+logic [O_COUNT-1:0] [D_WIDTH-1:0] dout_data;
 
 logic                             dout_next;
 logic                             dout_done;
@@ -67,7 +60,7 @@ logic                             iter_next;
 logic                             iter_done;
 logic                             iter_last;
 
-wire [O_BYTES-1:0] [D_WIDTH-1:0] n = {
+wire [O_COUNT-1:0] [D_WIDTH-1:0] n = {
     32'h5be0_cd19,    // h
     32'h1f83_d9ab,    // g
     32'h9b05_688c,    // f
@@ -114,23 +107,9 @@ wire [D_WIDTH-1:0] big_sigma_1 = {e[5:0], e[31:6]} ^ {e[10:0], e[31:11]} ^ {e[24
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        din_cnt  <= 'b0;
-        din_data <= 'b0;
-
-        din_next <= 'b0;
-        din_done <= 'b0;
-        din_last <= 'b0;
-
         in_ready_o <= 'b1;
     end else begin
-        din_cnt           <= din_done ? 'b0 : (in_valid_i & in_ready_o ? din_cnt + 'b1 : din_cnt);
-        din_data[din_cnt] <= (in_valid_i & ~din_done) ? {in_data_i[0], in_data_i[1], in_data_i[2], in_data_i[3]} : din_data[din_cnt];
-
-        din_next <= (ctl_sta == NEXT) & (iter_cnt == 'd15);
-        din_done <= (din_cnt == 'd15) ? 'b1 : (din_next ? 'b0 : din_done);
-        din_last <= (in_valid_i & in_ready_o & in_last_i) ? 'b1 : (din_next ? 'b0 : din_last);
-
-        in_ready_o <= (din_cnt == 'd14) ? 'b0 : (din_next ? 'b1 : in_ready_o);
+        in_ready_o <= (ctl_sta == NEXT) & iter_next & iter_last ? 'b1 : ((ctl_sta == NEXT) & (iter_cnt >= 12) ? 'b0 : in_ready_o);
     end
 end
 
@@ -244,7 +223,7 @@ begin
                     end
 
                     iter_cnt <= in_valid_i ? iter_cnt + 'b1 : iter_cnt;
-                end else if ((iter_cnt + 2) <= 63) begin
+                end else begin
                     w[0] <= sigma_1 + w[6] + sigma_0 + w[15];
 
                     for (int i = 1; i < 16; i++) begin
