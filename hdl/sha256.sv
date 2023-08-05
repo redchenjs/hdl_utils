@@ -44,18 +44,23 @@ logic [D_WIDTH-1:0] f;
 logic [D_WIDTH-1:0] g;
 logic [D_WIDTH-1:0] h;
 
+logic               [D_WIDTH-1:0] m;
 logic [I_COUNT-1:0] [D_WIDTH-1:0] w;
-logic               [D_WIDTH-1:0] wk;
+logic [O_COUNT-1:0] [D_WIDTH-1:0] t;
 
 logic       [$clog2(O_COUNT)-1:0] dout_cnt;
 logic [O_COUNT-1:0] [D_WIDTH-1:0] dout_data;
+logic                             dout_done;
 
 logic                             dout_next;
-logic                             dout_done;
 logic                             dout_keep;
 
 logic       [$clog2(D_ITERS)-1:0] iter_cnt;
 
+logic                             iter_save;
+logic                             iter_keep;
+
+logic                             iter_load;
 logic                             iter_next;
 logic                             iter_done;
 logic                             iter_last;
@@ -95,7 +100,7 @@ wire [D_WIDTH-1:0] y = w[ 1];
 wire [D_WIDTH-1:0] ch  = (e & f) ^ (~e & g);
 wire [D_WIDTH-1:0] mag = (a & b) ^ ( a & c) ^ (b & c);
 
-wire [D_WIDTH-1:0] t_1 = big_sigma_1 + ch + h + wk;
+wire [D_WIDTH-1:0] t_1 = big_sigma_1 + ch + h + m;
 wire [D_WIDTH-1:0] t_2 = big_sigma_0 + mag;
 
 wire [D_WIDTH-1:0] sigma_0 = {x[ 6:0], x[31: 7]} ^ {x[17:0], x[31:18]} ^ { 3'b0, x[31: 3]};
@@ -104,12 +109,14 @@ wire [D_WIDTH-1:0] sigma_1 = {y[16:0], y[31:17]} ^ {y[18:0], y[31:19]} ^ {10'b0,
 wire [D_WIDTH-1:0] big_sigma_0 = {a[1:0], a[31:2]} ^ {a[12:0], a[31:13]} ^ {a[21:0], a[31:22]};
 wire [D_WIDTH-1:0] big_sigma_1 = {e[5:0], e[31:6]} ^ {e[10:0], e[31:11]} ^ {e[24:0], e[31:25]};
 
+wire [D_WIDTH-1:0] in_data_s = {in_data_i[7:0], in_data_i[15:8], in_data_i[23:16], in_data_i[31:24]};
+
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
         in_ready_o <= 'b1;
     end else begin
-        in_ready_o <= (ctl_sta == NEXT) & iter_next & iter_last ? 'b1 : ((ctl_sta == NEXT) & (iter_cnt >= 12) ? 'b0 : in_ready_o);
+        in_ready_o <= (ctl_sta == NEXT) & iter_load ? 'b1 : (iter_cnt >= 12) & iter_keep ? 'b0 : in_ready_o;
     end
 end
 
@@ -118,9 +125,9 @@ begin
     if (!rst_n_i) begin
         dout_cnt  <= 'b0;
         dout_data <= 'b0;
+        dout_done <= 'b1;
 
         dout_next <= 'b0;
-        dout_done <= 'b0;
         dout_keep <= 'b0;
 
         out_data_o  <= 'b0;
@@ -128,10 +135,10 @@ begin
     end else begin
         dout_cnt  <= dout_done ? 'b0 : (dout_keep & out_ready_i ? dout_cnt + 'b1 : dout_cnt);
         dout_data <= dout_next ? {a, b, c, d, e, f, g, h} : dout_data;
-
-        dout_next <= iter_done;
         dout_done <= (dout_cnt == 'd6) ? 'b1 : (dout_next ? 'b0 : dout_done);
-        dout_keep <= dout_next & ~dout_done ? 'b1 : (dout_done ? 'b0 : dout_keep);
+
+        dout_next <= iter_last & iter_done;
+        dout_keep <= iter_last & dout_next & dout_done ? 'b1 : (dout_done ? 'b0 : dout_keep);
 
         out_data_o  <= dout_data[dout_cnt];
         out_valid_o <= dout_keep;
@@ -141,6 +148,8 @@ end
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
+        ctl_sta <= IDLE;
+
         a <= 'b0;
         b <= 'b0;
         c <= 'b0;
@@ -150,12 +159,16 @@ begin
         g <= 'b0;
         h <= 'b0;
 
-        w  <= 'b0;
-        wk <= 'b0;
+        m <= 'b0;
+        w <= 'b0;
+        t <= 'b0;
 
-        ctl_sta <= IDLE;
+        iter_cnt <= 'b0;
 
-        iter_cnt  <= 'b0;
+        iter_save <= 'b0;
+        iter_keep <= 'b0;
+
+        iter_load <= 'b0;
         iter_next <= 'b0;
         iter_done <= 'b0;
         iter_last <= 'b0;
@@ -182,23 +195,27 @@ begin
                 g <= 'b0;
                 h <= 'b0;
 
-                wk   <= 'b0;
-                w[0] <= in_data_i;
+                m <= 'b0;
+                t <= in_valid_i ? n : t;
+
+                w[0] <= in_data_s;
 
                 iter_cnt <= 'b0;
             end
             LOAD: begin
-                a <= a + n[0];
-                b <= b + n[1];
-                c <= c + n[2];
-                d <= d + n[3];
-                e <= e + n[4];
-                f <= f + n[5];
-                g <= g + n[6];
-                h <= h + n[7];
+                a <= a + t[0];
+                b <= b + t[1];
+                c <= c + t[2];
+                d <= d + t[3];
+                e <= e + t[4];
+                f <= f + t[5];
+                g <= g + t[6];
+                h <= h + t[7];
 
-                wk   <= k[0] + w[0];
-                w[0] <= in_data_i;
+                m <= k[0] + w[0];
+                t <= t;
+
+                w[0] <= in_data_s;
                 w[1] <= w[0];
 
                 iter_cnt <= 'b0;
@@ -213,10 +230,11 @@ begin
                 g <= f;
                 h <= g;
 
-                wk <= k[iter_cnt + 1] + w[0];
+                m <= k[iter_cnt + 1] + w[0];
+                t <= iter_save ? {h, g, f, e, d, c, b, a} : t;
 
-                if ((iter_cnt + 2) <= 15) begin
-                    w[0] <= in_valid_i ? in_data_i : w[0];
+                if ((iter_cnt + 2) <= 15 || iter_cnt >= 63) begin
+                    w[0] <= in_valid_i ? in_data_s : w[0];
 
                     for (int i = 1; i < 16; i++) begin
                         w[i] <= in_valid_i ? w[i-1] : w[i];
@@ -232,13 +250,16 @@ begin
 
                     iter_cnt <= iter_cnt + 'b1;
                 end
-
             end
         endcase
 
+        iter_save <= (ctl_sta == LOAD);
+        iter_keep <= (ctl_sta == LOAD) ? 'b1 : (iter_load ? 'b0 : iter_keep);
+
+        iter_load <= (iter_cnt == 'd60);
         iter_next <= (iter_cnt == 'd62);
         iter_done <= (iter_cnt == 'd63);
-        iter_last <= ((ctl_sta == LOAD) & in_last_i) ? 'b1 : (ctl_sta == LAST) ? 'b0 : iter_last;
+        iter_last <= (iter_cnt == 'd13) & in_valid_i & in_last_i ? 'b1 : (ctl_sta == LAST) ? 'b0 : iter_last;
     end
 end
 
