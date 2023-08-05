@@ -9,10 +9,11 @@
 
 module test_sha256;
 
+parameter I_WIDTH = 32;
+parameter O_WIDTH = 256;
+
 parameter I_COUNT = 17;
-parameter D_ITERS = 64;
-parameter D_WIDTH = 32;
-parameter O_COUNT = 8;
+parameter D_COUNT = 64;
 
 logic clk_i;
 logic rst_n_i;
@@ -23,8 +24,8 @@ logic next_i;
 logic null_o;
 logic done_o;
 
-logic [D_WIDTH-1:0] data_i;
-logic [D_WIDTH-1:0] data_o;
+logic [I_WIDTH-1:0] data_i;
+logic [O_WIDTH-1:0] data_o;
 
 logic [$clog2(I_COUNT)-1:0] data_cnt;
 

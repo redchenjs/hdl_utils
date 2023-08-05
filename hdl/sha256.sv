@@ -7,10 +7,8 @@
 
 `timescale 1 ns / 1 ps
 
-parameter I_COUNT = 16;
-parameter D_ITERS = 64;
 parameter D_WIDTH = 32;
-parameter O_COUNT = 8;
+parameter O_WIDTH = 256;
 
 module sha256(
     input logic clk_i,
@@ -21,10 +19,14 @@ module sha256(
     input  logic               in_valid_i,
     output logic               in_ready_o,
 
-    output logic [D_WIDTH-1:0] out_data_o,
+    output logic [O_WIDTH-1:0] out_data_o,
     output logic               out_valid_o,
     input  logic               out_ready_i
 );
+
+parameter I_COUNT = 16;
+parameter D_COUNT = 64;
+parameter O_COUNT = 8;
 
 typedef enum logic [1:0] {
     IDLE = 'h0,
@@ -48,21 +50,13 @@ logic               [D_WIDTH-1:0] m;
 logic [I_COUNT-1:0] [D_WIDTH-1:0] w;
 logic [O_COUNT-1:0] [D_WIDTH-1:0] t;
 
-logic       [$clog2(O_COUNT)-1:0] dout_cnt;
-logic [O_COUNT-1:0] [D_WIDTH-1:0] dout_data;
-logic                             dout_done;
-
-logic                             dout_next;
-logic                             dout_keep;
-
-logic       [$clog2(D_ITERS)-1:0] iter_cnt;
+logic       [$clog2(D_COUNT)-1:0] iter_cnt;
 
 logic                             iter_save;
 logic                             iter_keep;
 
 logic                             iter_load;
 logic                             iter_next;
-logic                             iter_done;
 logic                             iter_last;
 
 wire [O_COUNT-1:0] [D_WIDTH-1:0] n = {
@@ -75,7 +69,7 @@ wire [O_COUNT-1:0] [D_WIDTH-1:0] n = {
     32'hbb67_ae85,    // b
     32'h6a09_e667     // a
 };
-wire [D_ITERS-1:0] [D_WIDTH-1:0] k = {
+wire [D_COUNT-1:0] [D_WIDTH-1:0] k = {
     32'hc671_78f2, 32'hbef9_a3f7, 32'ha450_6ceb, 32'h90be_fffa,
     32'h8cc7_0208, 32'h84c8_7814, 32'h78a5_636f, 32'h748f_82ee,
     32'h682e_6ff3, 32'h5b9c_ca4f, 32'h4ed8_aa4a, 32'h391c_0cb3,
@@ -123,25 +117,11 @@ end
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        dout_cnt  <= 'b0;
-        dout_data <= 'b0;
-        dout_done <= 'b1;
-
-        dout_next <= 'b0;
-        dout_keep <= 'b0;
-
         out_data_o  <= 'b0;
         out_valid_o <= 'b0;
     end else begin
-        dout_cnt  <= dout_done ? 'b0 : (dout_keep & out_ready_i ? dout_cnt + 'b1 : dout_cnt);
-        dout_data <= dout_next ? {a, b, c, d, e, f, g, h} : dout_data;
-        dout_done <= (dout_cnt == 'd6) ? 'b1 : (dout_next ? 'b0 : dout_done);
-
-        dout_next <= iter_last & iter_done;
-        dout_keep <= iter_last & dout_next & dout_done ? 'b1 : (dout_done ? 'b0 : dout_keep);
-
-        out_data_o  <= dout_data[dout_cnt];
-        out_valid_o <= dout_keep;
+        out_data_o  <= (ctl_sta == LAST) & out_ready_i ? {a, b, c, d, e, f, g, h} : out_data_o;
+        out_valid_o <= (ctl_sta == LAST) & out_ready_i;
     end
 end
 
@@ -170,7 +150,6 @@ begin
 
         iter_load <= 'b0;
         iter_next <= 'b0;
-        iter_done <= 'b0;
         iter_last <= 'b0;
     end else begin
         case (ctl_sta)
@@ -258,7 +237,6 @@ begin
 
         iter_load <= (iter_cnt == 'd60);
         iter_next <= (iter_cnt == 'd62);
-        iter_done <= (iter_cnt == 'd63);
         iter_last <= (iter_cnt == 'd13) & in_valid_i & in_last_i ? 'b1 : (ctl_sta == LAST) ? 'b0 : iter_last;
     end
 end
