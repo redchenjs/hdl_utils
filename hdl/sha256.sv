@@ -73,6 +73,12 @@ logic [255:0] out_data_256;
 logic [383:0] out_data_384;
 logic [511:0] out_data_512;
 
+logic [D_WIDTH-1:0] sigma_0;
+logic [D_WIDTH-1:0] sigma_1;
+
+logic [D_WIDTH-1:0] big_sigma_0;
+logic [D_WIDTH-1:0] big_sigma_1;
+
 logic               [D_WIDTH-1:0] m;
 logic [I_COUNT-1:0] [D_WIDTH-1:0] w;
 logic [O_COUNT-1:0] [D_WIDTH-1:0] s;
@@ -130,12 +136,6 @@ wire [D_WIDTH-1:0] mag = (a & b) ^ ( a & c) ^ (b & c);
 wire [D_WIDTH-1:0] t_1 = big_sigma_1 + ch + h + m;
 wire [D_WIDTH-1:0] t_2 = big_sigma_0 + mag;
 
-wire [D_WIDTH-1:0] sigma_0 = {x[ 6:0], x[31: 7]} ^ {x[17:0], x[31:18]} ^ { 3'b0, x[31: 3]};
-wire [D_WIDTH-1:0] sigma_1 = {y[16:0], y[31:17]} ^ {y[18:0], y[31:19]} ^ {10'b0, y[31:10]};
-
-wire [D_WIDTH-1:0] big_sigma_0 = {a[1:0], a[31:2]} ^ {a[12:0], a[31:13]} ^ {a[21:0], a[31:22]};
-wire [D_WIDTH-1:0] big_sigma_1 = {e[5:0], e[31:6]} ^ {e[10:0], e[31:11]} ^ {e[24:0], e[31:25]};
-
 wire [D_WIDTH-1:0] in_data_s = {
     in_data_i[ 7: 0], in_data_i[15: 8], in_data_i[23:16], in_data_i[31:24],
     in_data_i[39:32], in_data_i[47:40], in_data_i[55:48], in_data_i[63:56]
@@ -153,9 +153,12 @@ generate
     assign s[6] = g;
     assign s[7] = h;
 
+    for (i = 0; i < 6; i++) begin
+        assign out_data_384[i*64+:64] = s[5-i];
+    end
+
     for (i = 0; i < 7; i++) begin
         assign out_data_224[i*32+:32] = s[6-i];
-        assign out_data_384[i*64+:64] = s[6-i];
     end
 
     for (i = 0; i < 8; i++) begin
@@ -163,6 +166,22 @@ generate
         assign out_data_512[i*64+:64] = s[7-i];
     end
 endgenerate
+
+always_comb begin
+    if (iter_mode[1]) begin
+        sigma_0 = {x[ 0:0], x[63: 1]} ^ {x[ 7:0], x[63: 8]} ^ {7'b0, x[63: 7]};
+        sigma_1 = {y[18:0], y[63:19]} ^ {y[60:0], y[63:61]} ^ {6'b0, y[63: 6]};
+
+        big_sigma_0 = {a[27:0], a[63:28]} ^ {a[33:0], a[63:34]} ^ {a[38:0], a[63:39]};
+        big_sigma_1 = {e[13:0], e[63:14]} ^ {e[17:0], e[63:18]} ^ {e[40:0], e[63:41]};
+    end else begin
+        sigma_0 = {x[ 6:0], x[31: 7]} ^ {x[17:0], x[31:18]} ^ { 3'b0, x[31: 3]};
+        sigma_1 = {y[16:0], y[31:17]} ^ {y[18:0], y[31:19]} ^ {10'b0, y[31:10]};
+
+        big_sigma_0 = {a[1:0], a[31:2]} ^ {a[12:0], a[31:13]} ^ {a[21:0], a[31:22]};
+        big_sigma_1 = {e[5:0], e[31:6]} ^ {e[10:0], e[31:11]} ^ {e[24:0], e[31:25]};
+    end
+end
 
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin

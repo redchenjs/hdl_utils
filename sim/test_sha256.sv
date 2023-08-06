@@ -73,8 +73,10 @@ always begin
 end
 
 assign data_i = (data_cnt >= 'h10) ? {data_blk_1[data_cnt[3:0]], 32'b0} : {data_blk_0[data_cnt[3:0]], 32'b0};
+//assign data_i = (data_cnt >= 'h10) ? {data_blk_1[data_cnt[3:0]+1], data_blk_1[data_cnt[3:0]]} : {data_blk_0[data_cnt[3:0]+1], data_blk_0[data_cnt[3:0]]};
 assign mode_i = (data_cnt == 'h00) ? 2'b01 : 2'b00;
 assign last_i = (data_cnt == 'h1f);
+//assign last_i = (data_cnt == 'h1e);
 
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
@@ -87,7 +89,8 @@ begin
         init_i <= null_o;
         next_i <= 'b1;
 
-        data_cnt <= init_i ? data_cnt + 'b1 : data_cnt;
+        data_cnt <= init_i ? data_cnt + 'd1 : data_cnt;
+//        data_cnt <= init_i ? data_cnt + 'd2 : data_cnt;
     end
 end
 
