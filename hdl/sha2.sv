@@ -1,5 +1,5 @@
 /*
- * sha256.sv
+ * sha2.sv
  *
  *  Created on: 2023-07-21 11:30
  *      Author: Jack Chen <redchenjs@live.com>
@@ -10,7 +10,7 @@
 parameter D_WIDTH = 64;
 parameter O_WIDTH = 512;
 
-module sha256(
+module sha2(
     input logic clk_i,
     input logic rst_n_i,
 
@@ -27,7 +27,6 @@ module sha256(
 );
 
 parameter I_COUNT = 16;
-parameter D_COUNT = 64;
 parameter O_COUNT = 8;
 
 typedef enum logic [1:0] {
