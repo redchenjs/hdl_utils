@@ -81,7 +81,6 @@ logic [D_WIDTH-1:0] big_sigma_1;
 logic               [D_WIDTH-1:0] m;
 logic [I_COUNT-1:0] [D_WIDTH-1:0] w;
 logic [O_COUNT-1:0] [D_WIDTH-1:0] s;
-logic [O_COUNT-1:0] [D_WIDTH-1:0] t;
 
 wire [7:0] [63:0] n_384 = {
     64'h47b5_481d_befa_4fa4,    // h
@@ -140,29 +139,22 @@ wire [D_WIDTH-1:0] in_data_s = {
     in_data_i[39:32], in_data_i[47:40], in_data_i[55:48], in_data_i[63:56]
 };
 
+wire [O_COUNT-1:0] [D_WIDTH-1:0] t = {h, g, f, e, d, c, b, a};
+
 generate
     genvar i;
 
-    assign s[0] = a;
-    assign s[1] = b;
-    assign s[2] = c;
-    assign s[3] = d;
-    assign s[4] = e;
-    assign s[5] = f;
-    assign s[6] = g;
-    assign s[7] = h;
-
     for (i = 0; i < 6; i++) begin
-        assign out_data_384[i*64+:64] = s[5-i];
+        assign out_data_384[i*64+:64] = t[5-i];
     end
 
     for (i = 0; i < 7; i++) begin
-        assign out_data_224[i*32+:32] = s[6-i];
+        assign out_data_224[i*32+:32] = t[6-i];
     end
 
     for (i = 0; i < 8; i++) begin
-        assign out_data_256[i*32+:32] = s[7-i];
-        assign out_data_512[i*64+:64] = s[7-i];
+        assign out_data_256[i*32+:32] = t[7-i];
+        assign out_data_512[i*64+:64] = t[7-i];
     end
 endgenerate
 
@@ -229,7 +221,7 @@ begin
 
         m <= 'b0;
         w <= 'b0;
-        t <= 'b0;
+        s <= 'b0;
 
         iter_cnt <= 'b0;
         iter_max <= 'b0;
@@ -270,10 +262,10 @@ begin
 
                 for (int i = 0; i < 8; i++) begin
                     case (in_mode_i)
-                        SHA_224: t[i] <= in_valid_i & iter_idle ? n_384[i][31: 0] : t[i];
-                        SHA_256: t[i] <= in_valid_i & iter_idle ? n_512[i][63:32] : t[i];
-                        SHA_384: t[i] <= in_valid_i & iter_idle ? n_384[i]        : t[i];
-                        SHA_512: t[i] <= in_valid_i & iter_idle ? n_512[i]        : t[i];
+                        SHA_224: s[i] <= in_valid_i & iter_idle ? n_384[i][31: 0] : s[i];
+                        SHA_256: s[i] <= in_valid_i & iter_idle ? n_512[i][63:32] : s[i];
+                        SHA_384: s[i] <= in_valid_i & iter_idle ? n_384[i]        : s[i];
+                        SHA_512: s[i] <= in_valid_i & iter_idle ? n_512[i]        : s[i];
                     endcase
                 end
 
@@ -283,16 +275,16 @@ begin
                 iter_max <= 'b0;
             end
             LOAD: begin
-                a <= a + t[0];
-                b <= b + t[1];
-                c <= c + t[2];
-                d <= d + t[3];
-                e <= e + t[4];
-                f <= f + t[5];
-                g <= g + t[6];
-                h <= h + t[7];
+                a <= a + s[0];
+                b <= b + s[1];
+                c <= c + s[2];
+                d <= d + s[3];
+                e <= e + s[4];
+                f <= f + s[5];
+                g <= g + s[6];
+                h <= h + s[7];
 
-                t <= t;
+                s <= s;
 
                 case (iter_mode)
                     SHA_224: m[31:0] <= k[0][63:32] + w[0];
@@ -325,7 +317,7 @@ begin
                 endcase
 
                 for (int i = 0; i < 8; i++) begin
-                    t[i] <= iter_save ? s[i] : t[i];
+                    s[i] <= iter_save ? t[i] : s[i];
                 end
 
                 if ((iter_cnt + 2) <= 15 || iter_cnt >= iter_max) begin
