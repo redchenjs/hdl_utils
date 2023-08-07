@@ -10,21 +10,21 @@
 module test_rom_sp;
 
 parameter PATH = "rom_init.txt";
-parameter WIDTH = 32;
+parameter D_WIDTH = 32;
 parameter DEPTH = 65536;
-parameter OUT_REG = 1;
+parameter REG_OUT = 1;
 
 logic rd_clk_i;
 
 logic                     rd_en_i;
 logic [$clog2(DEPTH)-1:0] rd_addr_i;
-logic         [WIDTH-1:0] rd_data_o;
+logic         [D_WIDTH-1:0] rd_data_o;
 
 rom_sp #(
     .PATH(PATH),
-    .WIDTH(WIDTH),
+    .D_WIDTH(D_WIDTH),
     .DEPTH(DEPTH),
-    .OUT_REG(OUT_REG)
+    .REG_OUT(REG_OUT)
 ) rom_sp (
     .rd_clk_i(rd_clk_i),
 

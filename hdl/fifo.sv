@@ -57,14 +57,13 @@ ram_tp #(
     .I_DEPTH(I_DEPTH),
     .O_WIDTH(O_WIDTH),
     .O_DEPTH(O_DEPTH),
-    .OUT_REG(1'b1)
+    .REG_OUT(1)
 ) ram_tp (
     .wr_clk_i(clk_i),
 
     .wr_en_i(wr_en_i & ~wr_full_o),
     .wr_addr_i(wr_addr[$clog2(I_DEPTH)-1:0]),
     .wr_data_i(wr_data_i),
-    .wr_byte_en_i({(I_WIDTH/8){1'b1}}),
 
     .rd_clk_i(clk_i),
 

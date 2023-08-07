@@ -8,8 +8,8 @@
 `timescale 1 ns / 1 ps
 
 module fifo_dc #(
-    parameter I_WIDTH = 32,
-    parameter I_DEPTH = 64,
+    parameter I_WIDTH = 64,
+    parameter I_DEPTH = 32,
     parameter O_WIDTH = 32,
     parameter O_DEPTH = 64
 ) (
@@ -67,8 +67,8 @@ generate
 endgenerate
 
 bin2gray #(
-    .WIDTH($clog2(I_DEPTH)+1),
-    .OUT_REG('b0)
+    .D_WIDTH($clog2(I_DEPTH)+1),
+    .REG_OUT('b0)
 ) bin2gray_w2r (
     .clk_i(wr_clk_i),
     .rst_n_i(wr_rst_n_i),
@@ -81,7 +81,7 @@ bin2gray #(
 );
 
 data_sync #(
-    .WIDTH($clog2(I_DEPTH)+1)
+    .D_WIDTH($clog2(I_DEPTH)+1)
 ) data_sync_w2r (
     .clk_i(rd_clk_i),
     .rst_n_i(rd_rst_n_i),
@@ -91,8 +91,8 @@ data_sync #(
 );
 
 gray2bin #(
-    .WIDTH($clog2(I_DEPTH)+1),
-    .OUT_REG('b0)
+    .D_WIDTH($clog2(I_DEPTH)+1),
+    .REG_OUT('b0)
 ) gray2bin_w2r (
     .clk_i(rd_clk_i),
     .rst_n_i(rd_rst_n_i),
@@ -105,8 +105,8 @@ gray2bin #(
 );
 
 bin2gray #(
-    .WIDTH($clog2(O_DEPTH)+1),
-    .OUT_REG('b0)
+    .D_WIDTH($clog2(O_DEPTH)+1),
+    .REG_OUT('b0)
 ) bin2gray_r2w (
     .clk_i(rd_clk_i),
     .rst_n_i(rd_rst_n_i),
@@ -119,7 +119,7 @@ bin2gray #(
 );
 
 data_sync #(
-    .WIDTH($clog2(O_DEPTH)+1)
+    .D_WIDTH($clog2(O_DEPTH)+1)
 ) data_sync_r2w (
     .clk_i(wr_clk_i),
     .rst_n_i(wr_rst_n_i),
@@ -129,8 +129,8 @@ data_sync #(
 );
 
 gray2bin #(
-    .WIDTH($clog2(O_DEPTH)+1),
-    .OUT_REG('b0)
+    .D_WIDTH($clog2(O_DEPTH)+1),
+    .REG_OUT('b0)
 ) gray2bin_r2w (
     .clk_i(wr_clk_i),
     .rst_n_i(wr_rst_n_i),
@@ -147,14 +147,13 @@ ram_tp #(
     .I_DEPTH(I_DEPTH),
     .O_WIDTH(O_WIDTH),
     .O_DEPTH(O_DEPTH),
-    .OUT_REG(1'b1)
+    .REG_OUT(1)
 ) ram_tp (
     .wr_clk_i(wr_clk_i),
 
     .wr_en_i(wr_en_i & ~wr_full_o),
     .wr_addr_i(wr_addr_w[$clog2(I_DEPTH)-1:0]),
     .wr_data_i(wr_data_i),
-    .wr_byte_en_i({(I_WIDTH/8){1'b1}}),
 
     .rd_clk_i(rd_clk_i),
 

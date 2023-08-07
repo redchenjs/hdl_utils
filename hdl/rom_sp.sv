@@ -9,25 +9,25 @@
 
 module rom_sp #(
     parameter FILE = "rom_init.txt",
-    parameter WIDTH = 8,
-    parameter DEPTH = 8,
-    parameter OUT_REG = 1
+    parameter D_WIDTH = 32,
+    parameter D_DEPTH = 64,
+    parameter REG_OUT = 1
 ) (
     input logic rd_clk_i,
 
-    input  logic                     rd_en_i,
-    input  logic [$clog2(DEPTH)-1:0] rd_addr_i,
-    output logic         [WIDTH-1:0] rd_data_o
+    input  logic                       rd_en_i,
+    input  logic [$clog2(D_DEPTH)-1:0] rd_addr_i,
+    output logic         [D_WIDTH-1:0] rd_data_o
 );
 
-logic [WIDTH-1:0] rom[DEPTH];
+logic [D_WIDTH-1:0] rom[D_DEPTH];
 
 initial begin
     $readmemh(FILE, rom);
 end
 
 generate
-    if (!OUT_REG) begin
+    if (!REG_OUT) begin
         assign rd_data_o = rom[rd_addr_i];
     end else begin
         always_ff @(posedge rd_clk_i) begin
