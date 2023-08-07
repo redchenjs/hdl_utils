@@ -1,5 +1,5 @@
 /*
- * uart_mmio.sv
+ * sbus2mmio.sv
  *
  *  Created on: 2021-08-22 18:36
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,22 +7,28 @@
 
 `timescale 1 ns / 1 ps
 
-module uart_mmio #(
+module sbus2mmio #(
     parameter XLEN = 32,
     parameter BASE = 32'h4000_0000
 ) (
     input logic clk_i,
     input logic rst_n_i,
 
+    // shared bus port
     input logic [XLEN-1:0] rd_addr_i,
     inout wire  [XLEN-1:0] rd_data_io,
 
-    input logic         [XLEN-1:0] wr_addr_i,
-    input logic         [XLEN-1:0] wr_data_i,
-    input logic [$clog2(XLEN)-1:0] wr_byte_en_i,
+    input logic [XLEN-1:0] wr_addr_i,
+    input logic [XLEN-1:0] wr_data_i,
 
-    input  logic rx_i,
-    output logic tx_o
+    // mmio port
+    output logic            wr_en_o,
+    output logic [XLEN-1:0] wr_addr_o,
+    output logic [XLEN-1:0] wr_data_o,
+
+    output logic            rd_en_o,
+    output logic [XLEN-1:0] rd_addr_o,
+    input  logic [XLEN-1:0] rd_data_i
 );
 
 logic [XLEN-1:0] rd_data;
@@ -33,25 +39,13 @@ wire wr_en = (wr_addr_i[31:8] == BASE[31:8]);
 
 assign rd_data_io = rd_en_r ? rd_data : {XLEN{1'bz}};
 
-uart_core #(
-    .A_WIDTH(XLEN),
-    .D_WIDTH(XLEN)
-) uart_core (
-    .clk_i(clk_i),
-    .rst_n_i(uart_ctrl_1.rst_n),
+assign wr_en_o   = wr_en;
+assign wr_addr_o = wr_addr_i;
+assign wr_data_o = wr_data_i;
 
-    .wr_en_i(wr_en),
-    .wr_addr_i(wr_addr_i),
-    .wr_data_i(wr_data_i),
-    .wr_byte_en_i(wr_byte_en_i),
-
-    .rd_en_i(rd_en),
-    .rd_addr_i(rd_addr_i),
-    .rd_data_o(rd_data),
-
-    .rx_i(rx_i),
-    .tx_o(tx_o)
-);
+assign rd_en_o   = rd_en;
+assign rd_addr_o = rd_addr_i;
+assign rd_data   = rd_data_i;
 
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin

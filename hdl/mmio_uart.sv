@@ -1,5 +1,5 @@
 /*
- * uart_core.sv
+ * mmio_uart.sv
  *
  *  Created on: 2021-08-22 18:36
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,17 +7,18 @@
 
 `timescale 1 ns / 1 ps
 
-module uart_core #(
+module mmio_uart #(
     parameter A_WIDTH = 8,
-    parameter D_WIDTH = 32
+    parameter D_WIDTH = 32,
+    parameter I_DEPTH = 16,
+    parameter O_DEPTH = 32
 ) (
     input logic clk_i,
     input logic rst_n_i,
 
-    input logic                       wr_en_i,
-    input logic         [A_WIDTH-1:0] wr_addr_i,
-    input logic         [D_WIDTH-1:0] wr_data_i,
-    input logic [$clog2(D_WIDTH)-1:0] wr_byte_en_i,
+    input logic               wr_en_i,
+    input logic [A_WIDTH-1:0] wr_addr_i,
+    input logic [D_WIDTH-1:0] wr_data_i,
 
     input  logic               rd_en_i,
     input  logic [A_WIDTH-1:0] rd_addr_i,
@@ -93,7 +94,11 @@ assign regs[UART_REG_CTRL_1]  = uart_ctrl_1;
 assign regs[UART_REG_DATA_TX] = uart_data_tx;
 assign regs[UART_REG_DATA_RX] = uart_data_rx;
 
-uart_tx uart_tx(
+uart #(
+    .D_WIDTH(D_WIDTH),
+    .I_DEPTH(I_DEPTH),
+    .O_DEPTH(O_DEPTH)
+) uart (
     .clk_i(clk_i),
     .rst_n_i(uart_ctrl_1.rst_n),
 
@@ -103,20 +108,12 @@ uart_tx uart_tx(
     .in_valid_i(tx_valid),
     .in_ready_o(tx_ready),
 
-    .tx_o(tx_o)
-);
-
-uart_rx uart_rx(
-    .clk_i(clk_i),
-    .rst_n_i(uart_ctrl_1.rst_n),
-
-    .baud_div_i(uart_ctrl_0.baud),
-
     .out_data_o(rx_data),
     .out_valid_o(rx_valid),
     .out_ready_i(rx_ready),
 
-    .rx_i(rx_i)
+    .rx_i(rx_i),
+    .tx_o(tx_o)
 );
 
 always_ff @(posedge clk_i or negedge rst_n_i)
