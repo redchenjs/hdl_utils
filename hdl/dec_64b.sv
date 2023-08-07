@@ -8,7 +8,7 @@
 `timescale 1 ns / 1 ps
 
 module dec_64b #(
-    parameter OUT_REG = 1
+    parameter REG_OUT = 1
 ) (
     input logic clk_i,
     input logic rst_n_i,
@@ -45,7 +45,7 @@ generate
         assign data_r[i * 8 + 7 : i * 8] = dec_8b_lsb[i];
     end
 
-    if (!OUT_REG) begin
+    if (!REG_OUT) begin
         assign out_data_o  = in_valid_i ? data_r : 'b0;
         assign out_valid_o = in_valid_i;
     end else begin

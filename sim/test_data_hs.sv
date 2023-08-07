@@ -9,23 +9,23 @@
 
 module test_data_hs;
 
-parameter WIDTH = 32;
+parameter D_WIDTH = 32;
 
 logic clk_i;
 logic rst_n_i;
 
-logic [WIDTH-1:0] in_data_i;
-logic             in_valid_i;
-logic             in_ready_o;
+logic [D_WIDTH-1:0] in_data_i;
+logic               in_valid_i;
+logic               in_ready_o;
 
-logic [WIDTH-1:0] out_data_o;
-logic             out_valid_o;
-logic             out_ready_i;
+logic [D_WIDTH-1:0] out_data_o;
+logic               out_valid_o;
+logic               out_ready_i;
 
-logic [WIDTH-1:0] out_data_s;
+logic [D_WIDTH-1:0] out_data_s;
 
 data_hs #(
-    .WIDTH(WIDTH)
+    .D_WIDTH(D_WIDTH)
 ) data_hs (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),

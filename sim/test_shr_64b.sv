@@ -9,7 +9,7 @@
 
 module test_shr_64b;
 
-parameter OUT_REG = 1;
+parameter REG_OUT = 1;
 
 logic clk_i;
 logic rst_n_i;
@@ -24,7 +24,7 @@ logic [63:0] data_i;
 logic [63:0] data_o;
 
 shr_64b #(
-    .OUT_REG(OUT_REG)
+    .REG_OUT(REG_OUT)
 ) shr_64b (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),

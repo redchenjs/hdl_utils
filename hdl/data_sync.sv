@@ -8,16 +8,16 @@
 `timescale 1 ns / 1 ps
 
 module data_sync #(
-    parameter WIDTH = 8
+    parameter D_WIDTH = 8
 ) (
     input logic clk_i,
     input logic rst_n_i,
 
-    input  logic [WIDTH-1:0] data_i,
-    output logic [WIDTH-1:0] data_o
+    input  logic [D_WIDTH-1:0] data_i,
+    output logic [D_WIDTH-1:0] data_o
 );
 
-logic [WIDTH-1:0] data_t;
+logic [D_WIDTH-1:0] data_t;
 
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin

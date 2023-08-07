@@ -45,7 +45,7 @@ wire res_out = (abs_rem < abs_div);
 wire res_err = (res_div == 'b0);
 
 pri_64b #(
-    .OUT_REG(1'b0)
+    .REG_OUT(1'b0)
 ) pri_64b_rem (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
@@ -58,7 +58,7 @@ pri_64b #(
 );
 
 enc_64b #(
-    .OUT_REG(1'b0)
+    .REG_OUT(1'b0)
 ) enc_64b_rem (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
@@ -71,7 +71,7 @@ enc_64b #(
 );
 
 pri_64b #(
-    .OUT_REG(1'b0)
+    .REG_OUT(1'b0)
 ) pri_64b_div (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
@@ -84,7 +84,7 @@ pri_64b #(
 );
 
 enc_64b #(
-    .OUT_REG(1'b0)
+    .REG_OUT(1'b0)
 ) enc_64b_div (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
@@ -97,7 +97,7 @@ enc_64b #(
 );
 
 dec_64b #(
-    .OUT_REG(1'b0)
+    .REG_OUT(1'b0)
 ) dec_64b_div (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
@@ -110,7 +110,7 @@ dec_64b #(
 );
 
 shl_64b #(
-    .OUT_REG(1'b0)
+    .REG_OUT(1'b0)
 ) shl_64b (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),

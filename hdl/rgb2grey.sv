@@ -8,7 +8,7 @@
 `timescale 1 ns / 1 ps
 
 module rgb2grey #(
-    parameter OUT_REG = 1
+    parameter REG_OUT = 1
 ) (
     input logic clk_i,
     input logic rst_n_i,
@@ -38,7 +38,7 @@ wire [15:0] data_y = data_r * 77 + data_g * 150 + data_b * 29;
 wire [23:0] data_t = {3{data_y[15:8]}};
 
 generate
-    if (!OUT_REG) begin
+    if (!REG_OUT) begin
         assign out_data_o  = in_valid_i ? data_t : in_data_i;
         assign out_valid_o = in_valid_i;
     end else begin

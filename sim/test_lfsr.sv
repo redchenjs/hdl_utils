@@ -9,15 +9,15 @@
 
 module test_lfsr;
 
-parameter N = 4;
+parameter D_WIDTH = 4;
 
 logic clk_i;
 logic rst_n_i;
 
-logic [N-1:0] data_o;
+logic [D_WIDTH-1:0] data_o;
 
 lfsr #(
-    .N(N)
+    .D_WIDTH(D_WIDTH)
 ) lfsr (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),

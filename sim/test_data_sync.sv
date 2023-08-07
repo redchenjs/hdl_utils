@@ -9,16 +9,16 @@
 
 module test_data_sync;
 
-parameter WIDTH = 8;
+parameter D_WIDTH = 8;
 
 logic clk_i;
 logic rst_n_i;
 
-logic [WIDTH-1:0] data_i;
-logic [WIDTH-1:0] data_o;
+logic [D_WIDTH-1:0] data_i;
+logic [D_WIDTH-1:0] data_o;
 
 data_sync #(
-    .WIDTH(WIDTH)
+    .D_WIDTH(D_WIDTH)
 ) data_sync (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),

@@ -8,19 +8,19 @@
 `timescale 1 ns / 1 ps
 
 module lfsr #(
-    parameter N = 32
+    parameter D_WIDTH = 32
 ) (
     input logic clk_i,
     input logic rst_n_i,
 
-    output logic [N-1:0] data_o
+    output logic [D_WIDTH-1:0] data_o
 );
 
 logic data_t;
 
 // Reference: http://www.xilinx.com/support/documentation/application_notes/xapp052.pdf
 always_comb begin
-    case (N)
+    case (D_WIDTH)
         'd3:
             data_t = data_o[2] ^~ data_o[1];
         'd4:
@@ -89,7 +89,7 @@ begin
     if (!rst_n_i) begin
         data_o <= 'b0;
     end else begin
-        data_o <= {data_o[N-2:0], data_t};
+        data_o <= {data_o[D_WIDTH-2:0], data_t};
     end
 end
 

@@ -9,7 +9,7 @@
 
 module shr_64b #(
     parameter D_WIDTH = 64,
-    parameter OUT_REG = 1
+    parameter REG_OUT = 1
 ) (
     input logic clk_i,
     input logic rst_n_i,
@@ -34,7 +34,7 @@ generate
         assign data_t[i] = shift_i[i] ? {{(1<<i){carry_i}}, data_t[i-1][D_WIDTH-1:(1<<i)]} : data_t[i-1];
     end
 
-    if (!OUT_REG) begin
+    if (!REG_OUT) begin
         assign out_data_o  = in_valid_i ? data_t[$clog2(D_WIDTH)-1] : in_data_i;
         assign out_valid_o = in_valid_i;
     end else begin

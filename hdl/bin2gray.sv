@@ -8,23 +8,23 @@
 `timescale 1 ns / 1 ps
 
 module bin2gray #(
-    parameter WIDTH = 8,
-    parameter OUT_REG = 1
+    parameter D_WIDTH = 8,
+    parameter REG_OUT = 1
 ) (
     input logic clk_i,
     input logic rst_n_i,
 
-    input logic [WIDTH-1:0] in_data_i,
-    input logic             in_valid_i,
+    input logic [D_WIDTH-1:0] in_data_i,
+    input logic               in_valid_i,
 
-    output logic [WIDTH-1:0] out_data_o,
-    output logic             out_valid_o
+    output logic [D_WIDTH-1:0] out_data_o,
+    output logic               out_valid_o
 );
 
-wire [WIDTH-1:0] data_t = in_data_i ^ {1'b0, in_data_i[WIDTH-1:1]};
+wire [D_WIDTH-1:0] data_t = in_data_i ^ {1'b0, in_data_i[D_WIDTH-1:1]};
 
 generate
-    if (!OUT_REG) begin
+    if (!REG_OUT) begin
         assign out_data_o  = in_valid_i ? data_t : 'b0;
         assign out_valid_o = in_valid_i;
     end else begin

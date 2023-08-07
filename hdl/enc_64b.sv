@@ -8,7 +8,7 @@
 `timescale 1 ns / 1 ps
 
 module enc_64b #(
-    parameter OUT_REG = 1
+    parameter REG_OUT = 1
 ) (
     input logic clk_i,
     input logic rst_n_i,
@@ -46,7 +46,7 @@ generate
         );
     end
 
-    if (!OUT_REG) begin
+    if (!REG_OUT) begin
         assign out_data_o  = in_valid_i ? data_r : 'b0;
         assign out_valid_o = in_valid_i;
     end else begin
