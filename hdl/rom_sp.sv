@@ -27,14 +27,14 @@ initial begin
 end
 
 generate
-    if (!REG_OUT) begin
-        assign rd_data_o = rom[rd_addr_i];
-    end else begin
+    if (REG_OUT) begin
         always_ff @(posedge rd_clk_i) begin
             if (rd_en_i) begin
                 rd_data_o <= rom[rd_addr_i];
             end
         end
+    end else begin
+        assign rd_data_o = rom[rd_addr_i];
     end
 endgenerate
 

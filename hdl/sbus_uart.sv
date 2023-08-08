@@ -71,7 +71,7 @@ mmio_uart #(
 
     .rd_en_i(rd_en),
     .rd_addr_i(rd_addr),
-    .rd_data_o(rd_data)
+    .rd_data_o(rd_data),
 
     .rx_i(rx_i),
     .tx_o(tx_o)

@@ -45,10 +45,7 @@ generate
         );
     end
 
-    if (!REG_OUT) begin
-        assign out_data_o  = in_valid_i ? data_r : 'b0;
-        assign out_valid_o = in_valid_i;
-    end else begin
+    if (REG_OUT) begin
         always_ff @(posedge clk_i or negedge rst_n_i)
         begin
             if (!rst_n_i) begin
@@ -59,6 +56,9 @@ generate
                 out_valid_o <= in_valid_i;
             end
         end
+    end else begin
+        assign out_data_o  = in_valid_i ? data_r : 'b0;
+        assign out_valid_o = in_valid_i;
     end
 endgenerate
 

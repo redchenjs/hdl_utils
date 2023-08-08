@@ -144,16 +144,19 @@ wire [O_COUNT-1:0] [D_WIDTH-1:0] t = {h, g, f, e, d, c, b, a};
 generate
     genvar i;
 
-    for (i = 0; i < 6; i++) begin
-        assign out_data_384[i*64+:64] = t[5-i];
-    end
-
-    for (i = 0; i < 7; i++) begin
+    for (i = 0; i < 7; i++) begin: gen_data_224
         assign out_data_224[i*32+:32] = t[6-i];
     end
 
-    for (i = 0; i < 8; i++) begin
+    for (i = 0; i < 8; i++) begin: gen_data_256
         assign out_data_256[i*32+:32] = t[7-i];
+    end
+
+    for (i = 0; i < 6; i++) begin: gen_data_384
+        assign out_data_384[i*64+:64] = t[5-i];
+    end
+
+    for (i = 0; i < 8; i++) begin: gen_data_512
         assign out_data_512[i*64+:64] = t[7-i];
     end
 endgenerate

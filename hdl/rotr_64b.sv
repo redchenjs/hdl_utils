@@ -29,14 +29,11 @@ generate
     assign data_t[0] = shift_i[0] ? {in_data_i[0], in_data_i[D_WIDTH-1:1]} : in_data_i;
 
     genvar i;
-    for (i = 1; i < $clog2(D_WIDTH); i++) begin
+    for (i = 1; i < $clog2(D_WIDTH); i++) begin: gen_data
         assign data_t[i] = shift_i[i] ? {data_t[i-1][(1<<i)-1:0], data_t[i-1][D_WIDTH-1:(1<<i)]} : data_t[i-1];
     end
 
-    if (!REG_OUT) begin
-        assign out_data_o  = in_valid_i ? data_t[$clog2(D_WIDTH)-1] : in_data_i;
-        assign out_valid_o = in_valid_i;
-    end else begin
+    if (REG_OUT) begin
         always_ff @(posedge clk_i or negedge rst_n_i)
         begin
             if (!rst_n_i) begin
@@ -47,6 +44,9 @@ generate
                 out_valid_o <= in_valid_i;
             end
         end
+    end else begin
+        assign out_data_o  = in_valid_i ? data_t[$clog2(D_WIDTH)-1] : in_data_i;
+        assign out_valid_o = in_valid_i;
     end
 endgenerate
 

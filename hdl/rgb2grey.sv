@@ -38,10 +38,7 @@ wire [15:0] data_y = data_r * 77 + data_g * 150 + data_b * 29;
 wire [23:0] data_t = {3{data_y[15:8]}};
 
 generate
-    if (!REG_OUT) begin
-        assign out_data_o  = in_valid_i ? data_t : in_data_i;
-        assign out_valid_o = in_valid_i;
-    end else begin
+    if (REG_OUT) begin
         always_ff @(posedge clk_i or negedge rst_n_i)
         begin
             if (!rst_n_i) begin
@@ -52,6 +49,9 @@ generate
                 out_valid_o <= in_valid_i;
             end
         end
+    end else begin
+        assign out_data_o  = in_valid_i ? data_t : in_data_i;
+        assign out_valid_o = in_valid_i;
     end
 endgenerate
 

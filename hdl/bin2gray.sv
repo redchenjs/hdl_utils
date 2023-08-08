@@ -24,10 +24,7 @@ module bin2gray #(
 wire [D_WIDTH-1:0] data_t = in_data_i ^ {1'b0, in_data_i[D_WIDTH-1:1]};
 
 generate
-    if (!REG_OUT) begin
-        assign out_data_o  = in_valid_i ? data_t : 'b0;
-        assign out_valid_o = in_valid_i;
-    end else begin
+    if (REG_OUT) begin
         always_ff @(posedge clk_i or negedge rst_n_i)
         begin
             if (!rst_n_i) begin
@@ -38,6 +35,9 @@ generate
                 out_valid_o <= in_valid_i;
             end
         end
+    end else begin
+        assign out_data_o  = in_valid_i ? data_t : 'b0;
+        assign out_valid_o = in_valid_i;
     end
 endgenerate
 

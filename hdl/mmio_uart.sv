@@ -129,7 +129,7 @@ begin
     end else begin
         rd_data_o <= rd_en_i ? regs[rd_addr_i[3:2]] : rd_data_o;
 
-        if (wr_en_i & |wr_byte_en_i) begin
+        if (wr_en_i) begin
             case (wr_addr_i[3:2])
                 UART_REG_CTRL_0: begin
                     uart_ctrl_0.baud <= wr_data_i;
