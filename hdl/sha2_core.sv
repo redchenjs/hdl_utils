@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-parameter D_WIDTH = 64;
+parameter I_WIDTH = 64;
 parameter O_WIDTH = 512;
 
 module sha2_core(
@@ -17,7 +17,7 @@ module sha2_core(
     input logic [1:0] in_mode_i,
     input logic       in_last_i,
 
-    input  logic [D_WIDTH-1:0] in_data_i,
+    input  logic [I_WIDTH-1:0] in_data_i,
     input  logic               in_valid_i,
     output logic               in_ready_o,
 
@@ -26,6 +26,7 @@ module sha2_core(
     input  logic               out_ready_i
 );
 
+parameter D_WIDTH = 64;
 parameter I_COUNT = 16;
 parameter O_COUNT = 8;
 

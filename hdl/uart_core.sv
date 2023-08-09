@@ -7,19 +7,21 @@
 
 `timescale 1 ns / 1 ps
 
+parameter D_WIDTH = 8;
+
 module uart_core(
     input logic clk_i,
     input logic rst_n_i,
 
     input logic [31:0] baud_div_i,
 
-    input  logic [7:0] in_data_i,
-    input  logic       in_valid_i,
-    output logic       in_ready_o,
+    input  logic [D_WIDTH-1:0] in_data_i,
+    input  logic               in_valid_i,
+    output logic               in_ready_o,
 
-    output logic [7:0] out_data_o,
-    output logic       out_valid_o,
-    input  logic       out_ready_i,
+    output logic [D_WIDTH-1:0] out_data_o,
+    output logic               out_valid_o,
+    input  logic               out_ready_i,
 
     input  logic rx_i,
     output logic tx_o
