@@ -42,7 +42,7 @@ logic [15:0] [31:0] data_blk_1 = {
     32'h0000_0000, 32'h0000_0000, 32'h0000_0080, 32'h0a11_2001
 };
 
-sha2 sha2(
+sha2_core sha2_core(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
