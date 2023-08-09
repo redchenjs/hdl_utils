@@ -57,7 +57,7 @@ typedef struct packed {
 
 typedef struct packed {
     logic [63:32] hi;
-    logic [32: 0] lo;
+    logic [31: 0] lo;
 } sha2_data_io_t;
 
 logic [1:0] in_mode;
