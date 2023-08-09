@@ -1,5 +1,5 @@
 /*
- * test_rom_sp.sv
+ * tb_rom_sp.sv
  *
  *  Created on: 2023-05-11 05:31
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-module test_rom_sp;
+module tb_rom_sp;
 
 parameter PATH = "rom_init.txt";
 parameter D_WIDTH = 32;

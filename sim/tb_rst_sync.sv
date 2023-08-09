@@ -1,5 +1,5 @@
 /*
- * test_rst_sync.sv
+ * tb_rst_sync.sv
  *
  *  Created on: 2020-07-08 18:12
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_rst_sync;
+module tb_rst_sync;
 
 logic clk_i;
 

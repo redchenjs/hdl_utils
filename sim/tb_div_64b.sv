@@ -1,5 +1,5 @@
 /*
- * test_div_64b.sv
+ * tb_div_64b.sv
  *
  *  Created on: 2022-10-21 14:07
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-module test_div_64b;
+module tb_div_64b;
 
 logic clk_i;
 logic rst_n_i;

@@ -1,5 +1,5 @@
 /*
- * test_edge2en.sv
+ * tb_edge2en.sv
  *
  *  Created on: 2020-07-08 17:16
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_edge2en;
+module tb_edge2en;
 
 logic clk_i;
 logic rst_n_i;

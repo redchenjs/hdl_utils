@@ -1,5 +1,5 @@
 /*
- * test_uart.sv
+ * tb_uart_core.sv
  *
  *  Created on: 2021-07-12 15:23
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_uart;
+module tb_uart_core;
 
 parameter BAUD_DIV = 32'd98;
 

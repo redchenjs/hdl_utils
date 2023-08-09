@@ -1,5 +1,5 @@
 /*
- * test_rotr_64b.sv
+ * tb_rotr_64b.sv
  *
  *  Created on: 2023-07-22 20:04
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-module test_rotr_64b;
+module tb_rotr_64b;
 
 parameter REG_OUT = 1;
 

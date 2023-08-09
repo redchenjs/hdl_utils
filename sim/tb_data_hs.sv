@@ -1,5 +1,5 @@
 /*
- * test_data_hs.sv
+ * tb_data_hs.sv
  *
  *  Created on: 2021-07-12 15:23
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_data_hs;
+module tb_data_hs;
 
 parameter D_WIDTH = 32;
 

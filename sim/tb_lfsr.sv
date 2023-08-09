@@ -1,5 +1,5 @@
 /*
- * test_lfsr.sv
+ * tb_lfsr.sv
  *
  *  Created on: 2020-07-09 22:59
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_lfsr;
+module tb_lfsr;
 
 parameter D_WIDTH = 4;
 

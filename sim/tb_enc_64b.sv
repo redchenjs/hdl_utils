@@ -1,5 +1,5 @@
 /*
- * test_enc_64b.sv
+ * tb_enc_64b.sv
  *
  *  Created on: 2022-10-18 22:02
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-module test_enc_64b;
+module tb_enc_64b;
 
 parameter REG_OUT = 1;
 

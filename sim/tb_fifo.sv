@@ -1,5 +1,5 @@
 /*
- * test_fifo.sv
+ * tb_fifo.sv
  *
  *  Created on: 2022-12-23 20:11
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-module test_fifo;
+module tb_fifo;
 
 parameter I_WIDTH = 32;
 parameter I_DEPTH = 16;

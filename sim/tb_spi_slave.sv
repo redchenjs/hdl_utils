@@ -1,5 +1,5 @@
 /*
- * test_spi_slave.sv
+ * tb_spi_slave.sv
  *
  *  Created on: 2020-07-08 15:07
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_spi_slave;
+module tb_spi_slave;
 
 logic clk_i;
 logic rst_n_i;

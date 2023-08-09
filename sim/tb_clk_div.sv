@@ -1,5 +1,5 @@
 /*
- * test_clk_div.sv
+ * tb_clk_div.sv
  *
  *  Created on: 2023-08-03 02:00
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_clk_div;
+module tb_clk_div;
 
 parameter D_WIDTH = 8;
 

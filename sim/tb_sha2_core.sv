@@ -1,5 +1,5 @@
 /*
- * test_sha2.sv
+ * tb_sha2_core.sv
  *
  *  Created on: 2023-07-23 00:48
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,9 +7,9 @@
 
 `timescale 1 ns / 1 ps
 
-module test_sha2;
+module tb_sha2_core;
 
-parameter D_WIDTH = 64;
+parameter I_WIDTH = 64;
 parameter O_WIDTH = 512;
 
 logic clk_i;
@@ -23,7 +23,7 @@ logic next_i;
 logic null_o;
 logic done_o;
 
-logic [D_WIDTH-1:0] data_i;
+logic [I_WIDTH-1:0] data_i;
 logic [O_WIDTH-1:0] data_o;
 
 logic [7:0] data_cnt;

@@ -1,5 +1,5 @@
 /*
- * test_fir_32s.sv
+ * tb_fir_32s.sv
  *
  *  Created on: 2022-10-13 22:27
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_fir_32s;
+module tb_fir_32s;
 
 localparam D_BITS = 16;
 localparam M_BITS = 16;

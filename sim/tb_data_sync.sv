@@ -1,5 +1,5 @@
 /*
- * test_data_sync.sv
+ * tb_data_sync.sv
  *
  *  Created on: 2021-06-09 16:40
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1ns / 1ps
 
-module test_data_sync;
+module tb_data_sync;
 
 parameter D_WIDTH = 8;
 

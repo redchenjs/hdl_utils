@@ -1,5 +1,5 @@
 /*
- * test_shl_64b.sv
+ * tb_shr_64b.sv
  *
  *  Created on: 2022-10-18 22:15
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-module test_shl_64b;
+module tb_shr_64b;
 
 parameter REG_OUT = 1;
 
@@ -23,9 +23,9 @@ logic [5:0] shift_i;
 logic [63:0] data_i;
 logic [63:0] data_o;
 
-shl_64b #(
+shr_64b #(
     .REG_OUT(REG_OUT)
-) shl_64b (
+) shr_64b (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
