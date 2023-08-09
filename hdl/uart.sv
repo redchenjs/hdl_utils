@@ -29,42 +29,43 @@ module uart #(
     output logic tx_o
 );
 
-logic tx_fifo_full;
-logic tx_fifo_empty;
+logic in_fifo_full;
+logic in_fifo_empty;
 
-logic rx_fifo_full;
-logic rx_fifo_empty;
+logic out_fifo_full;
+logic out_fifo_empty;
 
-logic [7:0] tx_data;
-logic       tx_valid;
-logic       tx_ready;
+logic [7:0] in_data;
+logic       in_valid;
+logic       in_ready;
 
-logic [7:0] rx_data;
-logic       rx_valid;
-logic       rx_ready;
+logic [7:0] out_data;
+logic       out_valid;
+logic       out_ready;
 
-assign  in_ready_o = ~tx_fifo_full;
-assign  tx_valid   = ~tx_fifo_empty;
-assign  rx_ready   = ~rx_fifo_full;
-assign out_valid_o = ~rx_fifo_empty;
+assign in_ready_o = ~in_fifo_full;
+assign in_valid   = ~in_fifo_empty;
+
+assign out_ready   = ~out_fifo_full;
+assign out_valid_o = ~out_fifo_empty;
 
 fifo #(
     .I_WIDTH(D_WIDTH),
     .I_DEPTH(I_DEPTH),
     .O_WIDTH(8),
     .O_DEPTH(D_WIDTH*I_DEPTH/8)
-) fifo_tx (
+) fifo_in_data (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
     .wr_en_i(in_valid_i),
     .wr_data_i(in_data_i),
-    .wr_full_o(tx_fifo_full),
+    .wr_full_o(in_fifo_full),
     .wr_free_o(),
 
-    .rd_en_i(tx_ready),
-    .rd_data_o(tx_data),
-    .rd_empty_o(tx_fifo_empty),
+    .rd_en_i(in_ready),
+    .rd_data_o(in_data),
+    .rd_empty_o(in_fifo_empty),
     .rd_avail_o()
 );
 
@@ -73,45 +74,37 @@ fifo #(
     .I_DEPTH(D_WIDTH*O_DEPTH/8),
     .O_WIDTH(D_WIDTH),
     .O_DEPTH(O_DEPTH)
-) fifo_rx (
+) fifo_out_data (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .wr_en_i(rx_valid),
-    .wr_data_i(rx_data),
-    .wr_full_o(rx_fifo_full),
+    .wr_en_i(out_valid),
+    .wr_data_i(out_data),
+    .wr_full_o(out_fifo_full),
     .wr_free_o(),
 
     .rd_en_i(out_ready_i),
     .rd_data_o(out_data_o),
-    .rd_empty_o(rx_fifo_empty),
+    .rd_empty_o(out_fifo_empty),
     .rd_avail_o()
 );
 
-uart_tx uart_tx(
+uart_core uart_core(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
     .baud_div_i(baud_div_i),
 
-    .in_data_i(tx_data),
-    .in_valid_i(tx_valid),
-    .in_ready_o(tx_ready),
+    .in_data_i(in_data),
+    .in_valid_i(in_valid),
+    .in_ready_o(in_ready),
 
+    .out_data_o(out_data),
+    .out_valid_o(out_valid),
+    .out_ready_i(out_ready),
+
+    .rx_i(rx_i),
     .tx_o(tx_o)
-);
-
-uart_rx uart_rx(
-    .clk_i(clk_i),
-    .rst_n_i(rst_n_i),
-
-    .baud_div_i(baud_div_i),
-
-    .out_data_o(rx_data),
-    .out_valid_o(rx_valid),
-    .out_ready_i(rx_ready),
-
-    .rx_i(rx_i)
 );
 
 endmodule

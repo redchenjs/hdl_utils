@@ -28,11 +28,13 @@ module mmio_uart #(
     output logic tx_o
 );
 
-typedef enum logic [1:0] {
+typedef enum  {
     UART_REG_CTRL_0  = 'h0,
     UART_REG_CTRL_1  = 'h1,
     UART_REG_DATA_TX = 'h2,
-    UART_REG_DATA_RX = 'h3
+    UART_REG_DATA_RX = 'h3,
+
+    UART_REG_IDX_MAX
 } uart_reg_t;
 
 typedef struct packed {
@@ -40,41 +42,29 @@ typedef struct packed {
 } uart_ctrl_0_t;
 
 typedef struct packed {
-    logic [7:0] rsvd_3;
-    logic [7:0] rsvd_2;
-    logic [7:0] rsvd_1;
-
-    logic [7:1] rsvd_0;
-    logic       rst_n;
+    logic [31:1] rsvd;
+    logic        rst_n;
 } uart_ctrl_1_t;
 
 typedef struct packed {
-    logic [7:0] rsvd_2;
-    logic [7:0] rsvd_1;
-
-    logic [7:1] rsvd_0;
-    logic       tx_flag;
-
-    logic [7:0] tx_data;
+    logic [31:9] rsvd;
+    logic        tx_flag;
+    logic  [7:0] tx_data;
 } uart_data_tx_t;
 
 typedef struct packed {
-    logic [7:0] rsvd_2;
-    logic [7:0] rsvd_1;
-
-    logic [7:1] rsvd_0;
-    logic       rx_flag;
-
-    logic [7:0] rx_data;
+    logic [31:9] rsvd;
+    logic        rx_flag;
+    logic  [7:0] rx_data;
 } uart_data_rx_t;
 
-logic [7:0] tx_data;
-logic       tx_valid;
-logic       tx_ready;
+logic [7:0] in_data;
+logic       in_valid;
+logic       in_ready;
 
-logic [7:0] rx_data;
-logic       rx_valid;
-logic       rx_ready;
+logic [7:0] out_data;
+logic       out_valid;
+logic       out_ready;
 
 uart_ctrl_0_t uart_ctrl_0;
 uart_ctrl_1_t uart_ctrl_1;
@@ -82,12 +72,12 @@ uart_ctrl_1_t uart_ctrl_1;
 uart_data_tx_t uart_data_tx;
 uart_data_rx_t uart_data_rx;
 
-assign uart_data_tx.tx_data = tx_data;
-assign uart_data_tx.tx_flag = tx_ready;
-assign uart_data_rx.rx_data = rx_data;
-assign uart_data_rx.rx_flag = rx_valid;
+assign uart_data_tx.tx_data = in_data;
+assign uart_data_tx.tx_flag = in_ready;
+assign uart_data_rx.rx_data = out_data;
+assign uart_data_rx.rx_flag = out_valid;
 
-logic [D_WIDTH-1:0] regs[4];
+logic [D_WIDTH-1:0] regs[UART_REG_IDX_MAX];
 
 assign regs[UART_REG_CTRL_0]  = uart_ctrl_0;
 assign regs[UART_REG_CTRL_1]  = uart_ctrl_1;
@@ -104,13 +94,13 @@ uart #(
 
     .baud_div_i(uart_ctrl_0.baud),
 
-    .in_data_i(tx_data),
-    .in_valid_i(tx_valid),
-    .in_ready_o(tx_ready),
+    .in_data_i(in_data),
+    .in_valid_i(in_valid),
+    .in_ready_o(in_ready),
 
-    .out_data_o(rx_data),
-    .out_valid_o(rx_valid),
-    .out_ready_i(rx_ready),
+    .out_data_o(out_data),
+    .out_valid_o(out_valid),
+    .out_ready_i(out_ready),
 
     .rx_i(rx_i),
     .tx_o(tx_o)
@@ -119,13 +109,22 @@ uart #(
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        tx_data  <= 'b0;
-        tx_valid <= 'b0;
+        out_ready <= 'b0;
+    end else begin
+        out_ready <= out_valid ? (rd_en_i & (rd_addr_i[3:2] == UART_REG_DATA_RX) ? 'b1 : out_ready) : 'b0;
+    end
+end
+
+always_ff @(posedge clk_i or negedge rst_n_i)
+begin
+    if (!rst_n_i) begin
+        in_data  <= 'b0;
+        in_valid <= 'b0;
 
         rd_data_o <= 'b0;
 
-        uart_ctrl_0.baud  <= 'b0;
-        uart_ctrl_1.rst_n <= 'b0;
+        uart_ctrl_0 <= 'b0;
+        uart_ctrl_1 <= 'b0;
     end else begin
         rd_data_o <= rd_en_i ? regs[rd_addr_i[3:2]] : rd_data_o;
 
@@ -138,23 +137,14 @@ begin
                     uart_ctrl_1.rst_n <= wr_data_i[0];
                 end
                 UART_REG_DATA_TX: begin
-                    tx_data  <= wr_data_i[7:0];
-                    tx_valid <= 'b1;
+                    in_data  <= wr_data_i[7:0];
+                    in_valid <= 'b1;
                 end
                 default;
             endcase
         end else begin
-            tx_valid <= tx_ready ? 'b0 : tx_valid;
+            in_valid <= in_ready ? 'b0 : in_valid;
         end
-    end
-end
-
-always_ff @(posedge clk_i or negedge rst_n_i)
-begin
-    if (!rst_n_i) begin
-        rx_ready <= 'b0;
-    end else begin
-        rx_ready <= rx_valid ? (rd_en_i & (rd_addr_i[3:2] == UART_REG_DATA_RX) ? 'b1 : rx_ready) : 'b0;
     end
 end
 
