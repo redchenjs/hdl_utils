@@ -68,7 +68,7 @@ endgenerate
 
 bin2gray #(
     .D_WIDTH($clog2(I_DEPTH)+1),
-    .REG_OUT('b0)
+    .REG_OUT(0)
 ) bin2gray_w2r (
     .clk_i(wr_clk_i),
     .rst_n_i(wr_rst_n_i),
@@ -92,7 +92,7 @@ data_sync #(
 
 gray2bin #(
     .D_WIDTH($clog2(I_DEPTH)+1),
-    .REG_OUT('b0)
+    .REG_OUT(0)
 ) gray2bin_w2r (
     .clk_i(rd_clk_i),
     .rst_n_i(rd_rst_n_i),
@@ -106,7 +106,7 @@ gray2bin #(
 
 bin2gray #(
     .D_WIDTH($clog2(O_DEPTH)+1),
-    .REG_OUT('b0)
+    .REG_OUT(0)
 ) bin2gray_r2w (
     .clk_i(rd_clk_i),
     .rst_n_i(rd_rst_n_i),
@@ -130,7 +130,7 @@ data_sync #(
 
 gray2bin #(
     .D_WIDTH($clog2(O_DEPTH)+1),
-    .REG_OUT('b0)
+    .REG_OUT(0)
 ) gray2bin_r2w (
     .clk_i(wr_clk_i),
     .rst_n_i(wr_rst_n_i),

@@ -29,10 +29,10 @@ module mmio_uart #(
 );
 
 typedef enum logic [1:0] {
-    UART_REG_CTRL_0  = 2'h0,
-    UART_REG_CTRL_1  = 2'h1,
-    UART_REG_DATA_TX = 2'h2,
-    UART_REG_DATA_RX = 2'h3
+    UART_REG_CTRL_0  = 'h0,
+    UART_REG_CTRL_1  = 'h1,
+    UART_REG_DATA_TX = 'h2,
+    UART_REG_DATA_RX = 'h3
 } uart_reg_t;
 
 typedef struct packed {
