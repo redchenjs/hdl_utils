@@ -7,11 +7,17 @@
 
 package apb_enum;
     typedef enum logic {
-        APB_PROT_0_NORMAL      = 1'b0,
-        APB_PROT_0_PRIVILEGED  = 1'b1,
+        APB_PROT_0_NORMAL     = 1'b0,
+        APB_PROT_0_PRIVILEGED = 1'b1
+    } apb_prot_0_t;
+
+    typedef enum logic {
         APB_PROT_1_SECURE      = 1'b0,
-        APB_PROT_1_NON_SECURE  = 1'b1,
+        APB_PROT_1_NON_SECURE  = 1'b1
+    } apb_prot_1_t;
+
+    typedef enum logic {
         APB_PROT_2_DATA        = 1'b0,
         APB_PROT_2_INSTRUCTION = 1'b1
-    } apb_prot_t;
+    } apb_prot_2_t;
 endpackage

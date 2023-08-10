@@ -26,8 +26,6 @@ module apb2mmio #(
 
     output logic [D_WIDTH-1:0] prdata_o,
 
-    output logic [(IRQ_CNT?(IRQ_CNT-1):0):0] irq_o,
-
     // mmio port
     output logic               wr_en_o,
     output logic [A_WIDTH-1:0] wr_addr_o,
@@ -35,9 +33,7 @@ module apb2mmio #(
 
     output logic               rd_en_o,
     output logic [A_WIDTH-1:0] rd_addr_o,
-    input  logic [D_WIDTH-1:0] rd_data_i,
-
-    input  logic [(IRQ_CNT?(IRQ_CNT-1):0):0] irq_i
+    input  logic [D_WIDTH-1:0] rd_data_i
 );
 
 assign wr_en_o   = psel_i & penable_i & pwrite_i;
@@ -48,7 +44,5 @@ assign rd_en_o   = psel_i & !penable_i & !pwrite_i;
 assign rd_addr_o = paddr_i;
 
 assign prdata_o = rd_data_i;
-
-assign irq_o = irq_i;
 
 endmodule

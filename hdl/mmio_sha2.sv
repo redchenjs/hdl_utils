@@ -24,7 +24,7 @@ module mmio_sha2 #(
     input  logic [A_WIDTH-1:0] rd_addr_i,
     output logic [D_WIDTH-1:0] rd_data_o,
 
-    output logic intr_o
+    output logic [1:0] irq_o
 );
 
 typedef enum {
@@ -96,7 +96,7 @@ assign regs[SHA2_REG_DATA_O_HI] = sha2_data_o.hi;
 assign regs[SHA2_REG_RSVD_0]    = 'b0;
 assign regs[SHA2_REG_RSVD_1]    = 'b0;
 
-assign intr_o = sha2_ctrl_0.intr_next | sha2_ctrl_0.intr_done;
+assign irq_o = {sha2_ctrl_0.intr_done, sha2_ctrl_0.intr_next};
 
 edge2en intr_done_en(
     .clk_i(clk_i),

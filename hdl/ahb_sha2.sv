@@ -89,8 +89,7 @@ mmio_sha2 #(
     .rd_addr_i(rd_addr),
     .rd_data_o(rd_data),
 
-    .intr_done_o(irq_o[1]),
-    .intr_next_o(irq_o[0])
+    .irq_o(irq_o)
 );
 
 endmodule

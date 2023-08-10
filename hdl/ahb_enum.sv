@@ -36,15 +36,24 @@ package ahb_enum;
     } ahb_burst_t;
 
     typedef enum logic {
-        AHB_PROT_0_OPCODE         = 1'b0,
-        AHB_PROT_0_DATA           = 1'b1,
-        AHB_PROT_1_USER           = 1'b0,
-        AHB_PROT_1_PRIVILEGED     = 1'b1,
+        AHB_PROT_0_OPCODE = 1'b0,
+        AHB_PROT_0_DATA   = 1'b1
+    } ahb_prot_0_t;
+
+    typedef enum logic {
+        AHB_PROT_1_USER       = 1'b0,
+        AHB_PROT_1_PRIVILEGED = 1'b1
+    } ahb_prot_1_t;
+
+    typedef enum logic {
         AHB_PROT_2_NON_BUFFERABLE = 1'b0,
-        AHB_PROT_2_BUFFERABLE     = 1'b1,
-        AHB_PROT_3_NON_CACHEABLE  = 1'b0,
-        AHB_PROT_3_CACHEABLE      = 1'b1
-    } ahb_prot_t;
+        AHB_PROT_2_BUFFERABLE     = 1'b1
+    } ahb_prot_2_t;
+
+    typedef enum logic {
+        AHB_PROT_3_NON_CACHEABLE = 1'b0,
+        AHB_PROT_3_CACHEABLE     = 1'b1
+    } ahb_prot_3_t;
 
     typedef enum logic [1:0] {
         AHB_RESP_OKAY  = 2'b00,
