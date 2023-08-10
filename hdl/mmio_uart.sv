@@ -85,7 +85,6 @@ assign regs[UART_REG_DATA_TX] = uart_data_tx;
 assign regs[UART_REG_DATA_RX] = uart_data_rx;
 
 uart #(
-    .D_WIDTH(D_WIDTH),
     .I_DEPTH(I_DEPTH),
     .O_DEPTH(O_DEPTH)
 ) uart (

@@ -8,22 +8,21 @@
 `timescale 1 ns / 1 ps
 
 module uart #(
-    parameter D_WIDTH = 32,
     parameter I_DEPTH = 16,
     parameter O_DEPTH = 32
 ) (
     input logic clk_i,
     input logic rst_n_i,
 
-    input logic        [31:0] baud_div_i,
+    input logic [31:0] baud_div_i,
 
-    input  logic [D_WIDTH-1:0] in_data_i,
-    input  logic               in_valid_i,
-    output logic               in_ready_o,
+    input  logic [7:0] in_data_i,
+    input  logic       in_valid_i,
+    output logic       in_ready_o,
 
-    output logic [D_WIDTH-1:0] out_data_o,
-    output logic               out_valid_o,
-    input  logic               out_ready_i,
+    output logic [7:0] out_data_o,
+    output logic       out_valid_o,
+    input  logic       out_ready_i,
 
     input  logic rx_i,
     output logic tx_o
@@ -50,10 +49,10 @@ assign out_ready   = ~out_fifo_full;
 assign out_valid_o = ~out_fifo_empty;
 
 fifo #(
-    .I_WIDTH(D_WIDTH),
+    .I_WIDTH(8),
     .I_DEPTH(I_DEPTH),
     .O_WIDTH(8),
-    .O_DEPTH(D_WIDTH*I_DEPTH/8)
+    .O_DEPTH(I_DEPTH)
 ) fifo_in_data (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
@@ -71,8 +70,8 @@ fifo #(
 
 fifo #(
     .I_WIDTH(8),
-    .I_DEPTH(D_WIDTH*O_DEPTH/8),
-    .O_WIDTH(D_WIDTH),
+    .I_DEPTH(O_DEPTH),
+    .O_WIDTH(8),
     .O_DEPTH(O_DEPTH)
 ) fifo_out_data (
     .clk_i(clk_i),
