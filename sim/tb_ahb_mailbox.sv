@@ -1,5 +1,5 @@
 /*
- * tb_ahb_ram.sv
+ * tb_ahb_mailbox.sv
  *
  *  Created on: 2023-08-10 22:37
  *      Author: Jack Chen <redchenjs@live.com>
@@ -9,13 +9,10 @@
 
 import ahb_enum::*;
 
-module tb_ahb_ram;
+module tb_ahb_mailbox;
 
-parameter INIT = 0;
-parameter FILE = "ram_init.txt";
 parameter A_WIDTH = 32;
 parameter D_WIDTH = 32;
-parameter D_DEPTH = 1024;
 
 logic hclk_i;
 logic hresetn_i;
@@ -33,13 +30,12 @@ logic         [1:0] hresp_o;
 logic               hready_o;
 logic [D_WIDTH-1:0] hrdata_o;
 
-ahb_ram #(
-    .INIT(INIT),
-    .FILE(FILE),
+logic irq_o;
+
+ahb_mailbox #(
     .A_WIDTH(A_WIDTH),
-    .D_WIDTH(D_WIDTH),
-    .D_DEPTH(D_DEPTH)
-) ahb_ram (
+    .D_WIDTH(D_WIDTH)
+) ahb_mailbox (
     .hclk_i(hclk_i),
     .hresetn_i(hresetn_i),
 
@@ -54,7 +50,9 @@ ahb_ram #(
 
     .hresp_o(hresp_o),
     .hready_o(hready_o),
-    .hrdata_o(hrdata_o)
+    .hrdata_o(hrdata_o),
+
+    .irq_o(irq_o)
 );
 
 initial begin
