@@ -24,9 +24,9 @@ module ahb_iopmp #(
     input logic               hwrite_i,
     input logic [D_WIDTH-1:0] hwdata_i,
 
-    output logic         [1:0] hresp_i,
-    output logic               hready_i,
-    output logic [D_WIDTH-1:0] hrdata_i,
+    output logic         [1:0] hresp_o,
+    output logic               hready_o,
+    output logic [D_WIDTH-1:0] hrdata_o,
 
     // Slave port 0
     input logic [A_WIDTH-1:0] s0_haddr_i,
@@ -137,8 +137,8 @@ logic [A_WIDTH-1:0] haddr_r;
 
 wire rd_en = hsel_i & !hwrite_i;
 
-assign hresp_i  = AHB_RESP_OKAY;
-assign hready_i = 'b1;
+assign hresp_o  = AHB_RESP_OKAY;
+assign hready_o = 'b1;
 
 assign m0_haddr_o  = s0_haddr_i;
 assign m0_hprot_o  = s0_hprot_i;
@@ -187,7 +187,7 @@ assign pmp_addr_1_hit[7] = pmp_ctrl_1.en[7] & ((s1_haddr_i & pmp_conf_1_7.mask) 
 always_ff @(posedge hclk_i or negedge hresetn_i)
 begin
     if (!hresetn_i) begin
-        hrdata_i <= 'b0;
+        hrdata_o <= 'b0;
 
         hsel_r  <= 'b0;
         haddr_r <= 'b0;
@@ -349,115 +349,115 @@ begin
         if (rd_en) begin
             case (haddr_i[7:0])
                 8'h00: begin
-                    hrdata_i <= pmp_ctrl_0;
+                    hrdata_o <= pmp_ctrl_0;
                 end
                 8'h04: begin
-                    hrdata_i <= pmp_ctrl_1;
+                    hrdata_o <= pmp_ctrl_1;
                 end
                 8'h08: begin
-                    hrdata_i <= pmp_dump_0;
+                    hrdata_o <= pmp_dump_0;
                 end
                 8'h0C: begin
-                    hrdata_i <= pmp_dump_1;
+                    hrdata_o <= pmp_dump_1;
                 end
                 8'h10: begin
-                    hrdata_i <= pmp_conf_0_0.base;
+                    hrdata_o <= pmp_conf_0_0.base;
                 end
                 8'h14: begin
-                    hrdata_i <= pmp_conf_0_0.mask;
+                    hrdata_o <= pmp_conf_0_0.mask;
                 end
                 8'h18: begin
-                    hrdata_i <= pmp_conf_0_1.base;
+                    hrdata_o <= pmp_conf_0_1.base;
                 end
                 8'h1C: begin
-                    hrdata_i <= pmp_conf_0_1.mask;
+                    hrdata_o <= pmp_conf_0_1.mask;
                 end
                 8'h20: begin
-                    hrdata_i <= pmp_conf_0_2.base;
+                    hrdata_o <= pmp_conf_0_2.base;
                 end
                 8'h24: begin
-                    hrdata_i <= pmp_conf_0_2.mask;
+                    hrdata_o <= pmp_conf_0_2.mask;
                 end
                 8'h28: begin
-                    hrdata_i <= pmp_conf_0_3.base;
+                    hrdata_o <= pmp_conf_0_3.base;
                 end
                 8'h2C: begin
-                    hrdata_i <= pmp_conf_0_3.mask;
+                    hrdata_o <= pmp_conf_0_3.mask;
                 end
                 8'h30: begin
-                    hrdata_i <= pmp_conf_0_4.base;
+                    hrdata_o <= pmp_conf_0_4.base;
                 end
                 8'h34: begin
-                    hrdata_i <= pmp_conf_0_4.mask;
+                    hrdata_o <= pmp_conf_0_4.mask;
                 end
                 8'h38: begin
-                    hrdata_i <= pmp_conf_0_5.base;
+                    hrdata_o <= pmp_conf_0_5.base;
                 end
                 8'h3C: begin
-                    hrdata_i <= pmp_conf_0_5.mask;
+                    hrdata_o <= pmp_conf_0_5.mask;
                 end
                 8'h40: begin
-                    hrdata_i <= pmp_conf_0_6.base;
+                    hrdata_o <= pmp_conf_0_6.base;
                 end
                 8'h44: begin
-                    hrdata_i <= pmp_conf_0_6.mask;
+                    hrdata_o <= pmp_conf_0_6.mask;
                 end
                 8'h48: begin
-                    hrdata_i <= pmp_conf_0_7.base;
+                    hrdata_o <= pmp_conf_0_7.base;
                 end
                 8'h4C: begin
-                    hrdata_i <= pmp_conf_0_7.mask;
+                    hrdata_o <= pmp_conf_0_7.mask;
                 end
                 8'h50: begin
-                    hrdata_i <= pmp_conf_1_0.base;
+                    hrdata_o <= pmp_conf_1_0.base;
                 end
                 8'h54: begin
-                    hrdata_i <= pmp_conf_1_0.mask;
+                    hrdata_o <= pmp_conf_1_0.mask;
                 end
                 8'h58: begin
-                    hrdata_i <= pmp_conf_1_1.base;
+                    hrdata_o <= pmp_conf_1_1.base;
                 end
                 8'h5C: begin
-                    hrdata_i <= pmp_conf_1_1.mask;
+                    hrdata_o <= pmp_conf_1_1.mask;
                 end
                 8'h60: begin
-                    hrdata_i <= pmp_conf_1_2.base;
+                    hrdata_o <= pmp_conf_1_2.base;
                 end
                 8'h64: begin
-                    hrdata_i <= pmp_conf_1_2.mask;
+                    hrdata_o <= pmp_conf_1_2.mask;
                 end
                 8'h68: begin
-                    hrdata_i <= pmp_conf_1_3.base;
+                    hrdata_o <= pmp_conf_1_3.base;
                 end
                 8'h6C: begin
-                    hrdata_i <= pmp_conf_1_3.mask;
+                    hrdata_o <= pmp_conf_1_3.mask;
                 end
                 8'h70: begin
-                    hrdata_i <= pmp_conf_1_4.base;
+                    hrdata_o <= pmp_conf_1_4.base;
                 end
                 8'h74: begin
-                    hrdata_i <= pmp_conf_1_4.mask;
+                    hrdata_o <= pmp_conf_1_4.mask;
                 end
                 8'h78: begin
-                    hrdata_i <= pmp_conf_1_5.base;
+                    hrdata_o <= pmp_conf_1_5.base;
                 end
                 8'h7C: begin
-                    hrdata_i <= pmp_conf_1_5.mask;
+                    hrdata_o <= pmp_conf_1_5.mask;
                 end
                 8'h80: begin
-                    hrdata_i <= pmp_conf_1_6.base;
+                    hrdata_o <= pmp_conf_1_6.base;
                 end
                 8'h84: begin
-                    hrdata_i <= pmp_conf_1_6.mask;
+                    hrdata_o <= pmp_conf_1_6.mask;
                 end
                 8'h88: begin
-                    hrdata_i <= pmp_conf_1_7.base;
+                    hrdata_o <= pmp_conf_1_7.base;
                 end
                 8'h8C: begin
-                    hrdata_i <= pmp_conf_1_7.mask;
+                    hrdata_o <= pmp_conf_1_7.mask;
                 end
                 default: begin
-                    hrdata_i <= 'b0;
+                    hrdata_o <= 'b0;
                 end
             endcase
         end

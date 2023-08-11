@@ -9,18 +9,18 @@ module apb_pmu #(
     parameter A_WIDTH = 32,
     parameter D_WIDTH = 32
 ) (
-    input logic pclk,
-    input logic presetn,
+    input logic pclk_i,
+    input logic presetn_i,
 
-    input logic               psel,
-    input logic [A_WIDTH-1:0] paddr,
-    input logic               pwrite,
-    input logic [D_WIDTH-1:0] pwdata,
-    input logic               penable,
+    input logic               psel_i,
+    input logic [A_WIDTH-1:0] paddr_i,
+    input logic               pwrite_i,
+    input logic [D_WIDTH-1:0] pwdata_i,
+    input logic               penable_i,
 
-    output logic [D_WIDTH-1:0] prdata,
+    output logic [D_WIDTH-1:0] prdata_o,
 
-    output logic sys_rst_n
+    output logic rst_n_o
 );
 
 typedef struct packed {
@@ -30,33 +30,33 @@ typedef struct packed {
 
 pmu_ctrl_t pmu_ctrl_0;
 
-wire wr_en = psel &  penable &  pwrite;
-wire rd_en = psel & !penable & !pwrite;
+wire wr_en = psel_i &  penable_i &  pwrite_i;
+wire rd_en = psel_i & !penable_i & !pwrite_i;
 
-assign sys_rst_n = pmu_ctrl_0.rst_n;
+assign rst_n_o = pmu_ctrl_0.rst_n;
 
-always_ff @(posedge pclk or negedge presetn)
+always_ff @(posedge pclk_i or negedge presetn_i)
 begin
-    if (!presetn) begin
-        prdata <= 'b0;
+    if (!presetn_i) begin
+        prdata_o <= 'b0;
 
         pmu_ctrl_0 <= 'b0;
     end else begin
         if (wr_en) begin
-            case (paddr[7:0])
+            case (paddr_i[7:0])
                 8'h00: begin
-                    pmu_ctrl_0 <= pwdata;
+                    pmu_ctrl_0 <= pwdata_i;
                 end
             endcase
         end
 
         if (rd_en) begin
-            case (paddr[7:0])
+            case (paddr_i[7:0])
                 8'h00: begin
-                    prdata <= pmu_ctrl_0;
+                    prdata_o <= pmu_ctrl_0;
                 end
                 default: begin
-                    prdata <= 'b0;
+                    prdata_o <= 'b0;
                 end
             endcase
         end
