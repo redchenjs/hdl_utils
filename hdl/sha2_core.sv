@@ -39,9 +39,11 @@ typedef enum {
 
 typedef enum {
     IDLE = 'h0,
-    LOAD = 'h1,
+    INIT = 'h1,
     NEXT = 'h2,
-    LAST = 'h3
+    LOAD = 'h3,
+    LAST = 'h4,
+    WAIT = 'h5
 } state_t;
 
 state_t ctl_sta;
@@ -183,7 +185,11 @@ begin
     if (!rst_n_i) begin
         in_ready_o <= 'b1;
     end else begin
-        in_ready_o <= (ctl_sta == NEXT) & iter_load ? 'b1 : (iter_cnt >= 12) & iter_keep ? 'b0 : in_ready_o;
+        if (iter_last) begin
+            in_ready_o <= (ctl_sta == LAST) ? 'b1 : (iter_cnt >= 12) & iter_keep ? 'b0 : in_ready_o;
+        end else begin
+            in_ready_o <= (ctl_sta == LOAD) ? 'b1 : (iter_cnt >= 12) ? 'b0 : in_ready_o;
+        end
     end
 end
 
@@ -242,11 +248,15 @@ begin
     end else begin
         case (ctl_sta)
             IDLE, LAST:
-                ctl_sta <= in_valid_i ? LOAD : IDLE;
-            LOAD:
-                ctl_sta <= iter_last ? LAST : NEXT;
+                ctl_sta <= in_valid_i ? INIT : IDLE;
+            WAIT:
+                ctl_sta <= in_valid_i ? INIT : WAIT;
+            INIT:
+                ctl_sta <= in_valid_i ? NEXT : INIT;
             NEXT:
                 ctl_sta <= iter_next ? LOAD : NEXT;
+            LOAD:
+                ctl_sta <= iter_last ? LAST : WAIT;
             default:
                 ctl_sta <= IDLE;
         endcase
@@ -278,6 +288,33 @@ begin
                 iter_cnt <= 'b0;
                 iter_max <= 'b0;
             end
+            INIT: begin
+                if (in_valid_i) begin
+                    a <= a + s[0];
+                    b <= b + s[1];
+                    c <= c + s[2];
+                    d <= d + s[3];
+                    e <= e + s[4];
+                    f <= f + s[5];
+                    g <= g + s[6];
+                    h <= h + s[7];
+
+                    s <= s;
+
+                    case (iter_mode)
+                        SHA_224: m[31:0] <= k[0][63:32] + w[0];
+                        SHA_256: m[31:0] <= k[0][63:32] + w[0];
+                        SHA_384: m       <= k[0]        + w[0];
+                        SHA_512: m       <= k[0]        + w[0];
+                    endcase
+
+                    w[0] <= in_data_s;
+                    w[1] <= w[0];
+
+                    iter_cnt <= 'b0;
+                    iter_max <= iter_mode[1] ? 'd79 : 'd63;
+                end
+            end
             LOAD: begin
                 a <= a + s[0];
                 b <= b + s[1];
@@ -304,35 +341,57 @@ begin
                 iter_max <= iter_mode[1] ? 'd79 : 'd63;
             end
             NEXT: begin
-                a <= t_1 + t_2;
-                b <= a;
-                c <= b;
-                d <= c;
-                e <= t_1 + d;
-                f <= e;
-                g <= f;
-                h <= g;
+                if ((iter_cnt + 2) <= 15) begin
+                    if (in_valid_i) begin
+                        a <= t_1 + t_2;
+                        b <= a;
+                        c <= b;
+                        d <= c;
+                        e <= t_1 + d;
+                        f <= e;
+                        g <= f;
+                        h <= g;
 
-                case (iter_mode)
-                    SHA_224: m[31:0] <= k[iter_cnt + 1][63:32] + w[0];
-                    SHA_256: m[31:0] <= k[iter_cnt + 1][63:32] + w[0];
-                    SHA_384: m       <= k[iter_cnt + 1]        + w[0];
-                    SHA_512: m       <= k[iter_cnt + 1]        + w[0];
-                endcase
+                        case (iter_mode)
+                            SHA_224: m[31:0] <= k[iter_cnt + 1][63:32] + w[0];
+                            SHA_256: m[31:0] <= k[iter_cnt + 1][63:32] + w[0];
+                            SHA_384: m       <= k[iter_cnt + 1]        + w[0];
+                            SHA_512: m       <= k[iter_cnt + 1]        + w[0];
+                        endcase
 
-                for (int i = 0; i < 8; i++) begin
-                    s[i] <= iter_save ? t[i] : s[i];
-                end
+                        for (int i = 0; i < 8; i++) begin
+                            s[i] <= iter_save ? t[i] : s[i];
+                        end
 
-                if ((iter_cnt + 2) <= 15 || iter_cnt >= iter_max) begin
-                    w[0] <= in_valid_i ? in_data_s : w[0];
+                        w[0] <= in_data_s;
 
-                    for (int i = 1; i < 16; i++) begin
-                        w[i] <= in_valid_i ? w[i-1] : w[i];
+                        for (int i = 1; i < 16; i++) begin
+                            w[i] <= w[i-1];
+                        end
+
+                        iter_cnt <= iter_cnt + 'b1;
+                    end
+                end else begin
+                    a <= t_1 + t_2;
+                    b <= a;
+                    c <= b;
+                    d <= c;
+                    e <= t_1 + d;
+                    f <= e;
+                    g <= f;
+                    h <= g;
+
+                    case (iter_mode)
+                        SHA_224: m[31:0] <= k[iter_cnt + 1][63:32] + w[0];
+                        SHA_256: m[31:0] <= k[iter_cnt + 1][63:32] + w[0];
+                        SHA_384: m       <= k[iter_cnt + 1]        + w[0];
+                        SHA_512: m       <= k[iter_cnt + 1]        + w[0];
+                    endcase
+
+                    for (int i = 0; i < 8; i++) begin
+                        s[i] <= iter_save ? t[i] : s[i];
                     end
 
-                    iter_cnt <= in_valid_i ? iter_cnt + 'b1 : iter_cnt;
-                end else begin
                     w[0] <= sigma_1 + w[6] + sigma_0 + w[15];
 
                     for (int i = 1; i < 16; i++) begin
@@ -341,11 +400,48 @@ begin
 
                     iter_cnt <= iter_cnt + 'b1;
                 end
+
+                iter_max <= iter_max;
+            end
+            WAIT: begin
+                if (in_valid_i) begin
+                    a <= 'b0;
+                    b <= 'b0;
+                    c <= 'b0;
+                    d <= 'b0;
+                    e <= 'b0;
+                    f <= 'b0;
+                    g <= 'b0;
+                    h <= 'b0;
+
+                    m <= 'b0;
+
+                    for (int i = 0; i < 8; i++) begin
+                        s[i] <= t[i];
+                    end
+                end else begin
+                    a <= a;
+                    b <= b;
+                    c <= c;
+                    d <= d;
+                    e <= e;
+                    f <= f;
+                    g <= g;
+                    h <= h;
+
+                    m <= m;
+                    s <= s;
+                end
+
+                w[0] <= in_data_s;
+
+                iter_cnt <= iter_cnt;
+                iter_max <= iter_max;
             end
         endcase
 
-        iter_save <= (ctl_sta == LOAD);
-        iter_keep <= (ctl_sta == LOAD) ? 'b1 : (iter_load ? 'b0 : iter_keep);
+        iter_save <= (ctl_sta == INIT) | (ctl_sta == LOAD);
+        iter_keep <= (ctl_sta == INIT) | (ctl_sta == LOAD) ? 'b1 : (iter_load ? 'b0 : iter_keep);
         iter_idle <= (ctl_sta == IDLE) | (ctl_sta == LAST) ? (in_valid_i ? 'b0 : 'b1) : iter_idle;
 
         iter_load <= (iter_cnt == (iter_max - 3));

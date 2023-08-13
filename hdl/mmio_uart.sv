@@ -84,10 +84,10 @@ assign regs[UART_REG_CTRL_1]  = uart_ctrl_1;
 assign regs[UART_REG_DATA_TX] = uart_data_tx;
 assign regs[UART_REG_DATA_RX] = uart_data_rx;
 
-uart #(
+stream_uart #(
     .I_DEPTH(I_DEPTH),
     .O_DEPTH(O_DEPTH)
-) uart (
+) stream_uart (
     .clk_i(clk_i),
     .rst_n_i(uart_ctrl_1.rst_n),
 

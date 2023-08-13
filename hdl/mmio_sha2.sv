@@ -56,8 +56,8 @@ typedef struct packed {
 } sha2_ctrl_1_t;
 
 typedef struct packed {
-    logic [63:32] hi;
-    logic [31: 0] lo;
+    logic [63:32] lo;
+    logic [31: 0] hi;
 } sha2_data_io_t;
 
 logic [1:0] in_mode;
@@ -74,6 +74,8 @@ logic        out_ready;
 logic        intr_done_p;
 logic        intr_next_p;
 
+logic        out_valid_r;
+
 sha2_ctrl_0_t sha2_ctrl_0;
 sha2_ctrl_1_t sha2_ctrl_1;
 
@@ -82,6 +84,11 @@ sha2_data_io_t sha2_data_o;
 
 assign in_mode = sha2_ctrl_1.mode;
 assign in_last = sha2_ctrl_1.last;
+assign in_data = sha2_data_i;
+
+assign sha2_ctrl_1.rsvd = 'b0;
+assign sha2_ctrl_1.next = in_ready;
+assign sha2_ctrl_1.done = out_valid;
 
 assign sha2_data_o = out_data;
 
@@ -112,10 +119,10 @@ edge2en intr_next_en(
     .pos_edge_o(intr_next_p)
 );
 
-sha2 #(
+stream_sha2 #(
     .I_DEPTH(I_DEPTH),
     .O_DEPTH(O_DEPTH)
-) sha2 (
+) stream_sha2 (
     .clk_i(clk_i),
     .rst_n_i(sha2_ctrl_0.rst_n),
 
@@ -134,20 +141,20 @@ sha2 #(
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        in_data  <= 'b0;
         in_valid <= 'b0;
     end else begin
-        in_data  <= wr_en_i & (wr_addr_i[4:2] == SHA2_REG_DATA_I_HI) ? sha2_data_i : in_data;
-        in_valid <= wr_en_i & (wr_addr_i[4:2] == SHA2_REG_DATA_I_HI) ? 'b1 : (in_ready ? 'b0 : in_valid);
+        in_valid <= wr_en_i & (wr_addr_i[4:2] == SHA2_REG_DATA_I_HI);
     end
 end
 
 always_ff @(posedge clk_i or negedge rst_n_i)
 begin
     if (!rst_n_i) begin
-        out_ready <= 'b0;
+        out_ready   <= 'b0;
+        out_valid_r <= 'b0;
     end else begin
-        out_ready <= out_valid & rd_en_i & (rd_addr_i[4:2] == SHA2_REG_DATA_O_HI);
+        out_ready   <= (out_valid & ~out_valid_r) | (out_valid & rd_en_i & (rd_addr_i[4:2] == SHA2_REG_DATA_O_HI));
+        out_valid_r <= out_valid;
     end
 end
 
@@ -157,7 +164,9 @@ begin
         rd_data_o <= 'b0;
 
         sha2_ctrl_0 <= 'b0;
-        sha2_ctrl_1 <= 'b0;
+
+        sha2_ctrl_1.last <= 'b0;
+        sha2_ctrl_1.mode <= 'b0;
 
         sha2_data_i <= 'b0;
     end else begin
