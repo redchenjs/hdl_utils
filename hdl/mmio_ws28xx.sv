@@ -58,6 +58,10 @@ ws28xx_ctrl_0_t ws28xx_ctrl_0;
 ws28xx_ctrl_1_t ws28xx_ctrl_1;
 ws28xx_ctrl_2_t ws28xx_ctrl_2;
 
+logic out_done;
+logic out_done_p;
+logic out_done_n;
+
 logic [D_WIDTH-1:0] regs[WS28XX_REG_IDX_MAX];
 
 assign regs[WS28XX_REG_CTRL_0] = ws28xx_ctrl_0;
@@ -71,6 +75,14 @@ assign ws28xx_ctrl_1.rsvd = 'b0;
 wire [8:0] ws28xx_t0s_time = ws28xx_ctrl_2.t0h + ws28xx_ctrl_2.t0l;
 wire [8:0] ws28xx_t1s_time = ws28xx_ctrl_2.t1h + ws28xx_ctrl_2.t1l;
 
+edge2en out_done_en(
+    .clk_i(clk_i),
+    .rst_n_i(rst_n_i),
+    .data_i(out_done),
+    .pos_edge_o(out_done_p),
+    .neg_edge_o(out_done_n)
+);
+
 ws28xx_core  #(
     .D_WIDTH(D_WIDTH),
     .D_DEPTH(D_DEPTH)
@@ -79,7 +91,7 @@ ws28xx_core  #(
     .rst_n_i(ws28xx_ctrl_0.rst_n),
 
     .out_sync_i(ws28xx_ctrl_1.sync),
-    .out_done_o(ws28xx_ctrl_0.done),
+    .out_done_o(out_done),
 
     .reg_t0h_time_i(ws28xx_ctrl_2.t0h),
     .reg_t0s_time_i(ws28xx_t0s_time),
@@ -98,6 +110,7 @@ begin
     if (!rst_n_i) begin
         rd_data_o <= 'b0;
 
+        ws28xx_ctrl_0.done  <= 'b0;
         ws28xx_ctrl_0.rst_n <= 'b0;
 
         ws28xx_ctrl_1.addr <= 'b0;
@@ -118,11 +131,15 @@ begin
                 WS28XX_REG_CTRL_2: begin
                     ws28xx_ctrl_2 <= wr_data_i;
                 end
-                default;
+                default: begin
+                    ws28xx_ctrl_1.sync <= out_done_n ? 'b0 : ws28xx_ctrl_1.sync;
+                end
             endcase
         end else begin
-            ws28xx_ctrl_1.sync <= !ws28xx_ctrl_0.done ? 'b0 : ws28xx_ctrl_1.sync;
+            ws28xx_ctrl_1.sync <= out_done_n ? 'b0 : ws28xx_ctrl_1.sync;
         end
+
+        ws28xx_ctrl_0.done <= ws28xx_ctrl_1.sync ? 'b0 : (out_done_p ? 'b1 : ws28xx_ctrl_0.done);
     end
 end
 

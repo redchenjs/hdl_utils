@@ -92,8 +92,7 @@ logic [15:0] [31:0] data_blk_1 = {
 };
 
 always begin
-    #3
-    data_cnt <= 0;
+    #3 data_cnt <= 0;
 
     #5  // write byte@0x0000
     hsel_i   <= 'b1;
@@ -133,7 +132,7 @@ always begin
     htrans_i <= AHB_TRANS_NONSEQ;
     hburst_i <= 'b0;
     hwrite_i <= 'b1;
-    hwdata_i <= 'h0f1f_1f0f;
+    hwdata_i <= 'h0e0e_0e04;
 
     for (int i = 0; i < 15; i++) begin
         #5  // write byte@0x04xx
@@ -211,6 +210,134 @@ always begin
     hwrite_i <= 'b0;
     hwdata_i <= 'h0000_0001;    // addr = 1'b0, sync = 1
 
+    #5  // read word@0x0004
+    hsel_i   <= 'b1;
+    haddr_i  <= 'h0004;
+    hprot_i  <= 'b0;
+    hsize_i  <= 'h0;
+    htrans_i <= AHB_TRANS_NONSEQ;
+    hburst_i <= 'b0;
+    hwrite_i <= 'b0;
+    hwdata_i <= 'h0;
+
+    while (hrdata_o & 'h0000_0001) begin
+        #5  // read word@0x0004
+        hsel_i   <= 'b1;
+        haddr_i  <= 'h0004;
+        hprot_i  <= 'b0;
+        hsize_i  <= 'h0;
+        htrans_i <= AHB_TRANS_NONSEQ;
+        hburst_i <= 'b0;
+        hwrite_i <= 'b0;
+        hwdata_i <= 'h0;
+    end
+
+    #5  // read word@0x0000
+    hsel_i   <= 'b1;
+    haddr_i  <= 'h0000;
+    hprot_i  <= 'b0;
+    hsize_i  <= 'h0;
+    htrans_i <= AHB_TRANS_NONSEQ;
+    hburst_i <= 'b0;
+    hwrite_i <= 'b0;
+    hwdata_i <= 'h0;
+
+    #5  // read word@0x0000
+    hsel_i   <= 'b1;
+    haddr_i  <= 'h0000;
+    hprot_i  <= 'b0;
+    hsize_i  <= 'h0;
+    htrans_i <= AHB_TRANS_NONSEQ;
+    hburst_i <= 'b0;
+    hwrite_i <= 'b0;
+    hwdata_i <= 'h0;
+
+    while (!(hrdata_o & 'h8000_0000)) begin
+        #5  // read word@0x0000
+        hsel_i   <= 'b1;
+        haddr_i  <= 'h0000;
+        hprot_i  <= 'b0;
+        hsize_i  <= 'h0;
+        htrans_i <= AHB_TRANS_NONSEQ;
+        hburst_i <= 'b0;
+        hwrite_i <= 'b0;
+        hwdata_i <= 'h0;
+    end
+
+    #5  // write byte@0x0004
+    hsel_i   <= 'b1;
+    haddr_i  <= 'h0004;
+    hprot_i  <= 'b0;
+    hsize_i  <= 'h0;
+    htrans_i <= AHB_TRANS_NONSEQ;
+    hburst_i <= 'b0;
+    hwrite_i <= 'b1;
+    hwdata_i <= 'h0;            // dummy data;
+
+    #5  // read word@0x0004
+    hsel_i   <= 'b1;
+    haddr_i  <= 'h0004;
+    hprot_i  <= 'b0;
+    hsize_i  <= 'h0;
+    htrans_i <= AHB_TRANS_NONSEQ;
+    hburst_i <= 'b0;
+    hwrite_i <= 'b0;
+    hwdata_i <= 'h0000_0001;    // addr = 1'b0, sync = 1
+
+    #5  // read word@0x0004
+    hsel_i   <= 'b1;
+    haddr_i  <= 'h0004;
+    hprot_i  <= 'b0;
+    hsize_i  <= 'h0;
+    htrans_i <= AHB_TRANS_NONSEQ;
+    hburst_i <= 'b0;
+    hwrite_i <= 'b0;
+    hwdata_i <= 'h0;
+
+    while (hrdata_o & 'h0000_0001) begin
+        #5  // read word@0x0004
+        hsel_i   <= 'b1;
+        haddr_i  <= 'h0004;
+        hprot_i  <= 'b0;
+        hsize_i  <= 'h0;
+        htrans_i <= AHB_TRANS_NONSEQ;
+        hburst_i <= 'b0;
+        hwrite_i <= 'b0;
+        hwdata_i <= 'h0;
+    end
+
+    #5  // read word@0x0000
+    hsel_i   <= 'b1;
+    haddr_i  <= 'h0000;
+    hprot_i  <= 'b0;
+    hsize_i  <= 'h0;
+    htrans_i <= AHB_TRANS_NONSEQ;
+    hburst_i <= 'b0;
+    hwrite_i <= 'b0;
+    hwdata_i <= 'h0;
+
+    #5  // read word@0x0000
+    hsel_i   <= 'b1;
+    haddr_i  <= 'h0000;
+    hprot_i  <= 'b0;
+    hsize_i  <= 'h0;
+    htrans_i <= AHB_TRANS_NONSEQ;
+    hburst_i <= 'b0;
+    hwrite_i <= 'b0;
+    hwdata_i <= 'h0;
+
+    while (!(hrdata_o & 'h8000_0000)) begin
+        #5  // read word@0x0000
+        hsel_i   <= 'b1;
+        haddr_i  <= 'h0000;
+        hprot_i  <= 'b0;
+        hsize_i  <= 'h0;
+        htrans_i <= AHB_TRANS_NONSEQ;
+        hburst_i <= 'b0;
+        hwrite_i <= 'b0;
+        hwdata_i <= 'h0;
+    end
+
     #5  // read word@0x0008
     hsel_i   <= 'b1;
     haddr_i  <= 'h0008;
@@ -231,7 +358,7 @@ always begin
     hwrite_i <= 'b0;
     hwdata_i <= 'h0;
 
-    #100000 hresetn_i <= 'b0;
+    #75 hresetn_i <= 'b0;
     #25 $finish;
 end
 
