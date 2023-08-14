@@ -9,7 +9,8 @@ module ws28xx_ctl(
     input logic clk_i,
     input logic rst_n_i,
 
-    input logic out_sync_i,
+    input  logic out_sync_i,
+    output logic out_done_o,
 
     output logic bit_data_o,
     output logic bit_valid_o,
@@ -59,6 +60,8 @@ begin
 
         bit_data  <= 'b0;
         bit_valid <= 'b0;
+
+        out_done_o <= 'b0;
     end else begin
         case (ctl_sta)
             IDLE:
@@ -81,6 +84,8 @@ begin
 
         bit_data  <= (ctl_sta == SEND_BIT) & bit_next ? rd_data[5'd23 - bit_sel] : bit_data;
         bit_valid <= (ctl_sta == SEND_BIT) & bit_next;
+
+        out_done_o <= (ctl_sta == IDLE);
     end
 end
 

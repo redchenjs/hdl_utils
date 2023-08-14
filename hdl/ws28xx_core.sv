@@ -12,7 +12,8 @@ module ws28xx_core #(
     input logic clk_i,
     input logic rst_n_i,
 
-    input logic out_sync_i,
+    input  logic out_sync_i,
+    output logic out_done_o,
 
     input logic [7:0] reg_t0h_time_i,
     input logic [8:0] reg_t0s_time_i,
@@ -57,6 +58,7 @@ ws28xx_ctl ws28xx_ctl(
     .rst_n_i(rst_n_i),
 
     .out_sync_i(out_sync_i),
+    .out_done_o(out_done_o),
 
     .bit_data_o(bit_data),
     .bit_valid_o(bit_valid),

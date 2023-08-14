@@ -36,7 +36,8 @@ typedef enum  {
 } ws28xx_reg_t;
 
 typedef struct packed {
-    logic [31:1] rsvd;
+    logic        done;
+    logic [30:1] rsvd;
     logic        rst_n;
 } ws28xx_ctrl_0_t;
 
@@ -78,6 +79,7 @@ ws28xx_core  #(
     .rst_n_i(ws28xx_ctrl_0.rst_n),
 
     .out_sync_i(ws28xx_ctrl_1.sync),
+    .out_done_o(ws28xx_ctrl_0.done),
 
     .reg_t0h_time_i(ws28xx_ctrl_2.t0h),
     .reg_t0s_time_i(ws28xx_t0s_time),
@@ -119,7 +121,7 @@ begin
                 default;
             endcase
         end else begin
-            ws28xx_ctrl_1.sync <= 'b0;
+            ws28xx_ctrl_1.sync <= !ws28xx_ctrl_0.done ? 'b0 : ws28xx_ctrl_1.sync;
         end
     end
 end
