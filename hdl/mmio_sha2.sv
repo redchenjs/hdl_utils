@@ -50,7 +50,8 @@ typedef struct packed {
 typedef struct packed {
     logic        done;
     logic        next;
-    logic [29:3] rsvd;
+    logic [29:4] rsvd;
+    logic        read;
     logic  [2:1] mode;
     logic        last;
 } sha2_ctrl_1_t;
@@ -58,7 +59,12 @@ typedef struct packed {
 typedef struct packed {
     logic [63:32] lo;
     logic [31: 0] hi;
-} sha2_data_io_t;
+} sha2_data_i_t;
+
+typedef struct packed {
+    logic [63:32] hi;
+    logic [31: 0] lo;
+} sha2_data_o_t;
 
 logic [1:0] in_mode;
 logic       in_last;
@@ -79,8 +85,8 @@ logic        out_valid_r;
 sha2_ctrl_0_t sha2_ctrl_0;
 sha2_ctrl_1_t sha2_ctrl_1;
 
-sha2_data_io_t sha2_data_i;
-sha2_data_io_t sha2_data_o;
+sha2_data_i_t sha2_data_i;
+sha2_data_o_t sha2_data_o;
 
 assign in_mode = sha2_ctrl_1.mode;
 assign in_last = sha2_ctrl_1.last;
@@ -153,7 +159,7 @@ begin
         out_ready   <= 'b0;
         out_valid_r <= 'b0;
     end else begin
-        out_ready   <= (out_valid & ~out_valid_r) | (out_valid & rd_en_i & (rd_addr_i[4:2] == SHA2_REG_DATA_O_HI));
+        out_ready   <= out_valid & sha2_ctrl_1.read;
         out_valid_r <= out_valid;
     end
 end
@@ -167,6 +173,7 @@ begin
 
         sha2_ctrl_1.last <= 'b0;
         sha2_ctrl_1.mode <= 'b0;
+        sha2_ctrl_1.read <= 'b0;
 
         sha2_data_i <= 'b0;
     end else begin
@@ -180,11 +187,16 @@ begin
                 SHA2_REG_CTRL_1: begin
                     sha2_ctrl_1.last <= wr_data_i[0];
                     sha2_ctrl_1.mode <= wr_data_i[2:1];
+                    sha2_ctrl_1.read <= wr_data_i[3];
                 end
                 SHA2_REG_DATA_I_LO: sha2_data_i.lo <= wr_data_i;
                 SHA2_REG_DATA_I_HI: sha2_data_i.hi <= wr_data_i;
-                default;
+                default: begin
+                    sha2_ctrl_1.read <= 'b0;
+                end
             endcase
+        end else begin
+            sha2_ctrl_1.read <= 'b0;
         end
 
         sha2_ctrl_0.intr_done <= intr_done_p ? 'b1 : (rd_en_i & (rd_addr_i[4:2] == SHA2_REG_CTRL_0) ? 'b0 : sha2_ctrl_0.intr_done);
