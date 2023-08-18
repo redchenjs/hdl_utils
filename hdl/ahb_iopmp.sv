@@ -57,7 +57,6 @@ module ahb_iopmp #(
     output logic [D_WIDTH-1:0] s1_hrdata_o,
 
     // Master port 0
-    output logic               m0_hsel_o,
     output logic [A_WIDTH-1:0] m0_haddr_o,
     output logic         [3:0] m0_hprot_o,
     output logic         [2:0] m0_hsize_o,
@@ -72,7 +71,6 @@ module ahb_iopmp #(
     input logic [D_WIDTH-1:0] m0_hrdata_i,
 
     // Master port 1
-    output logic               m1_hsel_o,
     output logic [A_WIDTH-1:0] m1_haddr_o,
     output logic         [3:0] m1_hprot_o,
     output logic         [2:0] m1_hsize_o,
@@ -152,13 +150,19 @@ logic [A_WIDTH-1:0] haddr_r;
 
 wire rd_en = hsel_i & !hwrite_i;
 
+wire pmp_addr_0_w = |pmp_addr_0_hit_w;
+wire pmp_addr_0_r = |pmp_addr_0_hit_r;
+
+wire pmp_addr_1_w = |pmp_addr_1_hit_w;
+wire pmp_addr_1_r = |pmp_addr_1_hit_r;
+
 assign hresp_o  = AHB_RESP_OKAY;
 assign hready_o = 'b1;
 
 assign m0_haddr_o  = s0_haddr_i;
 assign m0_hprot_o  = s0_hprot_i;
 assign m0_hsize_o  = s0_hsize_i;
-assign m0_htrans_o = (|pmp_addr_0_hit_w) | (|pmp_addr_0_hit_r) ? s0_htrans_i : AHB_TRANS_IDLE;
+assign m0_htrans_o = (pmp_addr_0_w | pmp_addr_0_r) ? s0_htrans_i : AHB_TRANS_IDLE;
 assign m0_hburst_o = s0_hburst_i;
 assign m0_hwrite_o = s0_hwrite_i;
 assign m0_hwdata_o = s0_hwdata_i;
@@ -166,7 +170,7 @@ assign m0_hwdata_o = s0_hwdata_i;
 assign m1_haddr_o  = s1_haddr_i;
 assign m1_hprot_o  = s1_hprot_i;
 assign m1_hsize_o  = s1_hsize_i;
-assign m1_htrans_o = (|pmp_addr_1_hit_w) | (|pmp_addr_1_hit_r) ? s1_htrans_i : AHB_TRANS_IDLE;
+assign m1_htrans_o = (pmp_addr_1_w | pmp_addr_1_r) ? s1_htrans_i : AHB_TRANS_IDLE;
 assign m1_hburst_o = s1_hburst_i;
 assign m1_hwrite_o = s1_hwrite_i;
 assign m1_hwdata_o = s1_hwdata_i;
@@ -268,14 +272,14 @@ begin
             pmp_dump_0_w.addr <= 'b0;
             pmp_dump_0_r.addr <= 'b0;
         end else begin
-            pmp_stat_0.hit_w <= |pmp_addr_0_hit_w ? pmp_addr_0_hit_w : pmp_stat_0.hit_w;
-            pmp_stat_0.hit_r <= |pmp_addr_0_hit_r ? pmp_addr_0_hit_r : pmp_stat_0.hit_r;
+            pmp_stat_0.hit_w <= pmp_addr_0_w ? pmp_addr_0_hit_w : pmp_stat_0.hit_w;
+            pmp_stat_0.hit_r <= pmp_addr_0_r ? pmp_addr_0_hit_r : pmp_stat_0.hit_r;
 
-            pmp_stat_0.err_w <= !(|pmp_addr_0_hit_w) & (s0_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_0.err_w;
-            pmp_stat_0.err_r <= !(|pmp_addr_0_hit_r) & (s0_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_0.err_r;
+            pmp_stat_0.err_w <= !pmp_addr_0_w &  s0_hwrite_i & (s0_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_0.err_w;
+            pmp_stat_0.err_r <= !pmp_addr_0_r & !s0_hwrite_i & (s0_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_0.err_r;
 
-            pmp_dump_0_w.addr <= !(|pmp_addr_0_hit_w) & (s0_htrans_i != AHB_TRANS_IDLE) ? s0_haddr_i : pmp_dump_0_w.addr;
-            pmp_dump_0_r.addr <= !(|pmp_addr_0_hit_r) & (s0_htrans_i != AHB_TRANS_IDLE) ? s0_haddr_i : pmp_dump_0_r.addr;
+            pmp_dump_0_w.addr <= !pmp_addr_0_w &  s0_hwrite_i & (s0_htrans_i != AHB_TRANS_IDLE) ? s0_haddr_i : pmp_dump_0_w.addr;
+            pmp_dump_0_r.addr <= !pmp_addr_0_r & !s0_hwrite_i & (s0_htrans_i != AHB_TRANS_IDLE) ? s0_haddr_i : pmp_dump_0_r.addr;
         end
 
         if (pmp_ctrl_1.rst) begin
@@ -288,14 +292,14 @@ begin
             pmp_dump_1_w.addr <= 'b0;
             pmp_dump_1_r.addr <= 'b0;
         end else begin
-            pmp_stat_1.hit_w <= |pmp_addr_1_hit_w ? pmp_addr_1_hit_w : pmp_stat_1.hit_w;
-            pmp_stat_1.hit_r <= |pmp_addr_1_hit_r ? pmp_addr_1_hit_r : pmp_stat_1.hit_r;
+            pmp_stat_1.hit_w <= pmp_addr_1_w ? pmp_addr_1_hit_w : pmp_stat_1.hit_w;
+            pmp_stat_1.hit_r <= pmp_addr_1_r ? pmp_addr_1_hit_r : pmp_stat_1.hit_r;
 
-            pmp_stat_1.err_w <= !(|pmp_addr_1_hit_w) & (s1_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_1.err_w;
-            pmp_stat_1.err_r <= !(|pmp_addr_1_hit_r) & (s1_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_1.err_r;
+            pmp_stat_1.err_w <= !pmp_addr_1_w &  s1_hwrite_i & (s1_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_1.err_w;
+            pmp_stat_1.err_r <= !pmp_addr_1_r & !s1_hwrite_i & (s1_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_1.err_r;
 
-            pmp_dump_1_w.addr <= !(|pmp_addr_1_hit_w) & (s1_htrans_i != AHB_TRANS_IDLE) ? s1_haddr_i : pmp_dump_1_w.addr;
-            pmp_dump_1_r.addr <= !(|pmp_addr_1_hit_r) & (s1_htrans_i != AHB_TRANS_IDLE) ? s1_haddr_i : pmp_dump_1_r.addr;
+            pmp_dump_1_w.addr <= !pmp_addr_1_w &  s1_hwrite_i & (s1_htrans_i != AHB_TRANS_IDLE) ? s1_haddr_i : pmp_dump_1_w.addr;
+            pmp_dump_1_r.addr <= !pmp_addr_1_r & !s1_hwrite_i & (s1_htrans_i != AHB_TRANS_IDLE) ? s1_haddr_i : pmp_dump_1_r.addr;
         end
 
         if (hsel_r) begin
