@@ -259,40 +259,40 @@ begin
         haddr_r <= haddr_i;
 
         if (pmp_ctrl_0.rst) begin
-            pmp_ctrl_0.hit_w <= 'b0;
-            pmp_ctrl_0.hit_r <= 'b0;
+            pmp_stat_0.hit_w <= 'b0;
+            pmp_stat_0.hit_r <= 'b0;
 
-            pmp_ctrl_0.err_w <= 'b0;
-            pmp_ctrl_0.err_r <= 'b0;
+            pmp_stat_0.err_w <= 'b0;
+            pmp_stat_0.err_r <= 'b0;
 
             pmp_dump_0_w.addr <= 'b0;
             pmp_dump_0_r.addr <= 'b0;
         end else begin
-            pmp_ctrl_0.hit_w <= |pmp_addr_0_hit_w ? pmp_addr_0_hit_w : pmp_ctrl_0.hit_w;
-            pmp_ctrl_0.hit_r <= |pmp_addr_0_hit_r ? pmp_addr_0_hit_r : pmp_ctrl_0.hit_r;
+            pmp_stat_0.hit_w <= |pmp_addr_0_hit_w ? pmp_addr_0_hit_w : pmp_stat_0.hit_w;
+            pmp_stat_0.hit_r <= |pmp_addr_0_hit_r ? pmp_addr_0_hit_r : pmp_stat_0.hit_r;
 
-            pmp_ctrl_0.err_w <= !(|pmp_addr_0_hit_w) & (s0_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_ctrl_0.err_w;
-            pmp_ctrl_0.err_r <= !(|pmp_addr_0_hit_r) & (s0_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_ctrl_0.err_r;
+            pmp_stat_0.err_w <= !(|pmp_addr_0_hit_w) & (s0_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_0.err_w;
+            pmp_stat_0.err_r <= !(|pmp_addr_0_hit_r) & (s0_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_0.err_r;
 
             pmp_dump_0_w.addr <= !(|pmp_addr_0_hit_w) & (s0_htrans_i != AHB_TRANS_IDLE) ? s0_haddr_i : pmp_dump_0_w.addr;
             pmp_dump_0_r.addr <= !(|pmp_addr_0_hit_r) & (s0_htrans_i != AHB_TRANS_IDLE) ? s0_haddr_i : pmp_dump_0_r.addr;
         end
 
         if (pmp_ctrl_1.rst) begin
-            pmp_ctrl_1.hit_w <= 'b0;
-            pmp_ctrl_1.hit_r <= 'b0;
+            pmp_stat_1.hit_w <= 'b0;
+            pmp_stat_1.hit_r <= 'b0;
 
-            pmp_ctrl_1.err_w <= 'b0;
-            pmp_ctrl_1.err_r <= 'b0;
+            pmp_stat_1.err_w <= 'b0;
+            pmp_stat_1.err_r <= 'b0;
 
             pmp_dump_1_w.addr <= 'b0;
             pmp_dump_1_r.addr <= 'b0;
         end else begin
-            pmp_ctrl_1.hit_w <= |pmp_addr_1_hit_w ? pmp_addr_1_hit_w : pmp_ctrl_1.hit_w;
-            pmp_ctrl_1.hit_r <= |pmp_addr_1_hit_r ? pmp_addr_1_hit_r : pmp_ctrl_1.hit_r;
+            pmp_stat_1.hit_w <= |pmp_addr_1_hit_w ? pmp_addr_1_hit_w : pmp_stat_1.hit_w;
+            pmp_stat_1.hit_r <= |pmp_addr_1_hit_r ? pmp_addr_1_hit_r : pmp_stat_1.hit_r;
 
-            pmp_ctrl_1.err_w <= !(|pmp_addr_1_hit_w) & (s1_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_ctrl_1.err_w;
-            pmp_ctrl_1.err_r <= !(|pmp_addr_1_hit_r) & (s1_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_ctrl_1.err_r;
+            pmp_stat_1.err_w <= !(|pmp_addr_1_hit_w) & (s1_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_1.err_w;
+            pmp_stat_1.err_r <= !(|pmp_addr_1_hit_r) & (s1_htrans_i != AHB_TRANS_IDLE) ? 'b1 : pmp_stat_1.err_r;
 
             pmp_dump_1_w.addr <= !(|pmp_addr_1_hit_w) & (s1_htrans_i != AHB_TRANS_IDLE) ? s1_haddr_i : pmp_dump_1_w.addr;
             pmp_dump_1_r.addr <= !(|pmp_addr_1_hit_r) & (s1_htrans_i != AHB_TRANS_IDLE) ? s1_haddr_i : pmp_dump_1_r.addr;
