@@ -199,23 +199,23 @@ assign pmp_addr_0_hit_r[5] = pmp_ctrl_0.en_r[5] & !s0_hwrite_i & ((s0_haddr_i & 
 assign pmp_addr_0_hit_r[6] = pmp_ctrl_0.en_r[6] & !s0_hwrite_i & ((s0_haddr_i & pmp_conf_0_6.mask) == pmp_conf_0_6.base);
 assign pmp_addr_0_hit_r[7] = pmp_ctrl_0.en_r[7] & !s0_hwrite_i & ((s0_haddr_i & pmp_conf_0_7.mask) == pmp_conf_0_7.base);
 
-assign pmp_addr_1_hit_w[0] = pmp_ctrl_1.en_w[0] & s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_0.mask) == pmp_conf_1_0.base);
-assign pmp_addr_1_hit_w[1] = pmp_ctrl_1.en_w[1] & s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_1.mask) == pmp_conf_1_1.base);
-assign pmp_addr_1_hit_w[2] = pmp_ctrl_1.en_w[2] & s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_2.mask) == pmp_conf_1_2.base);
-assign pmp_addr_1_hit_w[3] = pmp_ctrl_1.en_w[3] & s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_3.mask) == pmp_conf_1_3.base);
-assign pmp_addr_1_hit_w[4] = pmp_ctrl_1.en_w[4] & s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_4.mask) == pmp_conf_1_4.base);
-assign pmp_addr_1_hit_w[5] = pmp_ctrl_1.en_w[5] & s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_5.mask) == pmp_conf_1_5.base);
-assign pmp_addr_1_hit_w[6] = pmp_ctrl_1.en_w[6] & s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_6.mask) == pmp_conf_1_6.base);
-assign pmp_addr_1_hit_w[7] = pmp_ctrl_1.en_w[7] & s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_7.mask) == pmp_conf_1_7.base);
+assign pmp_addr_1_hit_w[0] = pmp_ctrl_1.en_w[0] & s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_0.mask) == pmp_conf_1_0.base);
+assign pmp_addr_1_hit_w[1] = pmp_ctrl_1.en_w[1] & s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_1.mask) == pmp_conf_1_1.base);
+assign pmp_addr_1_hit_w[2] = pmp_ctrl_1.en_w[2] & s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_2.mask) == pmp_conf_1_2.base);
+assign pmp_addr_1_hit_w[3] = pmp_ctrl_1.en_w[3] & s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_3.mask) == pmp_conf_1_3.base);
+assign pmp_addr_1_hit_w[4] = pmp_ctrl_1.en_w[4] & s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_4.mask) == pmp_conf_1_4.base);
+assign pmp_addr_1_hit_w[5] = pmp_ctrl_1.en_w[5] & s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_5.mask) == pmp_conf_1_5.base);
+assign pmp_addr_1_hit_w[6] = pmp_ctrl_1.en_w[6] & s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_6.mask) == pmp_conf_1_6.base);
+assign pmp_addr_1_hit_w[7] = pmp_ctrl_1.en_w[7] & s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_7.mask) == pmp_conf_1_7.base);
 
-assign pmp_addr_1_hit_r[0] = pmp_ctrl_1.en_r[0] & !s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_0.mask) == pmp_conf_1_0.base);
-assign pmp_addr_1_hit_r[1] = pmp_ctrl_1.en_r[1] & !s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_1.mask) == pmp_conf_1_1.base);
-assign pmp_addr_1_hit_r[2] = pmp_ctrl_1.en_r[2] & !s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_2.mask) == pmp_conf_1_2.base);
-assign pmp_addr_1_hit_r[3] = pmp_ctrl_1.en_r[3] & !s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_3.mask) == pmp_conf_1_3.base);
-assign pmp_addr_1_hit_r[4] = pmp_ctrl_1.en_r[4] & !s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_4.mask) == pmp_conf_1_4.base);
-assign pmp_addr_1_hit_r[5] = pmp_ctrl_1.en_r[5] & !s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_5.mask) == pmp_conf_1_5.base);
-assign pmp_addr_1_hit_r[6] = pmp_ctrl_1.en_r[6] & !s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_6.mask) == pmp_conf_1_6.base);
-assign pmp_addr_1_hit_r[7] = pmp_ctrl_1.en_r[7] & !s0_hwrite_i & ((s1_haddr_i & pmp_conf_1_7.mask) == pmp_conf_1_7.base);
+assign pmp_addr_1_hit_r[0] = pmp_ctrl_1.en_r[0] & !s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_0.mask) == pmp_conf_1_0.base);
+assign pmp_addr_1_hit_r[1] = pmp_ctrl_1.en_r[1] & !s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_1.mask) == pmp_conf_1_1.base);
+assign pmp_addr_1_hit_r[2] = pmp_ctrl_1.en_r[2] & !s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_2.mask) == pmp_conf_1_2.base);
+assign pmp_addr_1_hit_r[3] = pmp_ctrl_1.en_r[3] & !s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_3.mask) == pmp_conf_1_3.base);
+assign pmp_addr_1_hit_r[4] = pmp_ctrl_1.en_r[4] & !s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_4.mask) == pmp_conf_1_4.base);
+assign pmp_addr_1_hit_r[5] = pmp_ctrl_1.en_r[5] & !s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_5.mask) == pmp_conf_1_5.base);
+assign pmp_addr_1_hit_r[6] = pmp_ctrl_1.en_r[6] & !s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_6.mask) == pmp_conf_1_6.base);
+assign pmp_addr_1_hit_r[7] = pmp_ctrl_1.en_r[7] & !s1_hwrite_i & ((s1_haddr_i & pmp_conf_1_7.mask) == pmp_conf_1_7.base);
 
 always_ff @(posedge hclk_i or negedge hresetn_i)
 begin
