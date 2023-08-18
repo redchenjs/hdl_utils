@@ -88,18 +88,18 @@ module ahb_iopmp #(
 );
 
 typedef struct packed {
-    logic [31:24] en_w;
-    logic [23:16] en_r;
-    logic [15: 1] rsvd;
-    logic         rst;
+    logic  [7:0] en_w;
+    logic  [7:0] en_r;
+    logic [14:0] rsvd;
+    logic        rst;
 } pmp_ctrl_t;
 
 typedef struct packed {
-    logic [31:24] hit_w;
-    logic [23:16] hit_r;
-    logic [15: 2] rsvd;
-    logic         err_w;
-    logic         err_r;
+    logic  [7:0] hit_w;
+    logic  [7:0] hit_r;
+    logic [13:0] rsvd;
+    logic        err_w;
+    logic        err_r;
 } pmp_stat_t;
 
 typedef struct packed {
@@ -112,10 +112,16 @@ typedef struct packed {
 } pmp_conf_t;
 
 pmp_ctrl_t pmp_ctrl_0;
+pmp_ctrl_t pmp_ctrl_1;
+
 pmp_stat_t pmp_stat_0;
+pmp_stat_t pmp_stat_1;
 
 pmp_dump_t pmp_dump_0_w;
 pmp_dump_t pmp_dump_0_r;
+
+pmp_dump_t pmp_dump_1_w;
+pmp_dump_t pmp_dump_1_r;
 
 pmp_conf_t pmp_conf_0_0;
 pmp_conf_t pmp_conf_0_1;
@@ -125,12 +131,6 @@ pmp_conf_t pmp_conf_0_4;
 pmp_conf_t pmp_conf_0_5;
 pmp_conf_t pmp_conf_0_6;
 pmp_conf_t pmp_conf_0_7;
-
-pmp_ctrl_t pmp_ctrl_1;
-pmp_stat_t pmp_stat_1;
-
-pmp_dump_t pmp_dump_1_w;
-pmp_dump_t pmp_dump_1_r;
 
 pmp_conf_t pmp_conf_1_0;
 pmp_conf_t pmp_conf_1_1;
@@ -226,10 +226,16 @@ begin
         haddr_r <= 'b0;
 
         pmp_ctrl_0 <= 'b0;
-        pmp_stat_0 <= 'b0;
+        pmp_ctrl_1 <= 'b0;
 
-        pmp_dump_0_r <= 'b0;
+        pmp_stat_0 <= 'b0;
+        pmp_stat_1 <= 'b0;
+
         pmp_dump_0_w <= 'b0;
+        pmp_dump_0_r <= 'b0;
+
+        pmp_dump_1_w <= 'b0;
+        pmp_dump_1_r <= 'b0;
 
         pmp_conf_0_0 <= 'b0;
         pmp_conf_0_1 <= 'b0;
@@ -239,12 +245,6 @@ begin
         pmp_conf_0_5 <= 'b0;
         pmp_conf_0_6 <= 'b0;
         pmp_conf_0_7 <= 'b0;
-
-        pmp_ctrl_1 <= 'b0;
-        pmp_stat_1 <= 'b0;
-
-        pmp_dump_1_w <= 'b0;
-        pmp_dump_1_r <= 'b0;
 
         pmp_conf_1_0 <= 'b0;
         pmp_conf_1_1 <= 'b0;

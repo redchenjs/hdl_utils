@@ -42,18 +42,18 @@ typedef struct packed {
 } uart_ctrl_0_t;
 
 typedef struct packed {
-    logic [31:1] rsvd;
+    logic [30:0] rsvd;
     logic        rst_n;
 } uart_ctrl_1_t;
 
 typedef struct packed {
-    logic [31:9] rsvd;
+    logic [22:0] rsvd;
     logic        tx_flag;
     logic  [7:0] tx_data;
 } uart_data_tx_t;
 
 typedef struct packed {
-    logic [31:9] rsvd;
+    logic [22:0] rsvd;
     logic        rx_flag;
     logic  [7:0] rx_data;
 } uart_data_rx_t;

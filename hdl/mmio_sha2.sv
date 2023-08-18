@@ -43,27 +43,27 @@ typedef enum {
 typedef struct packed {
     logic        intr_done;
     logic        intr_next;
-    logic [29:1] rsvd;
+    logic [28:0] rsvd;
     logic        rst_n;
 } sha2_ctrl_0_t;
 
 typedef struct packed {
     logic        done;
     logic        next;
-    logic [29:4] rsvd;
+    logic [25:0] rsvd;
     logic        read;
-    logic  [2:1] mode;
+    logic  [1:0] mode;
     logic        last;
 } sha2_ctrl_1_t;
 
 typedef struct packed {
-    logic [63:32] lo;
-    logic [31: 0] hi;
+    logic [31:0] lo;
+    logic [31:0] hi;
 } sha2_data_i_t;
 
 typedef struct packed {
-    logic [63:32] hi;
-    logic [31: 0] lo;
+    logic [31:0] hi;
+    logic [31:0] lo;
 } sha2_data_o_t;
 
 logic [1:0] in_mode;

@@ -37,21 +37,21 @@ typedef enum  {
 
 typedef struct packed {
     logic        done;
-    logic [30:1] rsvd;
+    logic [29:0] rsvd;
     logic        rst_n;
 } ws28xx_ctrl_0_t;
 
 typedef struct packed {
-    logic [31:2] rsvd;
+    logic [29:0] rsvd;
     logic        addr;
     logic        sync;
 } ws28xx_ctrl_1_t;
 
 typedef struct packed {
-    logic [31:24] t1l;
-    logic [23:16] t1h;
-    logic [15: 8] t0l;
-    logic [ 7: 0] t0h;
+    logic [7:0] t1l;
+    logic [7:0] t1h;
+    logic [7:0] t0l;
+    logic [7:0] t0h;
 } ws28xx_ctrl_2_t;
 
 ws28xx_ctrl_0_t ws28xx_ctrl_0;
