@@ -11,8 +11,7 @@ import apb_enum::*;
 
 module apb2mmio #(
     parameter A_WIDTH = 32,
-    parameter D_WIDTH = 32,
-    parameter IRQ_CNT = 0
+    parameter D_WIDTH = 32
 ) (
     input logic pclk_i,
     input logic presetn_i,
