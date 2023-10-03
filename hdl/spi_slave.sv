@@ -39,7 +39,7 @@ edge2en sclk_en(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
-    .in_data_i(sclk_i),
+    .data_i(sclk_i),
 
     .pos_edge_o(sclk_p),
     .neg_edge_o(sclk_n),
