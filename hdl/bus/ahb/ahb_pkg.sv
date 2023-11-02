@@ -1,11 +1,11 @@
 /*
- * ahb_enum.sv
+ * ahb_pkg.sv
  *
  *  Created on: 2023-05-17 11:18
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
-package ahb_enum;
+package ahb_pkg;
     typedef enum logic [1:0] {
         AHB_TRANS_IDLE   = 2'b00,
         AHB_TRANS_BUSY   = 2'b01,
@@ -55,10 +55,20 @@ package ahb_enum;
         AHB_PROT_3_CACHEABLE     = 1'b1
     } ahb_prot_3_t;
 
+    typedef struct {
+        ahb_prot_0_t prot_0;
+        ahb_prot_1_t prot_1;
+        ahb_prot_2_t prot_2;
+        ahb_prot_3_t prot_3;
+    } ahb_prot_t;
+
     typedef enum logic [1:0] {
         AHB_RESP_OKAY  = 2'b00,
         AHB_RESP_ERROR = 2'b01,
         AHB_RESP_RETRY = 2'b10,
         AHB_RESP_SPLIT = 2'b11
     } ahb_resp_t;
+
+    typedef logic  [3:0] ahb_master_t;
+    typedef logic [15:0] ahb_split_t;
 endpackage

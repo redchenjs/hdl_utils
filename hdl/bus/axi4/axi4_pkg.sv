@@ -1,11 +1,11 @@
 /*
- * axi_enum.sv
+ * axi4_pkg.sv
  *
  *  Created on: 2023-05-17 11:18
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
-package axi_enum;
+package axi4_pkg;
     typedef enum logic [2:0] {
         AXI_SIZE_1_BYTE    = 3'b000,
         AXI_SIZE_2_BYTES   = 3'b001,
