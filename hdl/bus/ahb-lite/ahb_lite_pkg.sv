@@ -35,30 +35,10 @@ package ahb_lite_pkg;
         AHB_BURST_INCR16 = 3'b111
     } ahb_burst_t;
 
-    typedef enum logic {
-        AHB_PROT_0_OPCODE = 1'b0,
-        AHB_PROT_0_DATA   = 1'b1
-    } ahb_prot_0_t;
-
-    typedef enum logic {
-        AHB_PROT_1_USER       = 1'b0,
-        AHB_PROT_1_PRIVILEGED = 1'b1
-    } ahb_prot_1_t;
-
-    typedef enum logic {
-        AHB_PROT_2_NON_BUFFERABLE = 1'b0,
-        AHB_PROT_2_BUFFERABLE     = 1'b1
-    } ahb_prot_2_t;
-
-    typedef enum logic {
-        AHB_PROT_3_NON_CACHEABLE = 1'b0,
-        AHB_PROT_3_CACHEABLE     = 1'b1
-    } ahb_prot_3_t;
-
-    typedef struct {
-        ahb_prot_0_t prot_0;
-        ahb_prot_1_t prot_1;
-        ahb_prot_2_t prot_2;
-        ahb_prot_3_t prot_3;
+    typedef enum logic [3:0] {
+        AHB_PROT_DATA       = 4'b0001,
+        AHB_PROT_PRIVILEGED = 4'b0010,
+        AHB_PROT_BUFFERABLE = 4'b0100,
+        AHB_PROT_CACHEABLE  = 4'b1000
     } ahb_prot_t;
 endpackage
