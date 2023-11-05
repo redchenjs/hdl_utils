@@ -7,37 +7,24 @@
 
 `timescale 1 ns / 1 ps
 
-import ahb_enum::*;
+import ahb_pkg::*;
 
 module ahb2mmio #(
     parameter A_WIDTH = 32,
     parameter D_WIDTH = 32
 ) (
-    input logic hclk_i,
-    input logic hresetn_i,
+    input logic clk_i,
+    input logic rst_n_i,
 
-    // ahb port
-    input logic               hsel_i,
-    input logic [A_WIDTH-1:0] haddr_i,
-    input logic         [3:0] hprot_i,
-    input logic         [2:0] hsize_i,
-    input logic         [1:0] htrans_i,
-    input logic         [2:0] hburst_i,
-    input logic               hwrite_i,
-    input logic [D_WIDTH-1:0] hwdata_i,
+    ahb_if.slave #(
+        .A_WIDTH(A_WIDTH),
+        .D_WIDTH(D_WIDTH)
+    ) s_ahb,
 
-    output logic         [1:0] hresp_o,
-    output logic               hready_o,
-    output logic [D_WIDTH-1:0] hrdata_o,
-
-    // mmio port
-    output logic [D_WIDTH/8-1:0] wr_en_o,
-    output logic   [A_WIDTH-1:0] wr_addr_o,
-    output logic   [D_WIDTH-1:0] wr_data_o,
-
-    output logic               rd_en_o,
-    output logic [A_WIDTH-1:0] rd_addr_o,
-    input  logic [D_WIDTH-1:0] rd_data_i
+    mmio_if.master #(
+        .A_WIDTH(A_WIDTH),
+        .D_WIDTH(D_WIDTH)
+    ) m_mmio
 );
 
 logic                 hsel_r;
@@ -46,16 +33,17 @@ logic   [A_WIDTH-1:0] haddr_w;
 
 logic [D_WIDTH/8-1:0] [$clog2(D_WIDTH/8):0] [D_WIDTH/8-1:0] hsel_mux;
 
-assign wr_en_o   = hsel_w;
-assign wr_addr_o = haddr_w;
-assign wr_data_o = hwdata_i;
+assign m_mmio.wr_en     = 'b1;
+assign m_mmio.wr_addr   = haddr_w;
+assign m_mmio.wr_data   = s_ahb.hwdata;
+assign m_mmio.wr_byteen = hsel_w;
 
-assign rd_en_o   = hsel_r;
-assign rd_addr_o = haddr_i;
+assign m_mmio.rd_en   = hsel_r;
+assign m_mmio.rd_addr = s_ahb.haddr;
 
-assign hresp_o  = AHB_RESP_OKAY;
-assign hready_o = 'b1;
-assign hrdata_o = rd_data_i;
+assign s_ahb.hresp  = AHB_RESP_OKAY;
+assign s_ahb.hready = 'b1;
+assign s_ahb.hrdata = m_mmio.rd_data;
 
 generate
     genvar i;
@@ -74,14 +62,14 @@ generate
 endgenerate
 
 always_comb begin
-    case (htrans_i)
+    case (s_ahb.htrans)
         AHB_TRANS_IDLE,
         AHB_TRANS_BUSY: begin
             hsel_r = 'b0;
         end
         AHB_TRANS_NONSEQ,
         AHB_TRANS_SEQ: begin
-            hsel_r = hsel_i & !hwrite_i;
+            hsel_r = s_ahb.hsel & !s_ahb.hwrite;
         end
         default: begin
             hsel_r = 'b0;
@@ -89,13 +77,13 @@ always_comb begin
     endcase
 end
 
-always_ff @(posedge hclk_i or negedge hresetn_i)
+always_ff @(posedge clk_i or negedge rst_n_i)
 begin
-    if (!hresetn_i) begin
+    if (!rst_n_i) begin
         hsel_w  <= 'b0;
         haddr_w <= 'b0;
     end else begin
-        case (htrans_i)
+        case (s_ahb.htrans)
             AHB_TRANS_IDLE,
             AHB_TRANS_BUSY: begin
                 hsel_w  <= 'b0;
@@ -103,8 +91,8 @@ begin
             end
             AHB_TRANS_NONSEQ,
             AHB_TRANS_SEQ: begin
-                hsel_w  <= hsel_i & hwrite_i ? hsel_mux[haddr_i[$clog2(D_WIDTH/8)-1:0]][hsize_i] : 'b0;
-                haddr_w <= haddr_i;
+                hsel_w  <= s_ahb.hsel & s_ahb.hwrite ? hsel_mux[s_ahb.haddr[$clog2(D_WIDTH/8)-1:0]][s_ahb.hsize] : 'b0;
+                haddr_w <= s_ahb.haddr;
             end
             default: begin
                 hsel_w  <= 'b0;

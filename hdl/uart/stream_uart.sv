@@ -53,7 +53,7 @@ fifo #(
     .I_DEPTH(I_DEPTH),
     .O_WIDTH(8),
     .O_DEPTH(I_DEPTH)
-) fifo_in_data (
+) in_fifo (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
@@ -73,7 +73,7 @@ fifo #(
     .I_DEPTH(O_DEPTH),
     .O_WIDTH(8),
     .O_DEPTH(O_DEPTH)
-) fifo_out_data (
+) out_fifo (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 

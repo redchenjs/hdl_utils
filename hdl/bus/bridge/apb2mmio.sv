@@ -7,41 +7,34 @@
 
 `timescale 1 ns / 1 ps
 
-import apb_enum::*;
+import apb_pkg::*;
 
 module apb2mmio #(
     parameter A_WIDTH = 32,
     parameter D_WIDTH = 32
 ) (
-    input logic pclk_i,
-    input logic presetn_i,
+    input logic clk_i,
+    input logic rst_n_i,
 
-    // apb port
-    input logic               psel_i,
-    input logic [A_WIDTH-1:0] paddr_i,
-    input logic               pwrite_i,
-    input logic [D_WIDTH-1:0] pwdata_i,
-    input logic               penable_i,
+    apb_if.slave #(
+        .A_WIDTH(A_WIDTH),
+        .D_WIDTH(D_WIDTH)
+    ) s_apb,
 
-    output logic [D_WIDTH-1:0] prdata_o,
-
-    // mmio port
-    output logic               wr_en_o,
-    output logic [A_WIDTH-1:0] wr_addr_o,
-    output logic [D_WIDTH-1:0] wr_data_o,
-
-    output logic               rd_en_o,
-    output logic [A_WIDTH-1:0] rd_addr_o,
-    input  logic [D_WIDTH-1:0] rd_data_i
+    mmio_if.master #(
+        .A_WIDTH(A_WIDTH),
+        .D_WIDTH(D_WIDTH)
+    ) m_mmio
 );
 
-assign wr_en_o   = psel_i & penable_i & pwrite_i;
-assign wr_addr_o = paddr_i;
-assign wr_data_o = pwdata_i;
+assign m_mmio.wr_en     = s_apb.psel & s_apb.penable & s_apb.pwrite;
+assign m_mmio.wr_addr   = s_apb.paddr;
+assign m_mmio.wr_data   = s_apb.pwdata;
+assign m_mmio.wr_byteen = {(D_WIDTH/8){1'b1}};
 
-assign rd_en_o   = psel_i & !penable_i & !pwrite_i;
-assign rd_addr_o = paddr_i;
+assign m_mmio.rd_en   = s_apb.psel & !s_apb.penable & !s_apb.pwrite;
+assign m_mmio.rd_addr = s_apb.paddr;
 
-assign prdata_o = rd_data_i;
+assign s_apb.prdata = m_mmio.rd_data;
 
 endmodule
