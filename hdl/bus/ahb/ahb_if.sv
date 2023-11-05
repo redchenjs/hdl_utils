@@ -15,6 +15,8 @@ interface ahb_if #(
     // decoder parameters
     parameter DEC_NUMBER = 1
 );
+    logic                  hclk;
+    logic                  hresetn;
     logic [ADDR_WIDTH-1:0] haddr;
     ahb_trans_t            htrans;
     logic                  hwrite;
@@ -49,11 +51,11 @@ interface ahb_if #(
 
     modport master (
         input hrdata, hready, hresp, hgrant,
-        output haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hbusreq, hlock
+        output hclk, hresetn, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hbusreq, hlock
     );
 
     modport slave (
-        input hsel, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata,
+        input hclk, hresetn, hsel, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata,
         output hrdata, hready, hresp
     );
 
@@ -63,22 +65,22 @@ interface ahb_if #(
     );
 
     modport arbiter (
-        input hbusreqx, hlockx, hsplitx, haddr, htrans, hburst, hready, hresp,
+        input hclk, hresetn, hbusreqx, hlockx, hsplitx, haddr, htrans, hburst, hready, hresp,
         output hgrantx, hmaster, hmastlock
     );
 
     modport decoder (
-        input haddr,
+        input hclk, hresetn, haddr,
         output hselx
     );
 
     modport multiplexor_m (
-        input hgrantx, haddrx, hwdatax,
+        input hclk, hresetn, hgrantx, haddrx, hwdatax,
         output haddr, hwdata
     );
 
     modport multiplexor_s (
-        input hselx, hrdatax, hreadyx, hrespx,
+        input hclk, hresetn, hselx, hrdatax, hreadyx, hrespx,
         output hrdata, hready, hresp
     );
 endinterface

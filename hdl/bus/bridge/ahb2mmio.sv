@@ -13,18 +13,8 @@ module ahb2mmio #(
     parameter A_WIDTH = 32,
     parameter D_WIDTH = 32
 ) (
-    input logic clk_i,
-    input logic rst_n_i,
-
-    ahb_if.slave #(
-        .A_WIDTH(A_WIDTH),
-        .D_WIDTH(D_WIDTH)
-    ) s_ahb,
-
-    mmio_if.master #(
-        .A_WIDTH(A_WIDTH),
-        .D_WIDTH(D_WIDTH)
-    ) m_mmio
+    ahb_if.slave   s_ahb,
+    mmio_if.master m_mmio
 );
 
 logic                 hsel_r;
@@ -32,6 +22,9 @@ logic [D_WIDTH/8-1:0] hsel_w;
 logic   [A_WIDTH-1:0] haddr_w;
 
 logic [D_WIDTH/8-1:0] [$clog2(D_WIDTH/8):0] [D_WIDTH/8-1:0] hsel_mux;
+
+assign m_mmio.clk   = s_ahb.hclk;
+assign m_mmio.rst_n = s_ahb.hresetn;
 
 assign m_mmio.wr_en     = 'b1;
 assign m_mmio.wr_addr   = haddr_w;
@@ -77,9 +70,9 @@ always_comb begin
     endcase
 end
 
-always_ff @(posedge clk_i or negedge rst_n_i)
+always_ff @(posedge s_ahb.hclk or negedge s_ahb.hresetn)
 begin
-    if (!rst_n_i) begin
+    if (!s_ahb.hresetn) begin
         hsel_w  <= 'b0;
         haddr_w <= 'b0;
     end else begin

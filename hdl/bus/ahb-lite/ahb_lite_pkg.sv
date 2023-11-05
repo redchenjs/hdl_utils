@@ -41,4 +41,9 @@ package ahb_lite_pkg;
         AHB_PROT_BUFFERABLE = 4'b0100,
         AHB_PROT_CACHEABLE  = 4'b1000
     } ahb_prot_t;
+
+    typedef enum logic {
+        AHB_RESP_OKAY  = 1'b0,
+        AHB_RESP_ERROR = 1'b1
+    } ahb_resp_t;
 endpackage

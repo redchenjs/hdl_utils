@@ -10,6 +10,8 @@ interface mmio_if #(
     parameter D_WIDTH = 32,
     parameter SLV_NUM = 1
 );
+    logic                 clk;
+    logic                 rst_n;
     // write interface
     logic                 wr_en;
     logic   [A_WIDTH-1:0] wr_addr;
@@ -26,16 +28,16 @@ interface mmio_if #(
 
     modport master (
         input rd_data,
-        output wr_en, wr_addr, wr_data, wr_byteen, rd_en, rd_addr
+        output clk, rst_n, wr_en, wr_addr, wr_data, wr_byteen, rd_en, rd_addr
     );
 
     modport slave (
-        input wr_en, wr_addr, wr_data, wr_byteen, rd_en, rd_addr,
+        input clk, rst_n, wr_en, wr_addr, wr_data, wr_byteen, rd_en, rd_addr,
         output rd_data
     );
 
     modport multiplexor (
-        input wr_addr, rd_addr, rd_datax,
+        input clk, rst_n, wr_addr, rd_addr, rd_datax,
         output wr_enx, rd_enx, rd_data
     );
 endinterface

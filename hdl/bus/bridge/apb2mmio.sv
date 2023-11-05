@@ -7,8 +7,6 @@
 
 `timescale 1 ns / 1 ps
 
-import apb_pkg::*;
-
 module apb2mmio #(
     parameter A_WIDTH = 32,
     parameter D_WIDTH = 32

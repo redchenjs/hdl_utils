@@ -13,16 +13,7 @@ module mmio_sha2 #(
     parameter I_DEPTH = 32,
     parameter O_DEPTH = 2
 ) (
-    input logic clk_i,
-    input logic rst_n_i,
-
-    input logic               wr_en_i,
-    input logic [A_WIDTH-1:0] wr_addr_i,
-    input logic [D_WIDTH-1:0] wr_data_i,
-
-    input  logic               rd_en_i,
-    input  logic [A_WIDTH-1:0] rd_addr_i,
-    output logic [D_WIDTH-1:0] rd_data_o,
+    mmio_if.slave s_mmio,
 
     output logic [1:0] irq_o
 );
@@ -112,15 +103,15 @@ assign regs[SHA2_REG_RSVD_1]    = 'b0;
 assign irq_o = {sha2_ctrl_0.intr_done, sha2_ctrl_0.intr_next};
 
 edge2en intr_done_en(
-    .clk_i(clk_i),
-    .rst_n_i(rst_n_i),
+    .clk_i(s_mmio.clk),
+    .rst_n_i(s_mmio.rst_n),
     .data_i(sha2_ctrl_1.done),
     .pos_edge_o(intr_done_p)
 );
 
 edge2en intr_next_en(
-    .clk_i(clk_i),
-    .rst_n_i(rst_n_i),
+    .clk_i(s_mmio.clk),
+    .rst_n_i(s_mmio.rst_n),
     .data_i(sha2_ctrl_1.next),
     .pos_edge_o(intr_next_p)
 );
@@ -129,7 +120,7 @@ stream_sha2 #(
     .I_DEPTH(I_DEPTH),
     .O_DEPTH(O_DEPTH)
 ) stream_sha2 (
-    .clk_i(clk_i),
+    .clk_i(s_mmio.clk),
     .rst_n_i(sha2_ctrl_0.rst_n),
 
     .in_mode_i(in_mode),
@@ -144,18 +135,18 @@ stream_sha2 #(
     .out_ready_i(out_ready)
 );
 
-always_ff @(posedge clk_i or negedge rst_n_i)
+always_ff @(posedge s_mmio.clk or negedge s_mmio.rst_n)
 begin
-    if (!rst_n_i) begin
+    if (!s_mmio.rst_n) begin
         in_valid <= 'b0;
     end else begin
-        in_valid <= wr_en_i & (wr_addr_i[4:2] == SHA2_REG_DATA_I_HI);
+        in_valid <= s_mmio.wr_en & (s_mmio.wr_addr[4:2] == SHA2_REG_DATA_I_HI);
     end
 end
 
-always_ff @(posedge clk_i or negedge rst_n_i)
+always_ff @(posedge s_mmio.clk or negedge s_mmio.rst_n)
 begin
-    if (!rst_n_i) begin
+    if (!s_mmio.rst_n) begin
         out_ready   <= 'b0;
         out_valid_r <= 'b0;
     end else begin
@@ -164,10 +155,10 @@ begin
     end
 end
 
-always_ff @(posedge clk_i or negedge rst_n_i)
+always_ff @(posedge s_mmio.clk or negedge s_mmio.rst_n)
 begin
-    if (!rst_n_i) begin
-        rd_data_o <= 'b0;
+    if (!s_mmio.rst_n) begin
+        s_mmio.rd_data <= 'b0;
 
         sha2_ctrl_0 <= 'b0;
 
@@ -177,20 +168,20 @@ begin
 
         sha2_data_i <= 'b0;
     end else begin
-        rd_data_o <= rd_en_i ? regs[rd_addr_i[4:2]] : rd_data_o;
+        s_mmio.rd_data <= s_mmio.rd_en ? regs[s_mmio.rd_addr[4:2]] : s_mmio.rd_data;
 
-        if (wr_en_i) begin
-            case (wr_addr_i[3:2])
+        if (s_mmio.wr_en) begin
+            case (s_mmio.wr_addr[3:2])
                 SHA2_REG_CTRL_0: begin
-                    sha2_ctrl_0.rst_n <= wr_data_i[0];
+                    sha2_ctrl_0.rst_n <= s_mmio.wr_data[0];
                 end
                 SHA2_REG_CTRL_1: begin
-                    sha2_ctrl_1.last <= wr_data_i[0];
-                    sha2_ctrl_1.mode <= wr_data_i[2:1];
-                    sha2_ctrl_1.read <= wr_data_i[3];
+                    sha2_ctrl_1.last <= s_mmio.wr_data[0];
+                    sha2_ctrl_1.mode <= s_mmio.wr_data[2:1];
+                    sha2_ctrl_1.read <= s_mmio.wr_data[3];
                 end
-                SHA2_REG_DATA_I_LO: sha2_data_i.lo <= wr_data_i;
-                SHA2_REG_DATA_I_HI: sha2_data_i.hi <= wr_data_i;
+                SHA2_REG_DATA_I_LO: sha2_data_i.lo <= s_mmio.wr_data;
+                SHA2_REG_DATA_I_HI: sha2_data_i.hi <= s_mmio.wr_data;
                 default: begin
                     sha2_ctrl_1.read <= 'b0;
                 end
@@ -199,8 +190,8 @@ begin
             sha2_ctrl_1.read <= 'b0;
         end
 
-        sha2_ctrl_0.intr_done <= intr_done_p ? 'b1 : (rd_en_i & (rd_addr_i[4:2] == SHA2_REG_CTRL_0) ? 'b0 : sha2_ctrl_0.intr_done);
-        sha2_ctrl_0.intr_next <= intr_next_p ? 'b1 : (rd_en_i & (rd_addr_i[4:2] == SHA2_REG_CTRL_0) ? 'b0 : sha2_ctrl_0.intr_next);
+        sha2_ctrl_0.intr_done <= intr_done_p ? 'b1 : (s_mmio.rd_en & (s_mmio.rd_addr[4:2] == SHA2_REG_CTRL_0) ? 'b0 : sha2_ctrl_0.intr_done);
+        sha2_ctrl_0.intr_next <= intr_next_p ? 'b1 : (s_mmio.rd_en & (s_mmio.rd_addr[4:2] == SHA2_REG_CTRL_0) ? 'b0 : sha2_ctrl_0.intr_next);
     end
 end
 

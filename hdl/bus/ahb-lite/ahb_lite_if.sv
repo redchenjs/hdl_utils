@@ -7,7 +7,7 @@
 
 import ahb_lite_pkg::*;
 
-interface ahb_if #(
+interface ahb_lite_if #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32,
     // decoder parameters
