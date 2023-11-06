@@ -12,18 +12,19 @@ module ahb_sha2 #(
     parameter D_WIDTH = 32
 ) (
     ahb_if.slave s_ahb,
-
-    output logic [1:0] irq_o
+    output logic s_irq
 );
 
-mmio_if mmio();
+mmio_if #(
+    .ADDR_WIDTH(A_WIDTH),
+    .DATA_WIDTH(D_WIDTH)
+) mmio();
 
-ahb2mmio #(
-    .A_WIDTH(A_WIDTH),
-    .D_WIDTH(D_WIDTH)
-) ahb2mmio (
+ahb_mmio_bridge #(
+    .ADDR_WIDTH(A_WIDTH),
+    .DATA_WIDTH(D_WIDTH)
+) ahb_mmio_bridge (
     .s_ahb(s_ahb),
-
     .m_mmio(mmio)
 );
 
@@ -34,8 +35,7 @@ mmio_sha2 #(
     .O_DEPTH(2)
 ) mmio_sha2 (
     .s_mmio(mmio),
-
-    .irq_o(irq_o)
+    .s_irq(s_irq)
 );
 
 endmodule

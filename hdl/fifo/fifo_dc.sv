@@ -147,6 +147,7 @@ ram_tp #(
     .I_DEPTH(I_DEPTH),
     .O_WIDTH(O_WIDTH),
     .O_DEPTH(O_DEPTH),
+    .BYTE_EN(0),
     .REG_OUT(1)
 ) ram_tp (
     .wr_clk_i(wr_clk_i),
@@ -154,6 +155,7 @@ ram_tp #(
     .wr_en_i(wr_en_i & ~wr_full_o),
     .wr_addr_i(wr_addr_w[$clog2(I_DEPTH)-1:0]),
     .wr_data_i(wr_data_i),
+    .wr_byteen_i('b1),
 
     .rd_clk_i(rd_clk_i),
 

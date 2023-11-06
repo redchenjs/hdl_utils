@@ -17,8 +17,9 @@ module ram_sp #(
 ) (
     input logic rw_clk_i,
 
-    input logic [(BYTE_EN?(D_WIDTH/8-1):0):0] wr_en_i,
+    input logic                               wr_en_i,
     input logic                 [D_WIDTH-1:0] wr_data_i,
+    input logic [(BYTE_EN?(D_WIDTH/8-1):0):0] wr_byteen_i,
 
     input logic [$clog2(D_DEPTH)-1:0] rw_addr_i,
 
@@ -38,7 +39,7 @@ generate
     always_ff @(posedge rw_clk_i) begin
         if (BYTE_EN) begin
             for (int i = 0; i < D_WIDTH/8; i++) begin
-                if (wr_en_i[i]) begin
+                if (wr_en_i & wr_byteen_i[i]) begin
                     ram[rw_addr_i][i*8+:8] <= wr_data_i[i*8+:8];
                 end
             end

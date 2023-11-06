@@ -12,9 +12,6 @@ module mmio_multiplexor #(
     parameter D_WIDTH = 32,
     parameter SLV_NUM = 8
 ) (
-    input logic clk_i,
-    input logic rst_n_i,
-
     input logic [SLV_NUM-1:0] [1:0] [A_WIDTH-1:0] mmio_table,
 
     mmio_if.multiplexor #(
@@ -26,9 +23,9 @@ module mmio_multiplexor #(
 
 logic [$clog2(SLV_NUM)-1:0] rd_sel;
 
-pri_64b #(
+enc_64b #(
     .REG_OUT('b1)
-) pri_64b (
+) enc_64b (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 

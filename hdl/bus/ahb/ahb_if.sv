@@ -9,11 +9,11 @@ import ahb_pkg::*;
 
 interface ahb_if #(
     parameter ADDR_WIDTH = 32,
-    parameter DATA_WIDTH = 32,
+    parameter DATA_WIDTH = 64,
     // arbiter parameters
-    parameter ARB_NUMBER = 1,
+    parameter ARB_NUMBER = 16,
     // decoder parameters
-    parameter DEC_NUMBER = 1
+    parameter DEC_NUMBER = 16
 );
     logic                  hclk;
     logic                  hresetn;

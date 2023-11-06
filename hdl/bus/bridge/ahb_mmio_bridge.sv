@@ -1,5 +1,5 @@
 /*
- * ahb2mmio.sv
+ * ahb_mmio_bridge.sv
  *
  *  Created on: 2023-08-09 22:26
  *      Author: Jack Chen <redchenjs@live.com>
@@ -9,20 +9,20 @@
 
 import ahb_pkg::*;
 
-module ahb2mmio #(
-    parameter A_WIDTH = 32,
-    parameter D_WIDTH = 32
+module ahb_mmio_bridge #(
+    parameter ADDR_WIDTH = 32,
+    parameter DATA_WIDTH = 32
 ) (
     ahb_if.slave   s_ahb,
     mmio_if.master m_mmio
 );
 
-logic               hsel_r;
-logic               hsel_w;
-logic [A_WIDTH-1:0] haddr_w;
+logic                  hsel_r;
+logic                  hsel_w;
+logic [ADDR_WIDTH-1:0] haddr_w;
 
-logic                                       [D_WIDTH/8-1:0] byteen;
-logic [D_WIDTH/8-1:0] [$clog2(D_WIDTH/8):0] [D_WIDTH/8-1:0] byteen_mux;
+logic                                             [DATA_WIDTH/8-1:0] byteen;
+logic [DATA_WIDTH/8-1:0] [$clog2(DATA_WIDTH/8):0] [DATA_WIDTH/8-1:0] byteen_mux;
 
 assign m_mmio.clk   = s_ahb.hclk;
 assign m_mmio.rst_n = s_ahb.hresetn;
@@ -42,13 +42,13 @@ assign s_ahb.hrdata = m_mmio.rd_data;
 generate
     genvar i;
 
-    for (i = 0; i < $clog2(D_WIDTH/8)+1; i++) begin: gen_byteen_sel
+    for (i = 0; i < $clog2(DATA_WIDTH/8)+1; i++) begin: gen_byteen_sel
         genvar j;
 
-        for (j = 0; j < D_WIDTH/8; j++) begin: gen_byteen_bit
+        for (j = 0; j < DATA_WIDTH/8; j++) begin: gen_byteen_bit
             genvar k;
 
-            for (k = 0; k < D_WIDTH/8; k++) begin: gen_byteen_sft
+            for (k = 0; k < DATA_WIDTH/8; k++) begin: gen_byteen_sft
                 assign byteen_mux[k][i][j] = (j < ((1 << i) + k)) & (j >= k);
             end
         end
@@ -89,7 +89,7 @@ begin
             end
             AHB_TRANS_NONSEQ,
             AHB_TRANS_SEQ: begin
-                byteen <= s_ahb.hsel & s_ahb.hwrite ? byteen_mux[s_ahb.haddr[$clog2(D_WIDTH/8)-1:0]][s_ahb.hsize] : 'b0;
+                byteen <= s_ahb.hsel & s_ahb.hwrite ? byteen_mux[s_ahb.haddr[$clog2(DATA_WIDTH/8)-1:0]][s_ahb.hsize] : 'b0;
 
                 hsel_w  <= s_ahb.hsel & s_ahb.hwrite;
                 haddr_w <= s_ahb.haddr;

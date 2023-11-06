@@ -19,9 +19,10 @@ module ram_tp #(
 ) (
     input logic wr_clk_i,
 
-    input logic [(BYTE_EN?(I_WIDTH/8-1):0):0] wr_en_i,
+    input logic                               wr_en_i,
     input logic         [$clog2(I_DEPTH)-1:0] wr_addr_i,
     input logic                 [I_WIDTH-1:0] wr_data_i,
+    input logic [(BYTE_EN?(I_WIDTH/8-1):0):0] wr_byteen_i,
 
     input logic rd_clk_i,
 
@@ -49,7 +50,7 @@ generate
             for (k = 0; k < I_WIDTH/O_WIDTH; k++) begin: gen_wr_data
                 always_ff @(posedge wr_clk_i) begin
                     for (int i = 0; i < O_WIDTH/8; i++) begin
-                        if (wr_en_i[i]) begin
+                        if (wr_en_i & wr_byteen_i[i]) begin
                             ram[{wr_addr_i, k[$clog2(I_WIDTH/O_WIDTH)-1:0]}][i*8+:8] <= wr_data_i[k*O_WIDTH+i*8+:8];
                         end
                     end
@@ -58,7 +59,7 @@ generate
         end else begin
             always_ff @(posedge wr_clk_i) begin
                 for (int i = 0; i < I_WIDTH/8; i++) begin
-                    if (wr_en_i[i]) begin
+                    if (wr_en_i & wr_byteen_i[i]) begin
                         ram[wr_addr_i][i*8+:8] <= wr_data_i[i*8+:8];
                     end
                 end

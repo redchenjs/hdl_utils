@@ -14,17 +14,19 @@ module tb_ahb_sha2;
 parameter A_WIDTH = 32;
 parameter D_WIDTH = 32;
 
-ahb_if s_ahb();
+ahb_if #(
+    .ADDR_WIDTH(A_WIDTH),
+    .DATA_WIDTH(D_WIDTH)
+) s_ahb();
 
-logic [1:0] irq_o;
+logic s_irq;
 
 ahb_sha2 #(
     .A_WIDTH(A_WIDTH),
     .D_WIDTH(D_WIDTH)
 ) ahb_sha2 (
     .s_ahb(s_ahb),
-
-    .irq_o(irq_o)
+    .s_irq(s_irq)
 );
 
 initial begin

@@ -9,9 +9,11 @@ import axi4_pkg::*;
 
 interface axi4_if #(
     parameter ADDR_WIDTH = 32,
-    parameter DATA_WIDTH = 32,
-    parameter USER_WIDTH = 32
+    parameter DATA_WIDTH = 64,
+    parameter USER_WIDTH = 64
 );
+    logic                  aclk;
+    logic                  aresetn;
     // write address channel
     axi_id_t               awid;
     logic [ADDR_WIDTH-1:0] awaddr;

@@ -17,9 +17,10 @@ module ram_dp #(
 ) (
     input logic wr_clk_a_i,
 
-    input logic [(BYTE_EN?(D_WIDTH/8-1):0):0] wr_en_a_i,
+    input logic                               wr_en_a_i,
     input logic         [$clog2(D_DEPTH)-1:0] wr_addr_a_i,
     input logic                 [D_WIDTH-1:0] wr_data_a_i,
+    input logic [(BYTE_EN?(D_WIDTH/8-1):0):0] wr_byteen_a_i,
 
     input logic rd_clk_a_i,
 
@@ -29,9 +30,10 @@ module ram_dp #(
 
     input logic wr_clk_b_i,
 
-    input logic [(BYTE_EN?(D_WIDTH/8-1):0):0] wr_en_b_i,
+    input logic                               wr_en_b_i,
     input logic         [$clog2(D_DEPTH)-1:0] wr_addr_b_i,
     input logic                 [D_WIDTH-1:0] wr_data_b_i,
+    input logic [(BYTE_EN?(D_WIDTH/8-1):0):0] wr_byteen_b_i,
 
     input logic rd_clk_b_i,
 
@@ -52,7 +54,7 @@ generate
     always_ff @(posedge wr_clk_a_i) begin
         if (BYTE_EN) begin
             for (int i = 0; i < D_WIDTH/8; i++) begin
-                if (wr_en_a_i[i]) begin
+                if (wr_en_a_i & wr_byteen_a_i[i]) begin
                     ram[wr_addr_a_i][i*8+:8] <= wr_data_a_i[i*8+:8];
                 end
             end
@@ -66,7 +68,7 @@ generate
     always_ff @(posedge wr_clk_b_i) begin
         if (BYTE_EN) begin
             for (int i = 0; i < D_WIDTH/8; i++) begin
-                if (wr_en_b_i[i]) begin
+                if (wr_en_b_i & wr_byteen_b_i[i]) begin
                     ram[wr_addr_b_i][i*8+:8] <= wr_data_b_i[i*8+:8];
                 end
             end

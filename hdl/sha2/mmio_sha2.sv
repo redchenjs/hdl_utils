@@ -14,9 +14,12 @@ module mmio_sha2 #(
     parameter O_DEPTH = 2
 ) (
     mmio_if.slave s_mmio,
-
-    output logic [1:0] irq_o
+    output logic  s_irq
 );
+
+parameter U_WIDTH = 2;
+parameter I_WIDTH = 64;
+parameter O_WIDTH = 512;
 
 typedef enum {
     SHA2_REG_CTRL_0    = 'h0,
@@ -57,21 +60,16 @@ typedef struct packed {
     logic [31:0] lo;
 } sha2_data_o_t;
 
-logic [1:0] in_mode;
-logic       in_last;
+logic in_valid;
 
-logic [63:0] in_data;
-logic        in_valid;
-logic        in_ready;
+logic out_ready;
+logic out_valid_r;
 
-logic [63:0] out_data;
-logic        out_valid;
-logic        out_ready;
+logic intr_done_p;
+logic intr_next_p;
 
-logic        intr_done_p;
-logic        intr_next_p;
-
-logic        out_valid_r;
+logic out_fifo_full;
+logic out_fifo_empty;
 
 sha2_ctrl_0_t sha2_ctrl_0;
 sha2_ctrl_1_t sha2_ctrl_1;
@@ -79,15 +77,9 @@ sha2_ctrl_1_t sha2_ctrl_1;
 sha2_data_i_t sha2_data_i;
 sha2_data_o_t sha2_data_o;
 
-assign in_mode = sha2_ctrl_1.mode;
-assign in_last = sha2_ctrl_1.last;
-assign in_data = sha2_data_i;
-
 assign sha2_ctrl_1.rsvd = 'b0;
-assign sha2_ctrl_1.next = in_ready;
-assign sha2_ctrl_1.done = out_valid;
-
-assign sha2_data_o = out_data;
+assign sha2_ctrl_1.next = i_pipe.ready;
+assign sha2_ctrl_1.done = ~out_fifo_empty;
 
 logic [D_WIDTH-1:0] regs[SHA2_REG_IDX_MAX];
 
@@ -100,7 +92,7 @@ assign regs[SHA2_REG_DATA_O_HI] = sha2_data_o.hi;
 assign regs[SHA2_REG_RSVD_0]    = 'b0;
 assign regs[SHA2_REG_RSVD_1]    = 'b0;
 
-assign irq_o = {sha2_ctrl_0.intr_done, sha2_ctrl_0.intr_next};
+assign s_irq = sha2_ctrl_0.intr_done | sha2_ctrl_0.intr_next;
 
 edge2en intr_done_en(
     .clk_i(s_mmio.clk),
@@ -116,23 +108,50 @@ edge2en intr_next_en(
     .pos_edge_o(intr_next_p)
 );
 
-stream_sha2 #(
-    .I_DEPTH(I_DEPTH),
-    .O_DEPTH(O_DEPTH)
-) stream_sha2 (
+pipe_if #(
+    .DATA_WIDTH(I_WIDTH),
+    .USER_WIDTH(U_WIDTH)
+) i_pipe();
+
+pipe_if #(
+    .DATA_WIDTH(O_WIDTH),
+    .USER_WIDTH(U_WIDTH)
+) o_pipe();
+
+assign i_pipe.clk   = s_mmio.clk;
+assign i_pipe.rst_n = s_mmio.rst_n;
+assign i_pipe.valid = in_valid;
+assign i_pipe.data  = sha2_data_i;
+assign i_pipe.last  = sha2_ctrl_1.last;
+assign i_pipe.user  = sha2_ctrl_1.mode;
+
+assign o_pipe.ready = ~out_fifo_full;
+
+// i_pipe (64-bit) => o_pipe (512-bit)
+pipe_sha2 pipe_sha2(
+    .i_pipe(i_pipe),
+    .o_pipe(o_pipe)
+);
+
+// o_pipe (512-bit) => sha2_data_o (64-bit)
+fifo #(
+    .I_WIDTH(512),
+    .I_DEPTH(O_DEPTH),
+    .O_WIDTH(64),
+    .O_DEPTH(O_DEPTH*8)
+) fifo_out (
     .clk_i(s_mmio.clk),
     .rst_n_i(sha2_ctrl_0.rst_n),
 
-    .in_mode_i(in_mode),
-    .in_last_i(in_last),
+    .wr_en_i(o_pipe.valid),
+    .wr_data_i(o_pipe.data),
+    .wr_full_o(out_fifo_full),
+    .wr_free_o(),
 
-    .in_data_i(in_data),
-    .in_valid_i(in_valid),
-    .in_ready_o(in_ready),
-
-    .out_data_o(out_data),
-    .out_valid_o(out_valid),
-    .out_ready_i(out_ready)
+    .rd_en_i(out_ready),
+    .rd_data_o(sha2_data_o),
+    .rd_empty_o(out_fifo_empty),
+    .rd_avail_o()
 );
 
 always_ff @(posedge s_mmio.clk or negedge s_mmio.rst_n)
@@ -150,8 +169,8 @@ begin
         out_ready   <= 'b0;
         out_valid_r <= 'b0;
     end else begin
-        out_ready   <= out_valid & sha2_ctrl_1.read;
-        out_valid_r <= out_valid;
+        out_ready   <= ~out_fifo_empty & sha2_ctrl_1.read;
+        out_valid_r <= ~out_fifo_empty;
     end
 end
 
