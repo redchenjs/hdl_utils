@@ -31,14 +31,14 @@ axi4s_pipe_bridge axi4s_pipe_bridge(
     .o_pipe(i_pipe)
 );
 
-pipe_axi4s_bridge pipe_axi4s_bridge(
-    .i_pipe(o_pipe),
-    .m_axi4s(m_axi4s)
-);
-
 pipe_sha2 pipe_sha2(
     .i_pipe(i_pipe),
     .o_pipe(o_pipe)
+);
+
+pipe_axi4s_bridge pipe_axi4s_bridge(
+    .i_pipe(o_pipe),
+    .m_axi4s(m_axi4s)
 );
 
 endmodule
