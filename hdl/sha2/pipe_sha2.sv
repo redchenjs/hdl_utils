@@ -127,30 +127,26 @@ wire [D_WIDTH-1:0] mag = (a & b) ^ ( a & c) ^ (b & c);
 wire [D_WIDTH-1:0] t_1 = big_sigma_1 + ch + h + m;
 wire [D_WIDTH-1:0] t_2 = big_sigma_0 + mag;
 
-wire [D_WIDTH-1:0] in_data_s = {
-    i_pipe.data[ 7: 0], i_pipe.data[15: 8], i_pipe.data[23:16], i_pipe.data[31:24],
-    i_pipe.data[39:32], i_pipe.data[47:40], i_pipe.data[55:48], i_pipe.data[63:56]
-};
-
-wire [O_COUNT-1:0] [D_WIDTH-1:0] t = {h, g, f, e, d, c, b, a};
+wire               [D_WIDTH-1:0] data_i = {<< byte {i_pipe.data}};
+wire [O_COUNT-1:0] [D_WIDTH-1:0] data_o = {h, g, f, e, d, c, b, a};
 
 generate
     genvar i;
 
     for (i = 0; i < 7; i++) begin: gen_data_224
-        assign out_data_224[i*32+:32] = t[6-i];
+        assign out_data_224[i*32+:32] = data_o[6-i];
     end
 
     for (i = 0; i < 8; i++) begin: gen_data_256
-        assign out_data_256[i*32+:32] = t[7-i];
+        assign out_data_256[i*32+:32] = data_o[7-i];
     end
 
     for (i = 0; i < 6; i++) begin: gen_data_384
-        assign out_data_384[i*64+:64] = t[5-i];
+        assign out_data_384[i*64+:64] = data_o[5-i];
     end
 
     for (i = 0; i < 8; i++) begin: gen_data_512
-        assign out_data_512[i*64+:64] = t[7-i];
+        assign out_data_512[i*64+:64] = data_o[7-i];
     end
 endgenerate
 
@@ -276,7 +272,7 @@ begin
                     endcase
                 end
 
-                w[0] <= in_data_s;
+                w[0] <= data_i;
 
                 iter_cnt <= 'b0;
                 iter_max <= 'b0;
@@ -301,7 +297,7 @@ begin
                         SHA_512: m       <= k[0]        + w[0];
                     endcase
 
-                    w[0] <= in_data_s;
+                    w[0] <= data_i;
                     w[1] <= w[0];
 
                     iter_cnt <= 'b0;
@@ -327,7 +323,7 @@ begin
                     SHA_512: m       <= k[0]        + w[0];
                 endcase
 
-                w[0] <= in_data_s;
+                w[0] <= data_i;
                 w[1] <= w[0];
 
                 iter_cnt <= 'b0;
@@ -353,10 +349,10 @@ begin
                         endcase
 
                         for (int i = 0; i < 8; i++) begin
-                            s[i] <= iter_save ? t[i] : s[i];
+                            s[i] <= iter_save ? data_o[i] : s[i];
                         end
 
-                        w[0] <= in_data_s;
+                        w[0] <= data_i;
 
                         for (int i = 1; i < 16; i++) begin
                             w[i] <= w[i-1];
@@ -382,7 +378,7 @@ begin
                     endcase
 
                     for (int i = 0; i < 8; i++) begin
-                        s[i] <= iter_save ? t[i] : s[i];
+                        s[i] <= iter_save ? data_o[i] : s[i];
                     end
 
                     w[0] <= sigma_1 + w[6] + sigma_0 + w[15];
@@ -410,7 +406,7 @@ begin
                     m <= 'b0;
 
                     for (int i = 0; i < 8; i++) begin
-                        s[i] <= t[i];
+                        s[i] <= data_o[i];
                     end
                 end else begin
                     a <= a;
@@ -426,7 +422,7 @@ begin
                     s <= s;
                 end
 
-                w[0] <= in_data_s;
+                w[0] <= data_i;
 
                 iter_cnt <= iter_cnt;
                 iter_max <= iter_max;
