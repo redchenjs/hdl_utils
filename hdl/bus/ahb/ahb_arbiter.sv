@@ -24,7 +24,7 @@ wire [$clog2(MAS_NUMBER)-1:0] m_hbusreqx;
 generate
     genvar i;
 
-    for (i = 0; i < MAS_NUMBER; i++) begin: gen_arb
+    for (i = 0; i < MAS_NUMBER; i++) begin: gen_arbiter
         assign m_hlock[i] = m_ahb[i].hlock;
         assign m_hbusreq[i] = m_ahb[i].hbusreq;
 

@@ -28,7 +28,7 @@ interface ahb_if #(
     logic                  hbusreq;
     logic                  hlock;
     logic                  hgrant;
-    ahb_master_t           hslave;
+    logic            [3:0] hslave;
     ahb_master_t           hmaster;
     logic                  hmastlock;
     ahb_split_t            hsplitx;

@@ -6,8 +6,8 @@
  */
 
 interface pipe_if #(
-    parameter DATA_WIDTH = 32,
-    parameter USER_WIDTH = 64
+    parameter int DATA_WIDTH = 32,
+    parameter int USER_WIDTH = 64
 );
     logic                  clk;
     logic                  rst_n;

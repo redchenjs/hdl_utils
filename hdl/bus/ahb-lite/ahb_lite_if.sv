@@ -8,20 +8,18 @@
 import ahb_lite_pkg::*;
 
 interface ahb_lite_if #(
-    parameter ADDR_WIDTH = 32,
-    parameter DATA_WIDTH = 64,
-    // decoder parameters
-    parameter DEC_NUMBER = 16
+    parameter int ADDR_WIDTH = 32,
+    parameter int DATA_WIDTH = 64
 );
     logic                  hclk;
     logic                  hresetn;
     // master signals
     logic [ADDR_WIDTH-1:0] haddr;
-    ahb_burst_t            hburst;
+    ahb_lite_burst_t       hburst;
     logic                  hmastlock;
-    ahb_prot_t             hprot;
-    ahb_size_t             hsize;
-    ahb_trans_t            htrans;
+    ahb_lite_prot_t        hprot;
+    ahb_lite_size_t        hsize;
+    ahb_lite_trans_t       htrans;
     logic [DATA_WIDTH-1:0] hwdata;
     logic                  hwrite;
     // slave signals
@@ -30,30 +28,20 @@ interface ahb_lite_if #(
     logic                  hresp;
     // decoder signals
     logic                  hsel;
-    logic [DEC_NUMBER-1:0] hselx;
-    // multiplexor signals
-    logic                                   hready;
-    logic [DEC_NUMBER-1:0] [DATA_WIDTH-1:0] hrdatax;
-    logic                  [DEC_NUMBER-1:0] hreadyoutx;
-    ahb_resp_t             [DEC_NUMBER-1:0] hrespx;
+    logic            [3:0] hslave;
 
     modport master (
         input hrdata, hready, hresp,
-        output haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hmastlock
+        output hclk, hresetn, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hmastlock
     );
 
     modport slave (
-        input hsel, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hready, hmastlock,
+        input hclk, hresetn, hsel, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hready, hmastlock,
         output hrdata, hreadyout, hresp
     );
 
     modport decoder (
-        input haddr,
-        output hselx
-    );
-
-    modport multiplexor (
-        input hselx, hrdatax, hreadyoutx, hrespx,
-        output hrdata, hready, hresp
+        input hclk, hresetn, haddr,
+        output hsel, hslave
     );
 endinterface

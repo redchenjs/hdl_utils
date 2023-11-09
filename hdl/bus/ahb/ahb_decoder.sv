@@ -40,7 +40,7 @@ wire [$clog2(SLV_NUMBER)-1:0] s_hselx;
 generate
     genvar i;
 
-    for (i = 0; i < SLV_NUMBER; i++) begin: gen_dec
+    for (i = 0; i < SLV_NUMBER; i++) begin: gen_decoder
         assign s_hsel[i] = (s_ahb[i].haddr & ADDR_TABLE[i][1]) == ADDR_TABLE[i][0];
 
         assign s_ahb[i].hsel   = s_hsel[i];
