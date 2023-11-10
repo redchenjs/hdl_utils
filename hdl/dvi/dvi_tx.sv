@@ -55,24 +55,28 @@ par2ser_10b #(
 );
 
 generate
-    if (VENDOR == VENDOR_XILINX) begin
-        OBUFDS #(
-            .SLEW("FAST"),
-            .IOSTANDARD("TMDS_33")
-        ) OBUFDS [3:0] (
-            .I({clk_i, ser_data}),
-            .O(tmds_o[0]),
-            .OB(tmds_o[1])
-        );
-    end else if (VENDOR == VENDOR_GOWIN) begin
-        ELVDS_OBUF OBUFDS [3:0] (
-            .I({clk_i, ser_data}),
-            .O(tmds_o[0]),
-            .OB(tmds_o[1])
-        );
-    end else begin
-        assign tmds_o = 'b0;
-    end
+    case (VENDOR)
+        VENDOR_XILINX: begin
+            OBUFDS #(
+                .SLEW("FAST"),
+                .IOSTANDARD("TMDS_33")
+            ) OBUFDS [3:0] (
+                .I({clk_i, ser_data}),
+                .O(tmds_o[0]),
+                .OB(tmds_o[1])
+            );
+        end
+        VENDOR_GOWIN: begin
+            ELVDS_OBUF OBUFDS [3:0] (
+                .I({clk_i, ser_data}),
+                .O(tmds_o[0]),
+                .OB(tmds_o[1])
+            );
+        end
+        default: begin
+            assign tmds_o = 'b0;
+        end
+    endcase
 endgenerate
 
 endmodule
