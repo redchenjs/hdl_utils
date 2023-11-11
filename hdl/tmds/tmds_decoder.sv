@@ -25,8 +25,6 @@ logic [7:0] q_n;
 logic de, c1, c0;
 
 always_comb begin
-    q_m = d_i[9] ? ~d_i[7:0] : d_i[7:0];
-
     case (d_i)
         10'b11_0101_0100: {de, c1, c0} = 3'b0_00;
         10'b00_1010_1011: {de, c1, c0} = 3'b0_01;
@@ -34,6 +32,8 @@ always_comb begin
         10'b10_1010_1011: {de, c1, c0} = 3'b0_11;
         default:          {de, c1, c0} = 3'b1_00;
     endcase
+
+    q_m = d_i[9] ? ~d_i[7:0] : d_i[7:0];
 
     if (d_i[8]) begin
         q_n[0] = q_m[0];

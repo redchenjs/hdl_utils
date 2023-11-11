@@ -74,7 +74,7 @@ always begin
     #5 {de_i, c1_i, c0_i} = 3'b0_01;
     #5 {de_i, c1_i, c0_i} = 3'b0_00;
 
-    for (int i = 0; i < 15; i++) begin
+    for (int i = 0; i < 512; i++) begin
         #5 d_i = $random();
 
         {de_i, c1_i, c0_i} = 3'b1_00;        
