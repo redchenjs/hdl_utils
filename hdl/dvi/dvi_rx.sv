@@ -64,8 +64,8 @@ tmds_decoder tmds_decoder [2:0] (
     .d_o(pixel_i),
 
     .de_o(de_o),
-    .c0_o(hsync_o),
-    .c1_o(vsync_o)
+    .c1_o(vsync_o),
+    .c0_o(hsync_o)
 );
 
 endmodule

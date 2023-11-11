@@ -35,8 +35,8 @@ tmds_encoder tmds_encoder [2:0] (
     .rst_n_i(rst_n_i),
 
     .de_i({3{de_i}}),
-    .c0_i({2'b0, hsync_i}),
     .c1_i({2'b0, vsync_i}),
+    .c0_i({2'b0, hsync_i}),
 
     .d_i(pixel_i),
     .q_o(par_data)
