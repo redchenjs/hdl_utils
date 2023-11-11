@@ -1,5 +1,5 @@
 /*
- * ahblite_mmio_bridge.sv
+ * ahb2mif.sv
  *
  *  Created on: 2023-08-09 22:26
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,14 +7,14 @@
 
 `timescale 1 ns / 1 ps
 
-import ahb_lite_pkg::*;
+import ahb_pkg::*;
 
-module ahblite_mmio_bridge #(
+module ahb2mif #(
     parameter ADDR_WIDTH = 32,
-    parameter DATA_WIDTH = 32
+    parameter DATA_WIDTH = 64
 ) (
-    ahb_lite_if.slave s_ahblite,
-    mmio_if.master    m_mmio
+    ahb_if.slave     s_ahb,
+    memory_if.master m_mif
 );
 
 logic                  hsel_r;
@@ -24,20 +24,20 @@ logic [ADDR_WIDTH-1:0] haddr_w;
 logic                                             [DATA_WIDTH/8-1:0] byteen;
 logic [DATA_WIDTH/8-1:0] [$clog2(DATA_WIDTH/8):0] [DATA_WIDTH/8-1:0] byteen_mux;
 
-assign m_mmio.clk   = s_ahblite.hclk;
-assign m_mmio.rst_n = s_ahblite.hresetn;
+assign m_mif.clk   = s_ahb.hclk;
+assign m_mif.rst_n = s_ahb.hresetn;
 
-assign m_mmio.wr_en     = hsel_w;
-assign m_mmio.wr_addr   = haddr_w;
-assign m_mmio.wr_data   = s_ahblite.hwdata;
-assign m_mmio.wr_byteen = byteen;
+assign m_mif.wr_en     = hsel_w;
+assign m_mif.wr_addr   = haddr_w;
+assign m_mif.wr_data   = s_ahb.hwdata;
+assign m_mif.wr_byteen = byteen;
 
-assign m_mmio.rd_en   = hsel_r;
-assign m_mmio.rd_addr = s_ahblite.haddr;
+assign m_mif.rd_en   = hsel_r;
+assign m_mif.rd_addr = s_ahb.haddr;
 
-assign s_ahblite.hresp  = AHB_RESP_OKAY;
-assign s_ahblite.hready = 'b1;
-assign s_ahblite.hrdata = m_mmio.rd_data;
+assign s_ahb.hresp  = AHB_RESP_OKAY;
+assign s_ahb.hready = 'b1;
+assign s_ahb.hrdata = m_mif.rd_data;
 
 generate
     genvar i;
@@ -56,14 +56,14 @@ generate
 endgenerate
 
 always_comb begin
-    case (s_ahblite.htrans)
+    case (s_ahb.htrans)
         AHB_TRANS_IDLE,
         AHB_TRANS_BUSY: begin
             hsel_r = 'b0;
         end
         AHB_TRANS_NONSEQ,
         AHB_TRANS_SEQ: begin
-            hsel_r = s_ahblite.hsel & !s_ahblite.hwrite;
+            hsel_r = s_ahb.hsel & !s_ahb.hwrite;
         end
         default: begin
             hsel_r = 'b0;
@@ -71,15 +71,15 @@ always_comb begin
     endcase
 end
 
-always_ff @(posedge s_ahblite.hclk or negedge s_ahblite.hresetn)
+always_ff @(posedge s_ahb.hclk or negedge s_ahb.hresetn)
 begin
-    if (!s_ahblite.hresetn) begin
+    if (!s_ahb.hresetn) begin
         byteen <= 'b0;
 
         hsel_w  <= 'b0;
         haddr_w <= 'b0;
     end else begin
-        case (s_ahblite.htrans)
+        case (s_ahb.htrans)
             AHB_TRANS_IDLE,
             AHB_TRANS_BUSY: begin
                 byteen <= 'b0;
@@ -89,10 +89,10 @@ begin
             end
             AHB_TRANS_NONSEQ,
             AHB_TRANS_SEQ: begin
-                byteen <= s_ahblite.hsel & s_ahblite.hwrite ? byteen_mux[s_ahblite.haddr[$clog2(DATA_WIDTH/8)-1:0]][s_ahblite.hsize] : 'b0;
+                byteen <= s_ahb.hsel & s_ahb.hwrite ? byteen_mux[s_ahb.haddr[$clog2(DATA_WIDTH/8)-1:0]][s_ahb.hsize] : 'b0;
 
-                hsel_w  <= s_ahblite.hsel & s_ahblite.hwrite;
-                haddr_w <= s_ahblite.haddr;
+                hsel_w  <= s_ahb.hsel & s_ahb.hwrite;
+                haddr_w <= s_ahb.haddr;
             end
             default: begin
                 byteen <= 'b0;

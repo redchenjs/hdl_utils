@@ -1,5 +1,5 @@
 /*
- * pipe_sha2.sv
+ * sif_sha2.sv
  *
  *  Created on: 2023-07-21 11:30
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,12 +7,12 @@
 
 `timescale 1 ns / 1 ps
 
-module pipe_sha2(
-    pipe_if.in  i_pipe,
-    pipe_if.out o_pipe
+module sif_sha2(
+    stream_if.slave  s_sif,
+    stream_if.master m_sif
 );
 
-parameter U_WIDTH = 2;
+parameter C_WIDTH = 2;
 parameter I_WIDTH = 64;
 parameter O_WIDTH = 512;
 
@@ -127,7 +127,7 @@ wire [D_WIDTH-1:0] mag = (a & b) ^ ( a & c) ^ (b & c);
 wire [D_WIDTH-1:0] t_1 = big_sigma_1 + ch + h + m;
 wire [D_WIDTH-1:0] t_2 = big_sigma_0 + mag;
 
-wire               [D_WIDTH-1:0] data_i = {<< byte {i_pipe.data}};
+wire               [D_WIDTH-1:0] data_i = {<< byte {s_sif.data}};
 wire [O_COUNT-1:0] [D_WIDTH-1:0] data_o = {h, g, f, e, d, c, b, a};
 
 generate
@@ -166,47 +166,47 @@ always_comb begin
     end
 end
 
-always_ff @(posedge i_pipe.clk or negedge i_pipe.rst_n)
+always_ff @(posedge s_sif.clk or negedge s_sif.rst_n)
 begin
-    if (!i_pipe.rst_n) begin
-        i_pipe.ready <= 'b1;
+    if (!s_sif.rst_n) begin
+        s_sif.ready <= 'b1;
     end else begin
         if (iter_last) begin
-            i_pipe.ready <= (ctl_sta == LAST) ? 'b1 : (iter_cnt >= 12) & iter_keep ? 'b0 : i_pipe.ready;
+            s_sif.ready <= (ctl_sta == LAST) ? 'b1 : (iter_cnt >= 12) & iter_keep ? 'b0 : s_sif.ready;
         end else begin
-            i_pipe.ready <= (ctl_sta == LOAD) ? 'b1 : (iter_cnt >= 12) ? 'b0 : i_pipe.ready;
+            s_sif.ready <= (ctl_sta == LOAD) ? 'b1 : (iter_cnt >= 12) ? 'b0 : s_sif.ready;
         end
     end
 end
 
-assign o_pipe.clk   = i_pipe.clk;
-assign o_pipe.rst_n = i_pipe.rst_n;
+assign m_sif.clk   = s_sif.clk;
+assign m_sif.rst_n = s_sif.rst_n;
 
-always_ff @(posedge i_pipe.clk or negedge i_pipe.rst_n)
+always_ff @(posedge s_sif.clk or negedge s_sif.rst_n)
 begin
-    if (!i_pipe.rst_n) begin
-        o_pipe.data  <= 'b0;
-        o_pipe.valid <= 'b0;
+    if (!s_sif.rst_n) begin
+        m_sif.data  <= 'b0;
+        m_sif.valid <= 'b0;
     end else begin
-        if (~o_pipe.valid & (ctl_sta == LAST)) begin
+        if (~m_sif.valid & (ctl_sta == LAST)) begin
             case (iter_mode)
-                SHA_224: o_pipe.data <= out_data_224;
-                SHA_256: o_pipe.data <= out_data_256;
-                SHA_384: o_pipe.data <= out_data_384;
-                SHA_512: o_pipe.data <= out_data_512;
+                SHA_224: m_sif.data <= out_data_224;
+                SHA_256: m_sif.data <= out_data_256;
+                SHA_384: m_sif.data <= out_data_384;
+                SHA_512: m_sif.data <= out_data_512;
             endcase
 
-            o_pipe.valid <= 'b1;
+            m_sif.valid <= 'b1;
         end else begin
-            o_pipe.data  <= o_pipe.ready ? 'b0 : o_pipe.data;
-            o_pipe.valid <= o_pipe.ready ? 'b0 : o_pipe.valid;
+            m_sif.data  <= m_sif.ready ? 'b0 : m_sif.data;
+            m_sif.valid <= m_sif.ready ? 'b0 : m_sif.valid;
         end
     end
 end
 
-always_ff @(posedge i_pipe.clk or negedge i_pipe.rst_n)
+always_ff @(posedge s_sif.clk or negedge s_sif.rst_n)
 begin
-    if (!i_pipe.rst_n) begin
+    if (!s_sif.rst_n) begin
         ctl_sta <= IDLE;
 
         a <= 'b0;
@@ -237,11 +237,11 @@ begin
     end else begin
         case (ctl_sta)
             IDLE, LAST:
-                ctl_sta <= i_pipe.valid ? INIT : IDLE;
+                ctl_sta <= s_sif.valid ? INIT : IDLE;
             WAIT:
-                ctl_sta <= i_pipe.valid ? INIT : WAIT;
+                ctl_sta <= s_sif.valid ? INIT : WAIT;
             INIT:
-                ctl_sta <= i_pipe.valid ? NEXT : INIT;
+                ctl_sta <= s_sif.valid ? NEXT : INIT;
             NEXT:
                 ctl_sta <= iter_next ? LOAD : NEXT;
             LOAD:
@@ -264,11 +264,11 @@ begin
                 m <= 'b0;
 
                 for (int i = 0; i < 8; i++) begin
-                    case (i_pipe.user)
-                        SHA_224: s[i] <= i_pipe.valid & iter_idle ? n_384[i][31: 0] : s[i];
-                        SHA_256: s[i] <= i_pipe.valid & iter_idle ? n_512[i][63:32] : s[i];
-                        SHA_384: s[i] <= i_pipe.valid & iter_idle ? n_384[i]        : s[i];
-                        SHA_512: s[i] <= i_pipe.valid & iter_idle ? n_512[i]        : s[i];
+                    case (s_sif.ctrl[C_WIDTH-1:0])
+                        SHA_224: s[i] <= s_sif.valid & iter_idle ? n_384[i][31: 0] : s[i];
+                        SHA_256: s[i] <= s_sif.valid & iter_idle ? n_512[i][63:32] : s[i];
+                        SHA_384: s[i] <= s_sif.valid & iter_idle ? n_384[i]        : s[i];
+                        SHA_512: s[i] <= s_sif.valid & iter_idle ? n_512[i]        : s[i];
                     endcase
                 end
 
@@ -278,7 +278,7 @@ begin
                 iter_max <= 'b0;
             end
             INIT: begin
-                if (i_pipe.valid) begin
+                if (s_sif.valid) begin
                     a <= a + s[0];
                     b <= b + s[1];
                     c <= c + s[2];
@@ -331,7 +331,7 @@ begin
             end
             NEXT: begin
                 if ((iter_cnt + 2) <= 15) begin
-                    if (i_pipe.valid) begin
+                    if (s_sif.valid) begin
                         a <= t_1 + t_2;
                         b <= a;
                         c <= b;
@@ -393,7 +393,7 @@ begin
                 iter_max <= iter_max;
             end
             WAIT: begin
-                if (i_pipe.valid) begin
+                if (s_sif.valid) begin
                     a <= 'b0;
                     b <= 'b0;
                     c <= 'b0;
@@ -431,13 +431,13 @@ begin
 
         iter_save <= (ctl_sta == INIT) | (ctl_sta == LOAD);
         iter_keep <= (ctl_sta == INIT) | (ctl_sta == LOAD) ? 'b1 : (iter_load ? 'b0 : iter_keep);
-        iter_idle <= (ctl_sta == IDLE) | (ctl_sta == LAST) ? (i_pipe.valid ? 'b0 : 'b1) : iter_idle;
+        iter_idle <= (ctl_sta == IDLE) | (ctl_sta == LAST) ? (s_sif.valid ? 'b0 : 'b1) : iter_idle;
 
         iter_load <= (iter_cnt == (iter_max - 3));
         iter_next <= (iter_cnt == (iter_max - 1));
 
-        iter_mode <= i_pipe.valid & iter_idle ? i_pipe.user : (ctl_sta == LAST) ? 'b0 : iter_mode;
-        iter_last <= i_pipe.valid & (iter_cnt == 'd13) ? i_pipe.last : (ctl_sta == LAST) ? 'b0 : iter_last;
+        iter_mode <= s_sif.valid & iter_idle ? s_sif.ctrl[C_WIDTH-1:0] : (ctl_sta == LAST) ? 'b0 : iter_mode;
+        iter_last <= s_sif.valid & (iter_cnt == 'd13) ? s_sif.last : (ctl_sta == LAST) ? 'b0 : iter_last;
     end
 end
 

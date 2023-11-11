@@ -16,29 +16,29 @@ parameter U_WIDTH = 2;
 parameter I_WIDTH = 64;
 parameter O_WIDTH = 512;
 
-pipe_if #(
+stream_if #(
     .DATA_WIDTH(I_WIDTH),
     .USER_WIDTH(U_WIDTH)
-) i_pipe();
+) s_sif();
 
-pipe_if #(
+stream_if #(
     .DATA_WIDTH(O_WIDTH),
     .USER_WIDTH(U_WIDTH)
-) o_pipe();
+) m_sif();
 
-axi4s_pipe_bridge axi4s_pipe_bridge(
-    .s_axi4s(s_axi4s),
-    .o_pipe(i_pipe)
+axis2sif axis2sif(
+    .s_axis(s_axi4s),
+    .m_sif(s_sif)
 );
 
-pipe_sha2 pipe_sha2(
-    .i_pipe(i_pipe),
-    .o_pipe(o_pipe)
+sif_sha2 sif_sha2(
+    .s_sif(s_sif),
+    .m_sif(m_sif)
 );
 
-pipe_axi4s_bridge pipe_axi4s_bridge(
-    .i_pipe(o_pipe),
-    .m_axi4s(m_axi4s)
+sif2axis sif2axis(
+    .s_sif(m_sif),
+    .m_axis(m_axi4s)
 );
 
 endmodule

@@ -15,26 +15,26 @@ module ahb_sha2 #(
     output logic s_irq
 );
 
-mmio_if #(
+memory_if #(
     .ADDR_WIDTH(A_WIDTH),
     .DATA_WIDTH(D_WIDTH)
-) mmio();
+) mif();
 
-ahb_mmio_bridge #(
+ahb2mif #(
     .ADDR_WIDTH(A_WIDTH),
     .DATA_WIDTH(D_WIDTH)
-) ahb_mmio_bridge (
+) ahb2mif(
     .s_ahb(s_ahb),
-    .m_mmio(mmio)
+    .m_mif(mif)
 );
 
-mmio_sha2 #(
+mif_sha2 #(
     .A_WIDTH(A_WIDTH),
     .D_WIDTH(D_WIDTH),
     .I_DEPTH(32),
     .O_DEPTH(2)
-) mmio_sha2 (
-    .s_mmio(mmio),
+) mif_sha2(
+    .s_mif(mif),
     .s_irq(s_irq)
 );
 
