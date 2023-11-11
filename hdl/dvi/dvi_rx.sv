@@ -14,32 +14,52 @@ module dvi_rx #(
 ) (
     input logic rst_n_i,
 
-    // tmds_o[0] : {clk_p, ch2_p, ch1_p, ch0_p} : {CLK_P, RED, GREEN, BLUE}
-    // tmds_o[1] : {clk_n, ch2_n, ch1_n, ch0_n} : {CLK_N, RED, GREEN, BLUE}
+    input logic clk_5x_i,
+    input logic cal_en_i,
+
+    // tmds_o[0] : {clk_p, ch2_p, ch1_p, ch0_p} : {CLK, RED, GREEN, BLUE}
+    // tmds_o[1] : {clk_n, ch2_n, ch1_n, ch0_n} : {CLK, RED, GREEN, BLUE}
     input logic [1:0] [3:0] tmds_i,
 
     output logic             de_o,
-    output logic             hsync_o,
     output logic             vsync_o,
+    output logic             hsync_o,
     output logic [2:0] [7:0] pixel_o, // {r[23:16], g[15:8], b[7:0]}
 
-    output logic clk_o,
-    output logic clk_5x_o
+    output logic clk_o
 );
+
+logic [2:0] [2:0] ctrl;
 
 logic [2:0]       ser_data;
 logic [2:0] [9:0] par_data;
 
+assign de_o    = ctrl[2][0];
+assign vsync_o = ctrl[1][0];
+assign hsync_o = ctrl[0][0];
+
 generate
     case (VENDOR)
         VENDOR_XILINX: begin
-
+            IBUFDS #(
+                .DIFF_TERM("FALSE"),
+                .IOSTANDARD("TMDS_33"),
+                .IBUF_LOW_PWR("FALSE")
+            ) IBUFDS [3:0] (
+                .O({clk_o, ser_data}),
+                .I(tmds_i[0]),
+                .IB(tmds_i[1])
+            );
         end
         VENDOR_GOWIN: begin
-
+            ELVDS_IBUF IBUFDS [3:0] (
+                .O({clk_o, ser_data}),
+                .I(tmds_i[0]),
+                .IB(tmds_i[1])
+            );
         end
         default: begin
-            assign ser_data = 'b0;
+            assign {clk_o, ser_data} = 'b0;
         end
     endcase
 endgenerate
@@ -47,25 +67,26 @@ endgenerate
 ser2par_10b #(
     .VENDOR(VENDOR)
 ) ser2par_10b [2:0] (
+    .clk_i(clk_o),
     .rst_n_i(rst_n_i),
 
-    .ser_data_i(ser_data),
-    .par_data_o(par_data),
+    .clk_5x_i(clk_5x_i),
+    .cal_en_i(cal_en_i),
 
-    .clk_o(clk_o),
-    .clk_5x_o(clk_5x_o)
+    .ser_data_i(ser_data),
+    .par_data_o(par_data)
 );
 
 tmds_decoder tmds_decoder [2:0] (
     .clk_i(clk_o),
     .rst_n_i(rst_n_i),
 
-    .q_i(par_data),
-    .d_o(pixel_i),
+    .d_i(par_data),
+    .q_o(pixel_o),
 
-    .de_o(de_o),
-    .c1_o(vsync_o),
-    .c0_o(hsync_o)
+    .de_o(ctrl[2]),
+    .c1_o(ctrl[1]),
+    .c0_o(ctrl[0])
 );
 
 endmodule

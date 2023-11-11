@@ -24,8 +24,8 @@ module par2ser_10b #(
 generate
     case (VENDOR)
         VENDOR_XILINX: begin
-            logic shiftout1;
-            logic shiftout2;
+            logic shiftin1;
+            logic shiftin2;
 
             OSERDESE2 #(
                 .DATA_RATE_OQ("DDR"),
@@ -39,7 +39,7 @@ generate
                 .TBYTE_CTL("FALSE"),
                 .TBYTE_SRC("FALSE"),
                 .TRISTATE_WIDTH(1)
-            ) OSERDES_M (
+            ) OSERDES_M(
                 .OFB(),
                 .OQ(ser_data_o),
                 .SHIFTOUT1(),
@@ -59,8 +59,8 @@ generate
                 .D8(par_data_i[7]),
                 .OCE(1'b1),
                 .RST(~rst_n_i),
-                .SHIFTIN1(shiftout1),
-                .SHIFTIN2(shiftout2),
+                .SHIFTIN1(shiftin1),
+                .SHIFTIN2(shiftin2),
                 .T1(1'b0),
                 .T2(1'b0),
                 .T3(1'b0),
@@ -81,11 +81,11 @@ generate
                 .TBYTE_CTL("FALSE"),
                 .TBYTE_SRC("FALSE"),
                 .TRISTATE_WIDTH(1)
-            ) OSERDES_S (
+            ) OSERDES_S(
                 .OFB(),
                 .OQ(),
-                .SHIFTOUT1(shiftout1),
-                .SHIFTOUT2(shiftout2),
+                .SHIFTOUT1(shiftin1),
+                .SHIFTOUT2(shiftin2),
                 .TBYTEOUT(),
                 .TFB(),
                 .TQ(),
@@ -112,7 +112,10 @@ generate
             );
         end
         VENDOR_GOWIN: begin
-            OSER10 OSERDES (
+            OSER10 #(
+                .GSREN("false"),
+                .LSREN("true")
+            ) OSERDES(
                 .Q(ser_data_o),
                 .D0(par_data_i[0]),
                 .D1(par_data_i[1]),
