@@ -174,6 +174,9 @@ begin
     end
 end
 
+assign s_mif.wr_done = 'b1;
+assign s_mif.rd_done = 'b1;
+
 always_ff @(posedge s_mif.clk or negedge s_mif.rst_n)
 begin
     if (!s_mif.rst_n) begin
