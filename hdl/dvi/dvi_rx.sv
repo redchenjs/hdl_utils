@@ -29,6 +29,9 @@ module dvi_rx #(
     output logic clk_o
 );
 
+logic clk_5x;
+logic pll_rst_n;
+
 logic [2:0] [2:0] ctrl;
 
 logic [2:0]       ser_data;
@@ -64,13 +67,27 @@ generate
     endcase
 endgenerate
 
+pll #(
+    .VENDOR(VENDOR_XILINX),
+    .CLK_REF(100000000),
+    .CLK_MUL(5),
+    .CLK_DIV(1),
+    .CLK_PHA(0)
+) pll(
+    .clk_i(clk_o),
+    .rst_n_i(rst_n_i),
+
+    .clk_o(clk_5x),
+    .rst_n_o(pll_rst_n)
+);
+
 ser2par_10b #(
     .VENDOR(VENDOR)
 ) ser2par_10b [2:0] (
     .clk_i(clk_o),
-    .rst_n_i(rst_n_i),
+    .rst_n_i(rst_n_i & pll_rst_n),
 
-    .clk_5x_i(clk_5x_i),
+    .clk_5x_i(clk_5x),
     .cal_en_i(cal_en_i),
 
     .ser_data_i(ser_data),
@@ -79,7 +96,7 @@ ser2par_10b #(
 
 tmds_decoder tmds_decoder [2:0] (
     .clk_i(clk_o),
-    .rst_n_i(rst_n_i),
+    .rst_n_i(rst_n_i & pll_rst_n),
 
     .d_i(par_data),
     .q_o(pixel_o),

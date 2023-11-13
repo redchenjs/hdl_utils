@@ -27,6 +27,9 @@ module dvi_tx #(
     output logic [1:0] [3:0] tmds_o
 );
 
+logic clk_5x;
+logic pll_rst_n;
+
 logic [2:0] [2:0] ctrl;
 
 logic [2:0] [9:0] par_data;
@@ -36,9 +39,23 @@ assign ctrl[2] = {3{de_i}};
 assign ctrl[1] = {2'b0, vsync_i};
 assign ctrl[0] = {2'b0, hsync_i};
 
-tmds_encoder tmds_encoder [2:0] (
+pll #(
+    .VENDOR(VENDOR_XILINX),
+    .CLK_REF(100000000),
+    .CLK_MUL(5),
+    .CLK_DIV(1),
+    .CLK_PHA(0)
+) pll(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
+
+    .clk_o(clk_5x),
+    .rst_n_o(pll_rst_n)
+);
+
+tmds_encoder tmds_encoder [2:0] (
+    .clk_i(clk_i),
+    .rst_n_i(rst_n_i & pll_rst_n),
 
     .de_i(ctrl[2]),
     .c1_i(ctrl[1]),
@@ -52,9 +69,9 @@ par2ser_10b #(
     .VENDOR(VENDOR)
 ) par2ser_10b [2:0] (
     .clk_i(clk_i),
-    .rst_n_i(rst_n_i),
+    .rst_n_i(rst_n_i & pll_rst_n),
 
-    .clk_5x_i(clk_5x_i),
+    .clk_5x_i(clk_5x),
 
     .par_data_i(par_data),
     .ser_data_o(ser_data)
