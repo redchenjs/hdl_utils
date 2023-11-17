@@ -14,9 +14,6 @@ module dvi_rx #(
 ) (
     input logic rst_n_i,
 
-    input logic clk_5x_i,
-    input logic cal_en_i,
-
     // tmds_o[0] : {clk_p, ch2_p, ch1_p, ch0_p} : {CLK, RED, GREEN, BLUE}
     // tmds_o[1] : {clk_n, ch2_n, ch1_n, ch0_n} : {CLK, RED, GREEN, BLUE}
     input logic [1:0] [3:0] tmds_i,

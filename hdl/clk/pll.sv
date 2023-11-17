@@ -23,11 +23,11 @@ module pll #(
     output logic rst_n_o
 );
 
-logic clk_fb;
-
 generate
     case (VENDOR)
         VENDOR_XILINX: begin
+            logic clk_fb;
+
             PLLE2_BASE #(
                 .BANDWIDTH("OPTIMIZED"),
                 .CLKFBOUT_MULT(CLK_MUL*2),
@@ -70,7 +70,45 @@ generate
             );
         end
         VENDOR_GOWIN: begin
-
+            rPLL #(
+                .FCLKIN($sformatf("%0.3f", CLK_REF/1000000)),
+                .DYN_IDIV_SEL("false"),
+                .IDIV_SEL(CLK_DIV),
+                .DYN_FBDIV_SEL("false"),
+                .FBDIV_SEL(CLK_MUL*2-1),
+                .ODIV_SEL(2),
+                .PSDA_SEL("0000"),
+                .DYN_DA_EN("false"),
+                .DUTYDA_SEL("1000"),
+                .CLKOUT_FT_DIR(1'b1),
+                .CLKOUTP_FT_DIR(1'b1),
+                .CLKOUT_DLY_STEP(0),
+                .CLKOUTP_DLY_STEP(0),
+                .CLKFB_SEL("internal"),
+                .CLKOUT_BYPASS("false"),
+                .CLKOUTP_BYPASS("false"),
+                .CLKOUTD_BYPASS("false"),
+                .DYN_SDIV_SEL(2),
+                .CLKOUTD_SRC("CLKOUT"),
+                .CLKOUTD3_SRC("CLKOUT"),
+                .DEVICE("")
+            ) PLL(
+                .CLKOUT(clk_o),
+                .LOCK(rst_n_o),
+                .CLKOUTP(),
+                .CLKOUTD(),
+                .CLKOUTD3(),
+                .RESET(~rst_n_i),
+                .RESET_P(~rst_n_i),
+                .CLKIN(clk_i),
+                .CLKFB('b0),
+                .FBDSEL('b0),
+                .IDSEL('b0),
+                .ODSEL('b0),
+                .PSDA('b0),
+                .DUTYDA('b0),
+                .FDLY('b0)
+            );
         end
         default: begin
             assign clk_o   = clk_i;

@@ -15,8 +15,6 @@ module dvi_tx #(
     input logic clk_i,
     input logic rst_n_i,
 
-    input logic clk_5x_i,
-
     input logic             de_i,
     input logic             vsync_i,
     input logic             hsync_i,
@@ -40,7 +38,7 @@ assign ctrl[1] = {2'b0, vsync_i};
 assign ctrl[0] = {2'b0, hsync_i};
 
 pll #(
-    .VENDOR(VENDOR_XILINX),
+    .VENDOR(VENDOR),
     .CLK_REF(100000000),
     .CLK_MUL(5),
     .CLK_DIV(1),
