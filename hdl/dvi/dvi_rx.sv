@@ -10,6 +10,7 @@
 import vendor_pkg::*;
 
 module dvi_rx #(
+    parameter int REFCLK = 74250000,
     parameter int VENDOR = VENDOR_XILINX
 ) (
     input logic rst_n_i,
@@ -65,8 +66,8 @@ generate
 endgenerate
 
 pll #(
-    .VENDOR(VENDOR_XILINX),
-    .CLK_REF(100000000),
+    .VENDOR(VENDOR),
+    .CLK_REF(REFCLK),
     .CLK_MUL(5),
     .CLK_DIV(1),
     .CLK_PHA(0)

@@ -10,6 +10,7 @@
 import vendor_pkg::*;
 
 module dvi_tx #(
+    parameter int REFCLK = 74250000,
     parameter int VENDOR = VENDOR_XILINX
 ) (
     input logic clk_i,
@@ -39,7 +40,7 @@ assign ctrl[0] = {2'b0, hsync_i};
 
 pll #(
     .VENDOR(VENDOR),
-    .CLK_REF(100000000),
+    .CLK_REF(REFCLK),
     .CLK_MUL(5),
     .CLK_DIV(1),
     .CLK_PHA(0)
