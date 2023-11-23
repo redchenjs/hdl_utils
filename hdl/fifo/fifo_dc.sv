@@ -8,10 +8,11 @@
 `timescale 1 ns / 1 ps
 
 module fifo_dc #(
-    parameter I_WIDTH = 64,
-    parameter I_DEPTH = 32,
-    parameter O_WIDTH = 32,
-    parameter O_DEPTH = 64
+    parameter int I_WIDTH = 64,
+    parameter int I_DEPTH = 32,
+    parameter int O_WIDTH = 32,
+    parameter int O_DEPTH = 64,
+    parameter bit REG_OUT = 1
 ) (
     input logic wr_clk_i,
     input logic wr_rst_n_i,
@@ -148,7 +149,7 @@ ram_tp #(
     .O_WIDTH(O_WIDTH),
     .O_DEPTH(O_DEPTH),
     .BYTE_EN(0),
-    .REG_OUT(1)
+    .REG_OUT(REG_OUT)
 ) ram_tp (
     .wr_clk_i(wr_clk_i),
 
