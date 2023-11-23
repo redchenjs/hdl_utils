@@ -26,10 +26,6 @@ logic               in_valid_i;
 logic [O_WIDTH-1:0] out_data_o;
 logic               out_valid_o;
 
-logic [O_WIDTH-1:0] out_data_1;
-logic [O_WIDTH-1:0] out_data_2;
-logic [O_WIDTH-1:0] out_data_3;
-
 crc #(
     .REFI(REFI),
     .REFO(REFO),

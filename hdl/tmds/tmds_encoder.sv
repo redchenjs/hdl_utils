@@ -19,28 +19,12 @@ module tmds_encoder(
     output logic [9:0] q_o
 );
 
-// count 1s in a byte
-function logic [3:0] N_1(
-    input logic [7:0] x
-);
-    logic [1:0] x_0[4];
-    logic [2:0] x_1[2];
-
-    x_0[0] = x[0] + x[1];
-    x_0[1] = x[2] + x[3];
-    x_0[2] = x[4] + x[5];
-    x_0[3] = x[6] + x[7];
-
-    x_1[0]= x_0[0] + x_0[1];
-    x_1[1]= x_0[2] + x_0[3];
-
-    return x_1[0] + x_1[1];
-endfunction
-
 logic de, c1, c0;
 
 logic        [3:0] n_0;
 logic        [3:0] n_1;
+
+logic        [3:0] d_1;
 
 logic signed [4:0] m_0;
 logic signed [4:0] m_1;
@@ -52,8 +36,26 @@ logic        [8:0] q_m;
 logic        [8:0] q_r;
 logic        [9:0] q_n;
 
+math_op #(
+    .MATH_OP(MATH_OP_ADD),
+    .I_COUNT(8),
+    .I_WIDTH(1),
+    .O_COUNT(1),
+    .O_WIDTH(4),
+    .REG_OUT(0)
+) math_add [2:0] (
+    .clk_i(clk_i),
+    .rst_n_i(rst_n_i),
+
+    .in_data_i({q_r[7:0], ~q_r[7:0], d_i}),
+    .in_valid_i(3'b111),
+
+    .out_data_o({n_1, n_0, d_1}),
+    .out_valid_o()
+);
+
 always_comb begin
-    if ((N_1(d_i) > 4) | ((N_1(d_i) == 4) & ~d_i[0])) begin
+    if ((d_1 > 4) | ((d_1 == 4) & ~d_i[0])) begin
         q_m[0] = d_i[0];
         q_m[1] = d_i[1] ^~ q_m[0];
         q_m[2] = d_i[2] ^~ q_m[1];
@@ -74,9 +76,6 @@ always_comb begin
         q_m[7] = d_i[7] ^ q_m[6];
         q_m[8] = 1'b1;
     end
-
-    n_0 = N_1(~q_r[7:0]);
-    n_1 = N_1( q_r[7:0]);
 
     m_0 = c_t - (n_1 - n_0);
     m_1 = c_t + (n_1 - n_0);

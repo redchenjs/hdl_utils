@@ -10,9 +10,11 @@
 import vendor_pkg::*;
 
 module dvi_rx #(
+    parameter bit EXTCLK = 0,
     parameter int REFCLK = 74250000,
     parameter int VENDOR = VENDOR_XILINX
 ) (
+    input logic clk_i,
     input logic rst_n_i,
 
     // tmds_o[0] : {clk_p, ch2_p, ch1_p, ch0_p} : {CLK, RED, GREEN, BLUE}
@@ -27,6 +29,8 @@ module dvi_rx #(
     output logic clk_o
 );
 
+logic cal_en;
+
 logic clk_5x;
 logic pll_rst_n;
 
@@ -34,6 +38,8 @@ logic [2:0] [2:0] ctrl;
 
 logic [2:0]       ser_data;
 logic [2:0] [9:0] par_data;
+
+assign cal_en  = 1'b0;
 
 assign de_o    = ctrl[2][0];
 assign vsync_o = ctrl[1][0];
@@ -65,19 +71,24 @@ generate
     endcase
 endgenerate
 
-pll #(
-    .VENDOR(VENDOR),
-    .CLK_REF(REFCLK),
-    .CLK_MUL(5),
-    .CLK_DIV(1),
-    .CLK_PHA(0)
-) pll(
-    .clk_i(clk_o),
-    .rst_n_i(rst_n_i),
+if (EXTCLK) begin
+    assign clk_5x    = clk_i;
+    assign pll_rst_n = 1'b1;
+end else begin
+    pll #(
+        .VENDOR(VENDOR),
+        .CLK_REF(REFCLK),
+        .CLK_MUL(5),
+        .CLK_DIV(1),
+        .CLK_PHA(0)
+    ) pll(
+        .clk_i(clk_o),
+        .rst_n_i(rst_n_i),
 
-    .clk_o(clk_5x),
-    .rst_n_o(pll_rst_n)
-);
+        .clk_o(clk_5x),
+        .rst_n_o(pll_rst_n)
+    );
+end
 
 ser2par_10b #(
     .VENDOR(VENDOR)
@@ -86,7 +97,7 @@ ser2par_10b #(
     .rst_n_i(rst_n_i & pll_rst_n),
 
     .clk_5x_i(clk_5x),
-    .cal_en_i(cal_en_i),
+    .cal_en_i(cal_en),
 
     .ser_data_i(ser_data),
     .par_data_o(par_data)

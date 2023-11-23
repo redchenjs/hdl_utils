@@ -30,10 +30,10 @@ generate
 
             PLLE2_BASE #(
                 .BANDWIDTH("OPTIMIZED"),
-                .CLKFBOUT_MULT(CLK_MUL*2),
+                .CLKFBOUT_MULT(CLK_MUL*3),
                 .CLKFBOUT_PHASE(0.0),
                 .CLKIN1_PERIOD(1000000000/CLK_REF),
-                .CLKOUT0_DIVIDE(CLK_DIV*2),
+                .CLKOUT0_DIVIDE(CLK_DIV*3),
                 .CLKOUT1_DIVIDE(1),
                 .CLKOUT2_DIVIDE(1),
                 .CLKOUT3_DIVIDE(1),

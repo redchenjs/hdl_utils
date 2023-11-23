@@ -127,7 +127,7 @@ wire [D_WIDTH-1:0] mag = (a & b) ^ ( a & c) ^ (b & c);
 wire [D_WIDTH-1:0] t_1 = big_sigma_1 + ch + h + m;
 wire [D_WIDTH-1:0] t_2 = big_sigma_0 + mag;
 
-wire               [D_WIDTH-1:0] data_i = {<< byte {s_sif.data}};
+wire               [D_WIDTH-1:0] data_i = {<< byte{s_sif.data}};
 wire [O_COUNT-1:0] [D_WIDTH-1:0] data_o = {h, g, f, e, d, c, b, a};
 
 generate

@@ -11,12 +11,12 @@ import vendor_pkg::*;
 
 module tb_dvi;
 
+parameter bit EXTCLK = 0;
+parameter int REFCLK = 74250000;
 parameter int VENDOR = VENDOR_XILINX;
 
 logic clk_i;
 logic rst_n_i;
-
-logic clk_5x_i;
 
 logic             de_i;
 logic             vsync_i;
@@ -27,8 +27,6 @@ logic [2:0] [7:0] pixel_i; // {r[23:16], g[15:8], b[7:0]}
 // tmds_o[1] : {clk_n, ch2_n, ch1_n, ch0_n} : {CLK, RED, GREEN, BLUE}
 logic [1:0] [3:0] tmds_o;
 
-logic cal_en_i;
-
 logic             de_o;
 logic             vsync_o;
 logic             hsync_o;
@@ -37,12 +35,12 @@ logic [2:0] [7:0] pixel_o; // {r[23:16], g[15:8], b[7:0]}
 logic clk_o;
 
 dvi_tx #(
+    .EXTCLK(EXTCLK),
+    .REFCLK(REFCLK),
     .VENDOR(VENDOR_XILINX)
 ) dvi_tx(
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
-
-    .clk_5x_i(rst_n_i),
 
     .de_i(de_i),
     .vsync_i(vsync_i),
@@ -53,12 +51,12 @@ dvi_tx #(
 );
 
 dvi_rx #(
+    .EXTCLK(EXTCLK),
+    .REFCLK(REFCLK),
     .VENDOR(VENDOR_XILINX)
 ) dvi_rx(
+    .clk_i(clk_i),
     .rst_n_i(rst_n_i),
-
-    .clk_5x_i(clk_5x_i),
-    .cal_en_i(cal_en_i),
 
     .tmds_i(tmds_o),
 
@@ -78,8 +76,6 @@ initial begin
     vsync_i = 'b0;
     hsync_i = 'b0;
     pixel_i = 'b0;
-
-    cal_en_i = 'b0;
 
     #2 rst_n_i = 'b1;
 end

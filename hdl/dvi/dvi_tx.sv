@@ -10,11 +10,12 @@
 import vendor_pkg::*;
 
 module dvi_tx #(
+    parameter bit EXTCLK = 0,
     parameter int REFCLK = 74250000,
     parameter int VENDOR = VENDOR_XILINX
 ) (
-    input logic clk_i,
-    input logic rst_n_i,
+    input logic [EXTCLK:0] clk_i,
+    input logic            rst_n_i,
 
     input logic             de_i,
     input logic             vsync_i,
@@ -38,19 +39,24 @@ assign ctrl[2] = {3{de_i}};
 assign ctrl[1] = {2'b0, vsync_i};
 assign ctrl[0] = {2'b0, hsync_i};
 
-pll #(
-    .VENDOR(VENDOR),
-    .CLK_REF(REFCLK),
-    .CLK_MUL(5),
-    .CLK_DIV(1),
-    .CLK_PHA(0)
-) pll(
-    .clk_i(clk_i),
-    .rst_n_i(rst_n_i),
+if (EXTCLK) begin
+    assign clk_5x    = clk_i[1];
+    assign pll_rst_n = 1'b1;
+end else begin
+    pll #(
+        .VENDOR(VENDOR),
+        .CLK_REF(REFCLK),
+        .CLK_MUL(5),
+        .CLK_DIV(1),
+        .CLK_PHA(0)
+    ) pll(
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
 
-    .clk_o(clk_5x),
-    .rst_n_o(pll_rst_n)
-);
+        .clk_o(clk_5x),
+        .rst_n_o(pll_rst_n)
+    );
+end
 
 tmds_encoder tmds_encoder [2:0] (
     .clk_i(clk_i),

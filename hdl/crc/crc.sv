@@ -61,14 +61,15 @@ generate
                 assign lfsr_x[i][          j] =        poly_x[j-(O_WIDTH-I_WIDTH)][i];
             end
 
-            assign data_d[i][j] = data_x[i][j] ? in_data_i[j] : 'b0;
-            assign lfsr_d[i][j] = lfsr_x[i][j] ?    data_n[j] : 'b0;
+            assign data_d[i][j] = (j < I_WIDTH) & data_x[i][j] ? in_data_i[j] : 'b0;
+            assign lfsr_d[i][j] = (j < O_WIDTH) & lfsr_x[i][j] ?    data_n[j] : 'b0;
         end
 
         math_op #(
             .MATH_OP(MATH_OP_XOR),
             .I_COUNT(O_WIDTH*2),
             .I_WIDTH(1),
+            .O_COUNT(1),
             .O_WIDTH(1),
             .REG_OUT(0)
         ) math_xor(
@@ -76,14 +77,14 @@ generate
             .rst_n_i(rst_n_i),
 
             .in_data_i({data_d[i], lfsr_d[i]}),
-            .in_valid_i('b1),
+            .in_valid_i(1'b1),
 
             .out_data_o(data_k[i]),
             .out_valid_o()
         );
     end
 
-    assign data_m = REFO ? {<< bit {data_k}} : data_k;
+    assign data_m = REFO ? {<< bit{data_k}} : data_k;
     assign data_r = XORO ^ data_m;
 endgenerate
 
