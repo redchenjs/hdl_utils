@@ -10,11 +10,11 @@
 import math_pkg::*;
 
 module math_op #(
-    parameter int MATH_OP = MATH_OP_ADD,
-    parameter int I_COUNT = 2,
-    parameter int I_WIDTH = 64,
+    parameter int MATH_OP = MATH_OP_AND,
+    parameter int I_COUNT = 5,
+    parameter int I_WIDTH = 8,
     parameter int O_COUNT = 1,
-    parameter int O_WIDTH = 64,
+    parameter int O_WIDTH = 8,
     parameter bit REG_OUT = 1
 ) (
     input logic clk_i,
@@ -27,10 +27,31 @@ module math_op #(
     output logic                             out_valid_o
 );
 
-logic [$clog2(I_WIDTH):0]               [I_WIDTH-1:0] data_s;
-logic [$clog2(I_COUNT):0] [I_COUNT-1:0] [I_WIDTH-1:0] data_t;
-logic [$clog2(I_COUNT):0] [I_COUNT-1:0] [O_WIDTH-1:0] data_c;
-logic                     [O_COUNT-1:0] [O_WIDTH-1:0] data_r;
+logic [$clog2(I_WIDTH):0]             [I_WIDTH-1:0] data_s;
+logic                     [I_COUNT:0] [I_WIDTH-1:0] data_t;
+logic [$clog2(I_COUNT):0] [I_COUNT:0] [O_WIDTH-1:0] data_c;
+logic                     [O_COUNT:0] [O_WIDTH-1:0] data_r;
+
+initial begin
+    data_s = 'b0;
+
+    foreach (data_t[i,j]) begin
+        case (MATH_OP)
+            MATH_OP_ADD,
+            MATH_OP_NAND,
+            MATH_OP_OR,
+            MATH_OP_XOR:
+                data_t[i][j] = 1'b0;
+            MATH_OP_AND,
+            MATH_OP_NOR,
+            MATH_OP_XNOR:
+                data_t[i][j] = 1'b1;
+        endcase
+    end
+
+    data_c = 'b0;
+    data_r = 'b0;
+end
 
 generate
     genvar i, j;
@@ -42,29 +63,36 @@ generate
         MATH_OP_ASR,
         MATH_OP_ROR: begin
             assign data_s[0] = in_data_i;
+
+            for (j = 0; j < I_COUNT; j++) begin
+                assign data_c[0][j] = data_t[0][j];
+            end
+
             assign data_r[0] = data_s[$clog2(I_WIDTH)];
         end
         default: begin
-            assign data_t[0] = in_data_i;
+            for (j = 0; j <= I_COUNT; j++) begin
+                assign data_t[j] = in_data_i[j];
+                assign data_c[0][j] = data_t[j];
+            end
+
             assign data_r[0] = data_c[$clog2(I_COUNT)][0];
         end
     endcase
 
-    for (j = 0; j < I_COUNT; j++) begin
-        assign data_c[0][j] = data_t[0][j];
-    end
-
-    for (i = 0; i < $clog2(I_COUNT); i++) begin: gen_data_c
-        for (j = 0; j < 2**($clog2(I_COUNT)-i)/2; j++) begin: gen_data_d
-            case (MATH_OP)
-                MATH_OP_ADD:  assign data_c[i+1][j] = data_c[i][j*2] +  data_c[i][j*2+1];
-                MATH_OP_AND:  assign data_c[i+1][j] = data_c[i][j*2] &  data_c[i][j*2+1];
-                MATH_OP_NAND: assign data_c[i+1][j] = data_c[i][j*2] &~ data_c[i][j*2+1];
-                MATH_OP_OR:   assign data_c[i+1][j] = data_c[i][j*2] |  data_c[i][j*2+1];
-                MATH_OP_NOR:  assign data_c[i+1][j] = data_c[i][j*2] |~ data_c[i][j*2+1];
-                MATH_OP_XOR:  assign data_c[i+1][j] = data_c[i][j*2] ^  data_c[i][j*2+1];
-                MATH_OP_XNOR: assign data_c[i+1][j] = data_c[i][j*2] ^~ data_c[i][j*2+1];
-            endcase
+    for (i = 1; i <= $clog2(I_COUNT); i++) begin: gen_data_c
+        for (j = 0; j < 2**($clog2(I_COUNT)-i); j++) begin: gen_data_d
+            if ((j * 2) < I_COUNT) begin
+                case (MATH_OP)
+                    MATH_OP_ADD:  assign data_c[i][j] = data_c[i-1][j*2] +  data_c[i-1][j*2+1];
+                    MATH_OP_AND:  assign data_c[i][j] = data_c[i-1][j*2] &  data_c[i-1][j*2+1];
+                    MATH_OP_NAND: assign data_c[i][j] = data_c[i-1][j*2] &~ data_c[i-1][j*2+1];
+                    MATH_OP_OR:   assign data_c[i][j] = data_c[i-1][j*2] |  data_c[i-1][j*2+1];
+                    MATH_OP_NOR:  assign data_c[i][j] = data_c[i-1][j*2] |~ data_c[i-1][j*2+1];
+                    MATH_OP_XOR:  assign data_c[i][j] = data_c[i-1][j*2] ^  data_c[i-1][j*2+1];
+                    MATH_OP_XNOR: assign data_c[i][j] = data_c[i-1][j*2] ^~ data_c[i-1][j*2+1];
+                endcase
+            end
         end
     end
 
