@@ -11,12 +11,12 @@ import math_pkg::*;
 
 module tb_math_op;
 
-parameter int MATH_OP = MATH_OP_OR;
-parameter int I_COUNT = 5;
-parameter int I_WIDTH = 8;
-parameter int O_COUNT = 1;
-parameter int O_WIDTH = 8;
-parameter bit REG_OUT = 1;
+parameter math_op_t MATH_OP = MATH_OP_ADD;
+parameter       int I_COUNT = 8;
+parameter       int I_WIDTH = 8;
+parameter       int O_COUNT = 1;
+parameter       int O_WIDTH = 8;
+parameter       bit REG_OUT = 0;
 
 logic clk_i;
 logic rst_n_i;

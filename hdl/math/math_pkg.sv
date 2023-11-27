@@ -22,8 +22,9 @@ package math_pkg;
         MATH_OP_ASR  = 'h0009,
         MATH_OP_ROR  = 'h000a,
 
-        MATH_OP_ADD  = 'h0010,
-        MATH_OP_MUL  = 'h0011,
-        MATH_OP_DIV  = 'h0012
+        MATH_OP_ADD  = 'h000b,
+        MATH_OP_SUB  = 'h000c,
+        MATH_OP_MUL  = 'h000d,
+        MATH_OP_DIV  = 'h000e
     } math_op_t;
 endpackage
