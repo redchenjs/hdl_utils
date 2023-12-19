@@ -11,8 +11,11 @@ import ahb_pkg::*;
 
 module ahb2mif #(
     parameter ADDR_WIDTH = 32,
-    parameter DATA_WIDTH = 64
+    parameter DATA_WIDTH = 32
 ) (
+    input logic clk_i,
+    input logic rst_n_i,
+
     ahb_if.slave     s_ahb,
     memory_if.master m_mif
 );
@@ -23,9 +26,6 @@ logic [ADDR_WIDTH-1:0] haddr_w;
 
 logic                                             [DATA_WIDTH/8-1:0] byteen;
 logic [DATA_WIDTH/8-1:0] [$clog2(DATA_WIDTH/8):0] [DATA_WIDTH/8-1:0] byteen_mux;
-
-assign m_mif.clk   = s_ahb.hclk;
-assign m_mif.rst_n = s_ahb.hresetn;
 
 assign m_mif.wr_en     = hsel_w;
 assign m_mif.wr_addr   = haddr_w;
@@ -71,9 +71,9 @@ always_comb begin
     endcase
 end
 
-always_ff @(posedge s_ahb.hclk or negedge s_ahb.hresetn)
+always_ff @(posedge clk_i or negedge rst_n_i)
 begin
-    if (!s_ahb.hresetn) begin
+    if (!rst_n_i) begin
         byteen <= 'b0;
 
         hsel_w  <= 'b0;

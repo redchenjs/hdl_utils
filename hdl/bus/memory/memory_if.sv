@@ -7,10 +7,8 @@
 
 interface memory_if #(
     parameter int ADDR_WIDTH = 32,
-    parameter int DATA_WIDTH = 64
+    parameter int DATA_WIDTH = 32
 );
-    logic                    clk;
-    logic                    rst_n;
     // write interface
     logic                    wr_en;
     logic                    wr_done;
@@ -25,11 +23,11 @@ interface memory_if #(
 
     modport master (
         input wr_done, rd_done, rd_data,
-        output clk, rst_n, wr_en, wr_addr, wr_data, wr_byteen, rd_en, rd_addr
+        output wr_en, wr_addr, wr_data, wr_byteen, rd_en, rd_addr
     );
 
     modport slave (
-        input clk, rst_n, wr_en, wr_addr, wr_data, wr_byteen, rd_en, rd_addr,
+        input wr_en, wr_addr, wr_data, wr_byteen, rd_en, rd_addr,
         output wr_done, rd_done, rd_data
     );
 endinterface

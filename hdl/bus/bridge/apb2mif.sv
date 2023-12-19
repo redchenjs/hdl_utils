@@ -11,12 +11,12 @@ module apb2mif #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 32
 ) (
+    input logic clk_i,
+    input logic rst_n_i,
+
     apb_if.slave  s_apb,
     mif_if.master m_mif
 );
-
-assign m_mif.clk   = s_apb.pclk;
-assign m_mif.rst_n = s_apb.presetn;
 
 assign m_mif.wr_en     = s_apb.psel & s_apb.penable & s_apb.pwrite;
 assign m_mif.wr_addr   = s_apb.paddr;

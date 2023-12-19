@@ -9,9 +9,6 @@ interface stream_if #(
     parameter int CTRL_WIDTH = 32,
     parameter int DATA_WIDTH = 32
 );
-    logic                  clk;
-    logic                  rst_n;
-    // stream interface
     logic [CTRL_WIDTH-1:0] ctrl;
     logic [DATA_WIDTH-1:0] data;
     logic                  last;
@@ -20,11 +17,11 @@ interface stream_if #(
 
     modport master (
         input ready,
-        output clk, rst_n, ctrl, data, last, valid
+        output ctrl, data, last, valid
     );
 
     modport slave (
-        input clk, rst_n, ctrl, data, last, valid,
+        input ctrl, data, last, valid,
         output ready
     );
 endinterface
