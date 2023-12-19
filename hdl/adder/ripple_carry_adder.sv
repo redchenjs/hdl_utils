@@ -1,5 +1,5 @@
 /*
- * rca.sv
+ * ripple_carry_adder.sv
  *
  *  Created on: 2023-11-24 14:10
  *      Author: Jack Chen <redchenjs@live.com>
@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps
 
-module rca #(
+module ripple_carry_adder #(
     parameter int D_WIDTH = 64
 ) (
     input logic [D_WIDTH-1:0] a_i,

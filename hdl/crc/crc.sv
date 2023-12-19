@@ -65,23 +65,7 @@ generate
             assign lfsr_d[i][j] = (j < O_WIDTH) & lfsr_x[i][j] ?    data_n[j] : 'b0;
         end
 
-        math_op #(
-            .MATH_OP(MATH_OP_XOR),
-            .I_COUNT(O_WIDTH*2),
-            .I_WIDTH(1),
-            .O_COUNT(1),
-            .O_WIDTH(1),
-            .REG_OUT(0)
-        ) math_xor(
-            .clk_i(clk_i),
-            .rst_n_i(rst_n_i),
-
-            .in_data_i({data_d[i], lfsr_d[i]}),
-            .in_valid_i(1'b1),
-
-            .out_data_o(data_k[i]),
-            .out_valid_o()
-        );
+        assign data_k[i] = ^{data_d[i], lfsr_d[i]};
     end
 
     assign data_m = REFO ? {<< bit{data_k}} : data_k;

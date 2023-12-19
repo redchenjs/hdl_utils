@@ -24,7 +24,7 @@ logic               c_o_rca;
 logic [D_WIDTH-1:0] s_o_lca;
 logic               c_o_lca;
 
-rca #(
+ripple_carry_adder #(
     .D_WIDTH(D_WIDTH)
 ) rca(
     .a_i(a_i),
@@ -35,7 +35,7 @@ rca #(
     .c_o(c_o_rca)
 );
 
-lca #(
+lookahead_carry_adder #(
     .D_WIDTH(D_WIDTH)
 ) lca(
     .a_i(a_i),
