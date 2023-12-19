@@ -11,8 +11,6 @@ interface apb_if #(
     // bridge parameters
     parameter DEC_NUMBER = 16
 );
-    logic                  pclk;
-    logic                  presetn;
     logic [ADDR_WIDTH-1:0] paddr;
     logic                  penable;
     logic                  psel;

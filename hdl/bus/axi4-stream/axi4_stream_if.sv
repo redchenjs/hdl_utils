@@ -11,9 +11,6 @@ interface axi4_stream_if #(
     parameter DATA_WIDTH = 64,
     parameter USER_WIDTH = 64
 );
-    logic                    aclk;
-    logic                    aresetn;
-    // stream interface
     logic                    tvalid;
     logic                    tready;
     logic   [DATA_WIDTH-1:0] tdata;
@@ -26,11 +23,11 @@ interface axi4_stream_if #(
 
     modport master (
         input tready,
-        output aclk, aresetn, tvalid, tdata, tstrb, tkeep, tlast, tid, tdest, tuser
+        output tvalid, tdata, tstrb, tkeep, tlast, tid, tdest, tuser
     );
 
     modport slave (
-        input aclk, aresetn, tvalid, tdata, tstrb, tkeep, tlast, tid, tdest, tuser,
+        input tvalid, tdata, tstrb, tkeep, tlast, tid, tdest, tuser,
         output tready
     );
 endinterface

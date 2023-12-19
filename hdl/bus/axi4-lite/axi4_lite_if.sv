@@ -11,36 +11,34 @@ interface axi4_lite_if #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 64
 );
-    logic                  aclk;
-    logic                  aresetn;
     // write address channel
-    axi_id_t               awid;
-    logic [ADDR_WIDTH-1:0] awaddr;
-    axi_prot_t             awprot;
-    logic                  awvalid;
-    logic                  awready;
+    axi_id_t                 awid;
+    logic   [ADDR_WIDTH-1:0] awaddr;
+    axi_prot_t               awprot;
+    logic                    awvalid;
+    logic                    awready;
     // write data channel
     logic   [DATA_WIDTH-1:0] wdata;
     logic [DATA_WIDTH/8-1:0] wstrb;
     logic                    wvalid;
     logic                    wready;
     // write response channel
-    axi_id_t   bid;
-    axi_resp_t bresp;
-    logic      bvalid;
-    logic      bready;
+    axi_id_t                 bid;
+    axi_resp_t               bresp;
+    logic                    bvalid;
+    logic                    bready;
     // read address channel
-    axi_id_t               arid;
-    logic [ADDR_WIDTH-1:0] araddr;
-    axi_prot_t             arprot;
-    logic                  arvalid;
-    logic                  arready;
+    axi_id_t                 arid;
+    logic   [ADDR_WIDTH-1:0] araddr;
+    axi_prot_t               arprot;
+    logic                    arvalid;
+    logic                    arready;
     // read data channel
-    axi_id_t               rid;
-    logic [DATA_WIDTH-1:0] rdata;
-    axi_resp_t             rresp;
-    logic                  rvalid;
-    logic                  rready;
+    axi_id_t                 rid;
+    logic   [DATA_WIDTH-1:0] rdata;
+    axi_resp_t               rresp;
+    logic                    rvalid;
+    logic                    rready;
 
     modport master (
         // write address channel

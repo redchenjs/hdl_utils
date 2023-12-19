@@ -78,8 +78,6 @@ generate
 
     for (i = 0; i < MAS_NUMBER; i++) begin
         // assign master interface
-        assign m_ahb_if[i].hclk    = m_ahb[i].hclk;
-        assign m_ahb_if[i].hresetn = m_ahb[i].hresetn;
         assign m_ahb_if[i].haddr   = m_ahb[i].haddr;
         assign m_ahb_if[i].htrans  = m_ahb[i].htrans;
         assign m_ahb_if[i].hwrite  = m_ahb[i].hwrite;
@@ -111,8 +109,6 @@ generate
 
     for (i = 0; i < SLV_NUMBER; i++) begin
         // assign slave interface
-        assign s_ahb[i].hclk      = s_ahb_if[i].hclk;
-        assign s_ahb[i].hresetn   = s_ahb_if[i].hresetn;
         assign s_ahb[i].hsel      = s_ahb_if[i].hsel;
         assign s_ahb[i].haddr     = s_ahb_if[i].haddr;
         assign s_ahb[i].htrans    = s_ahb_if[i].htrans;

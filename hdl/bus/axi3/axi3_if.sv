@@ -11,19 +11,17 @@ interface axi3_if #(
     parameter ADDR_WIDTH = 32,
     parameter DATA_WIDTH = 64
 );
-    logic                  aclk;
-    logic                  aresetn;
     // write address channel
-    axi_id_t               awid;
-    logic [ADDR_WIDTH-1:0] awaddr;
-    axi_len_t              awlen;
-    axi_size_t             awsize;
-    axi_burst_t            awburst;
-    axi_lock_t             awlock;
-    axi_cache_t            awcache;
-    axi_prot_t             awprot;
-    logic                  awvalid;
-    logic                  awready;
+    axi_id_t                 awid;
+    logic   [ADDR_WIDTH-1:0] awaddr;
+    axi_len_t                awlen;
+    axi_size_t               awsize;
+    axi_burst_t              awburst;
+    axi_lock_t               awlock;
+    axi_cache_t              awcache;
+    axi_prot_t               awprot;
+    logic                    awvalid;
+    logic                    awready;
     // write data channel
     axi_id_t                 wid;
     logic   [DATA_WIDTH-1:0] wdata;
@@ -32,32 +30,32 @@ interface axi3_if #(
     logic                    wvalid;
     logic                    wready;
     // write response channel
-    axi_id_t   bid;
-    axi_resp_t bresp;
-    logic      bvalid;
-    logic      bready;
+    axi_id_t                 bid;
+    axi_resp_t               bresp;
+    logic                    bvalid;
+    logic                    bready;
     // read address channel
-    axi_id_t               arid;
-    logic [ADDR_WIDTH-1:0] araddr;
-    axi_len_t              arlen;
-    axi_size_t             arsize;
-    axi_burst_t            arburst;
-    axi_lock_t             arlock;
-    axi_cache_t            arcache;
-    axi_prot_t             arprot;
-    logic                  arvalid;
-    logic                  arready;
+    axi_id_t                 arid;
+    logic   [ADDR_WIDTH-1:0] araddr;
+    axi_len_t                arlen;
+    axi_size_t               arsize;
+    axi_burst_t              arburst;
+    axi_lock_t               arlock;
+    axi_cache_t              arcache;
+    axi_prot_t               arprot;
+    logic                    arvalid;
+    logic                    arready;
     // read data channel
-    axi_id_t               rid;
-    logic [DATA_WIDTH-1:0] rdata;
-    axi_resp_t             rresp;
-    logic                  rlast;
-    logic                  rvalid;
-    logic                  rready;
+    axi_id_t                 rid;
+    logic   [DATA_WIDTH-1:0] rdata;
+    axi_resp_t               rresp;
+    logic                    rlast;
+    logic                    rvalid;
+    logic                    rready;
     // low-power interface
-    logic         csysreq;
-    logic         csysack;
-    axi_cactive_t cactive;
+    logic                    csysreq;
+    logic                    csysack;
+    axi_cactive_t            cactive;
 
     modport master (
         // write address channel

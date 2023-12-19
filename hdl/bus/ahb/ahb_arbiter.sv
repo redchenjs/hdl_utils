@@ -38,8 +38,8 @@ endgenerate
 pri_64b #(
     .REG_OUT('b0)
 ) pri_64b (
-    .clk_i(m_ahb[0].hclk),
-    .rst_n_i(m_ahb[0].hresetn),
+    .clk_i('b0),
+    .rst_n_i('b1),
 
     .in_data_i(m_hbusreq),
     .in_valid_i('b1),
@@ -51,8 +51,8 @@ pri_64b #(
 dec_64b #(
     .REG_OUT('b0)
 ) dec_64b (
-    .clk_i(m_ahb[0].hclk),
-    .rst_n_i(m_ahb[0].hresetn),
+    .clk_i('b0),
+    .rst_n_i('b1),
 
     .in_data_i(m_hbusreqx),
     .in_valid_i('b1),

@@ -11,8 +11,6 @@ interface ahb_lite_if #(
     parameter int ADDR_WIDTH = 32,
     parameter int DATA_WIDTH = 64
 );
-    logic                  hclk;
-    logic                  hresetn;
     // master signals
     logic [ADDR_WIDTH-1:0] haddr;
     ahb_lite_burst_t       hburst;
@@ -32,16 +30,16 @@ interface ahb_lite_if #(
 
     modport master (
         input hrdata, hready, hresp,
-        output hclk, hresetn, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hmastlock
+        output haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hmastlock
     );
 
     modport slave (
-        input hclk, hresetn, hsel, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hready, hmastlock,
+        input hsel, haddr, htrans, hwrite, hsize, hburst, hprot, hwdata, hready, hmastlock,
         output hrdata, hreadyout, hresp
     );
 
     modport decoder (
-        input hclk, hresetn, haddr,
+        input haddr,
         output hsel, hslave
     );
 endinterface

@@ -51,8 +51,8 @@ endgenerate
 pri_64b #(
     .REG_OUT('b0)
 ) pri_64b (
-    .clk_i(s_ahb[0].hclk),
-    .rst_n_i(s_ahb[0].hresetn),
+    .clk_i('b0),
+    .rst_n_i('b1),
 
     .in_data_i(s_hsel),
     .in_valid_i('b1),
