@@ -34,49 +34,21 @@ generate
     assign c_o    = c_t[D_WIDTH];
 
     for (i = 0; i <= D_WIDTH; i++) begin: gen_c_t
-        for (j = 0; j <= i; j++) begin: gen_c_y
-            assign c_x[i][j][0] = g_t[j];
+        for (j = 0; j <= D_WIDTH; j++) begin: gen_c_y
+            if (j > i) begin
+                assign c_y[i][j] = 'b0;
+            end else begin
+                assign c_x[i][j][0] = g_t[j];
 
-            for (k = 1; k <= i; k++) begin: gen_c_x
-                assign c_x[i][j][k] = p_t[i-k];
+                for (k = 1; k <= D_WIDTH; k++) begin: gen_c_x
+                    assign c_x[i][j][k] = k <= (i - j) ? p_t[i-k] : 'b1;
+                end
+
+                assign c_y[i][j] = &c_x[i][j];
             end
-
-            math_op #(
-                .MATH_OP(MATH_OP_AND),
-                .I_COUNT(i-j+1),
-                .I_WIDTH(1),
-                .O_COUNT(1),
-                .O_WIDTH(1),
-                .REG_OUT(0)
-            ) math_and(
-                .clk_i(clk_i),
-                .rst_n_i(rst_n_i),
-
-                .in_data_i(c_x[i][j]),
-                .in_valid_i(1'b1),
-
-                .out_data_o(c_y[i][j]),
-                .out_valid_o()
-            );
         end
 
-        math_op #(
-            .MATH_OP(MATH_OP_OR),
-            .I_COUNT(i+1),
-            .I_WIDTH(1),
-            .O_COUNT(1),
-            .O_WIDTH(1),
-            .REG_OUT(0)
-        ) math_or(
-            .clk_i(clk_i),
-            .rst_n_i(rst_n_i),
-
-            .in_data_i(c_y[i]),
-            .in_valid_i(1'b1),
-
-            .out_data_o(c_t[i]),
-            .out_valid_o()
-        );
+        assign c_t[i] = |c_y[i];
     end
 
     for (i = 0; i < D_WIDTH; i++) begin
