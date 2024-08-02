@@ -8,7 +8,9 @@
 `timescale 1 ns / 1 ps
 
 module data_sync #(
-    parameter D_WIDTH = 8
+    parameter int S_STAGE = 2,
+    parameter int I_VALUE = 0,
+    parameter int D_WIDTH = 8
 ) (
     input logic clk_i,
     input logic rst_n_i,
@@ -17,17 +19,48 @@ module data_sync #(
     output logic [D_WIDTH-1:0] data_o
 );
 
-logic [D_WIDTH-1:0] data_t;
-
-always_ff @(posedge clk_i or negedge rst_n_i)
-begin
-    if (!rst_n_i) begin
-        data_t <= 'b0;
-        data_o <= 'b0;
-    end else begin
-        data_t <= data_i;
-        data_o <= data_t;
+generate
+    // No Sync
+    if (S_STAGE == 0) begin
+        assign data_o = data_i;
     end
-end
+
+    // Two-Stage Sync: Falling Edge + Rising Edge
+    if (S_STAGE == 1) begin
+        logic [D_WIDTH-1:0] data_t;
+
+        always_ff @(negedge clk_i or negedge rst_n_i)
+        begin
+            if (!rst_n_i) begin
+                data_t <= I_VALUE;
+            end else begin
+                data_t <= data_i;
+            end
+        end
+
+        always_ff @(posedge clk_i or negedge rst_n_i)
+        begin
+            if (!rst_n_i) begin
+                data_o <= I_VALUE;
+            end else begin
+                data_o <= data_t;
+            end
+        end
+    end
+
+    // Multi-Stage Sync: Rising Edge
+    if (S_STAGE >= 2) begin
+        logic [S_STAGE-1:0] [D_WIDTH-1:0] data_t;
+
+        always_ff @(posedge clk_i or negedge rst_n_i)
+        begin
+            if (!rst_n_i) begin
+                {data_o, data_t} <= {(S_STAGE+1){I_VALUE[D_WIDTH-1:0]}};
+            end else begin
+                {data_o, data_t} <= {data_t[S_STAGE-1:0], data_i};
+            end
+        end
+    end
+endgenerate
 
 endmodule
