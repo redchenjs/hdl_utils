@@ -35,6 +35,8 @@ end
 always begin
     #13 rst_n_i <= 1'b0;
     #13 rst_n_i <= 1'b1;
+    #13 rst_n_i <= 1'b0;
+    #13 rst_n_i <= 1'b1;
 
     #25 $finish;
 end

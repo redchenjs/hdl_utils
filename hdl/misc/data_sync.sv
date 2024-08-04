@@ -27,25 +27,27 @@ generate
 
     // Two-Stage Sync: Falling Edge + Rising Edge
     if (S_STAGE == 1) begin
-        logic [D_WIDTH-1:0] data_t;
+        logic [1:0] [D_WIDTH-1:0] data_t;
 
         always_ff @(negedge clk_i or negedge rst_n_i)
         begin
             if (!rst_n_i) begin
-                data_t <= I_VALUE;
+                data_t[0] <= I_VALUE;
             end else begin
-                data_t <= data_i;
+                data_t[0] <= data_i;
             end
         end
 
         always_ff @(posedge clk_i or negedge rst_n_i)
         begin
             if (!rst_n_i) begin
-                data_o <= I_VALUE;
+                data_t[1] <= I_VALUE;
             end else begin
-                data_o <= data_t;
+                data_t[1] <= data_t[0];
             end
         end
+
+        assign data_o = data_t[1];
     end
 
     // Multi-Stage Sync: Rising Edge
@@ -55,11 +57,13 @@ generate
         always_ff @(posedge clk_i or negedge rst_n_i)
         begin
             if (!rst_n_i) begin
-                {data_o, data_t} <= {(S_STAGE+1){I_VALUE[D_WIDTH-1:0]}};
+                data_t <= {S_STAGE{I_VALUE[D_WIDTH-1:0]}};
             end else begin
-                {data_o, data_t} <= {data_t[S_STAGE-1:0], data_i};
+                data_t <= {data_t[S_STAGE-2:0], data_i};
             end
         end
+
+        assign data_o = data_t[S_STAGE-1];
     end
 endgenerate
 

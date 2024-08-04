@@ -21,12 +21,12 @@ data_sync #(
     .S_STAGE(S_STAGE),
     .I_VALUE(0),
     .D_WIDTH(1)
-) u_data_sync (
+) data_sync (
     .clk_i(clk_i),
     .rst_n_i(rst_n_i),
 
     .data_i(1'b1),
     .data_o(rst_n_o)
-)
+);
 
 endmodule

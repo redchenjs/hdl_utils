@@ -12,8 +12,8 @@ module fifo #(
     parameter int I_DEPTH = 32,
     parameter int O_WIDTH = 32,
     parameter int O_DEPTH = 64,
-    parameter bit T_ASYNC = 1,
-    parameter bit DBG_OUT = 1,
+    parameter bit T_ASYNC = 0,
+    parameter bit DBG_OUT = 0,
     parameter bit REG_OUT = 1
 ) (
     input logic wr_clk_i,
@@ -52,7 +52,7 @@ generate
         wire [$clog2(I_DEPTH):0] rd_addr_w_ext  = {rd_addr_w, {$clog2(I_DEPTH/O_DEPTH){1'b0}}};
         wire [$clog2(I_DEPTH):0] rd_avail_r_ext = {wr_addr_r[$clog2(I_DEPTH)] ^ rd_addr_r_ext[$clog2(I_DEPTH)], wr_addr_r[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_r_ext[$clog2(I_DEPTH)-1:0]};
 
-        assign wr_full_o = (rd_addr_s_ext == {~wr_addr_g[$clog2(I_DEPTH)], wr_addr_g[$clog2(I_DEPTH)-1:0]});
+        assign wr_full_o = (rd_addr_s_ext == {~wr_addr_g[$clog2(I_DEPTH):$clog2(I_DEPTH)-T_ASYNC], wr_addr_g[$clog2(I_DEPTH)-T_ASYNC-1:0]});
         assign wr_free_o = DBG_OUT ? (I_DEPTH - ({wr_addr_w[$clog2(I_DEPTH)] ^ rd_addr_w_ext[$clog2(I_DEPTH)], wr_addr_w[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_w_ext[$clog2(I_DEPTH)-1:0]})) : 'b0;
 
         assign rd_empty_o = (rd_addr_g_ext == wr_addr_s);
@@ -65,7 +65,7 @@ generate
         wire [$clog2(O_DEPTH):0] wr_addr_r_ext = {wr_addr_r, {$clog2(O_DEPTH/I_DEPTH){1'b0}}};
         wire [$clog2(O_DEPTH):0] wr_free_w_ext = (O_DEPTH - ({wr_addr_w_ext[$clog2(O_DEPTH)] ^ rd_addr_w[$clog2(O_DEPTH)], wr_addr_w_ext[$clog2(O_DEPTH)-1:0]} - {1'b0, rd_addr_w[$clog2(O_DEPTH)-1:0]}));
 
-        assign wr_full_o = (rd_addr_s == {~wr_addr_g_ext[$clog2(O_DEPTH)], wr_addr_g_ext[$clog2(O_DEPTH)-1:0]});
+        assign wr_full_o = (rd_addr_s == {~wr_addr_g_ext[$clog2(O_DEPTH):$clog2(O_DEPTH)-T_ASYNC], wr_addr_g_ext[$clog2(O_DEPTH)-T_ASYNC-1:0]});
         assign wr_free_o = DBG_OUT ? ({{$clog2(O_DEPTH/I_DEPTH){1'b0}}, wr_free_w_ext[$clog2(O_DEPTH):$clog2(O_DEPTH/I_DEPTH)]}) : 'b0;
 
         assign rd_empty_o = (rd_addr_g == wr_addr_s_ext);
@@ -102,20 +102,22 @@ if (T_ASYNC) begin
         .data_o(wr_addr_s)
     );
 
-    // [Write -> Read] Gray To Bin (FOR DEBUG OUTPUT)
-    gray2bin #(
-        .D_WIDTH($clog2(I_DEPTH)+1),
-        .REG_OUT(0)
-    ) gray2bin_w2r (
-        .clk_i(rd_clk_i),
-        .rst_n_i(rd_rst_n_i),
+    if (DBG_OUT) begin
+        // [Write -> Read] Gray To Bin (FOR DEBUG OUTPUT)
+        gray2bin #(
+            .D_WIDTH($clog2(I_DEPTH)+1),
+            .REG_OUT(0)
+        ) gray2bin_w2r (
+            .clk_i(rd_clk_i),
+            .rst_n_i(rd_rst_n_i),
 
-        .in_data_i(wr_addr_s),
-        .in_valid_i('b1),
+            .in_data_i(wr_addr_s),
+            .in_valid_i('b1),
 
-        .out_data_o(wr_addr_r),
-        .out_valid_o()
-    );
+            .out_data_o(wr_addr_r),
+            .out_valid_o()
+        );
+    end
 
     // [Read -> Write] Bin To Gray
     bin2gray #(
@@ -145,20 +147,22 @@ if (T_ASYNC) begin
         .data_o(rd_addr_s)
     );
 
-    // [Read -> Write] Gray To Bin (FOR DEBUG OUTPUT)
-    gray2bin #(
-        .D_WIDTH($clog2(O_DEPTH)+1),
-        .REG_OUT(0)
-    ) gray2bin_r2w (
-        .clk_i(wr_clk_i),
-        .rst_n_i(wr_rst_n_i),
+    if (DBG_OUT) begin
+        // [Read -> Write] Gray To Bin (FOR DEBUG OUTPUT)
+        gray2bin #(
+            .D_WIDTH($clog2(O_DEPTH)+1),
+            .REG_OUT(0)
+        ) gray2bin_r2w (
+            .clk_i(wr_clk_i),
+            .rst_n_i(wr_rst_n_i),
 
-        .in_data_i(rd_addr_s),
-        .in_valid_i('b1),
+            .in_data_i(rd_addr_s),
+            .in_valid_i('b1),
 
-        .out_data_o(rd_addr_w),
-        .out_valid_o()
-    );
+            .out_data_o(rd_addr_w),
+            .out_valid_o()
+        );
+    end
 end else begin
     // No CDC Sync
     assign wr_addr_g = wr_addr_w;

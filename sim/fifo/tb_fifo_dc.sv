@@ -9,10 +9,13 @@
 
 module tb_fifo_dc;
 
-parameter I_WIDTH = 32;
-parameter I_DEPTH = 16;
-parameter O_WIDTH = 16;
-parameter O_DEPTH = 32;
+parameter int I_WIDTH = 32;
+parameter int I_DEPTH = 16;
+parameter int O_WIDTH = 16;
+parameter int O_DEPTH = 32;
+parameter bit T_ASYNC = 1;
+parameter bit DBG_OUT = 1;
+parameter bit REG_OUT = 1;
 
 logic wr_clk_i;
 logic wr_rst_n_i;
@@ -30,12 +33,15 @@ logic       [O_WIDTH-1:0] rd_data_o;
 logic                     rd_empty_o;
 logic [$clog2(O_DEPTH):0] rd_avail_o;
 
-fifo_dc #(
+fifo #(
     .I_WIDTH(I_WIDTH),
     .I_DEPTH(I_DEPTH),
     .O_WIDTH(O_WIDTH),
-    .O_DEPTH(O_DEPTH)
-) fifo_dc (
+    .O_DEPTH(O_DEPTH),
+    .T_ASYNC(T_ASYNC),
+    .DBG_OUT(DBG_OUT),
+    .REG_OUT(REG_OUT)
+) fifo (
     .wr_clk_i(wr_clk_i),
     .wr_rst_n_i(wr_rst_n_i),
 
