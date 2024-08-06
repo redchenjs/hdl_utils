@@ -53,10 +53,10 @@ generate
         wire [$clog2(I_DEPTH):0] rd_avail_r_ext = {wr_addr_r[$clog2(I_DEPTH)] ^ rd_addr_r_ext[$clog2(I_DEPTH)], wr_addr_r[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_r_ext[$clog2(I_DEPTH)-1:0]};
 
         assign wr_full_o = (rd_addr_s_ext == {~wr_addr_g[$clog2(I_DEPTH):$clog2(I_DEPTH)-T_ASYNC], wr_addr_g[$clog2(I_DEPTH)-T_ASYNC-1:0]});
-        assign wr_free_o = DBG_OUT ? (I_DEPTH - ({wr_addr_w[$clog2(I_DEPTH)] ^ rd_addr_w_ext[$clog2(I_DEPTH)], wr_addr_w[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_w_ext[$clog2(I_DEPTH)-1:0]})) : 'b0;
+        assign wr_free_o = DBG_OUT ? (I_DEPTH - ({wr_addr_w[$clog2(I_DEPTH)] ^ rd_addr_w_ext[$clog2(I_DEPTH)], wr_addr_w[$clog2(I_DEPTH)-1:0]} - {1'b0, rd_addr_w_ext[$clog2(I_DEPTH)-1:0]})) : 1'b0;
 
         assign rd_empty_o = (rd_addr_g_ext == wr_addr_s);
-        assign rd_avail_o = DBG_OUT ? ({{$clog2(I_DEPTH/O_DEPTH){1'b0}}, rd_avail_r_ext[$clog2(I_DEPTH):$clog2(I_DEPTH/O_DEPTH)]}) : 'b0;
+        assign rd_avail_o = DBG_OUT ? ({{$clog2(I_DEPTH/O_DEPTH){1'b0}}, rd_avail_r_ext[$clog2(I_DEPTH):$clog2(I_DEPTH/O_DEPTH)]}) : 1'b0;
     end else begin
         // Read Data Width < Write Data Width : Extend Write Address
         wire [$clog2(O_DEPTH):0] wr_addr_w_ext = {wr_addr_w, {$clog2(O_DEPTH/I_DEPTH){1'b0}}};
@@ -66,10 +66,10 @@ generate
         wire [$clog2(O_DEPTH):0] wr_free_w_ext = (O_DEPTH - ({wr_addr_w_ext[$clog2(O_DEPTH)] ^ rd_addr_w[$clog2(O_DEPTH)], wr_addr_w_ext[$clog2(O_DEPTH)-1:0]} - {1'b0, rd_addr_w[$clog2(O_DEPTH)-1:0]}));
 
         assign wr_full_o = (rd_addr_s == {~wr_addr_g_ext[$clog2(O_DEPTH):$clog2(O_DEPTH)-T_ASYNC], wr_addr_g_ext[$clog2(O_DEPTH)-T_ASYNC-1:0]});
-        assign wr_free_o = DBG_OUT ? ({{$clog2(O_DEPTH/I_DEPTH){1'b0}}, wr_free_w_ext[$clog2(O_DEPTH):$clog2(O_DEPTH/I_DEPTH)]}) : 'b0;
+        assign wr_free_o = DBG_OUT ? ({{$clog2(O_DEPTH/I_DEPTH){1'b0}}, wr_free_w_ext[$clog2(O_DEPTH):$clog2(O_DEPTH/I_DEPTH)]}) : 1'b0;
 
         assign rd_empty_o = (rd_addr_g == wr_addr_s_ext);
-        assign rd_avail_o = DBG_OUT ? ({wr_addr_r_ext[$clog2(O_DEPTH)] ^ rd_addr_r[$clog2(O_DEPTH)], wr_addr_r_ext[$clog2(O_DEPTH)-1:0]} - {1'b0, rd_addr_r[$clog2(O_DEPTH)-1:0]}) : 'b0;
+        assign rd_avail_o = DBG_OUT ? ({wr_addr_r_ext[$clog2(O_DEPTH)] ^ rd_addr_r[$clog2(O_DEPTH)], wr_addr_r_ext[$clog2(O_DEPTH)-1:0]} - {1'b0, rd_addr_r[$clog2(O_DEPTH)-1:0]}) : 1'b0;
     end
 endgenerate
 
@@ -83,7 +83,7 @@ if (T_ASYNC) begin
         .rst_n_i(wr_rst_n_i),
 
         .in_data_i(wr_addr_w),
-        .in_valid_i('b1),
+        .in_valid_i(1'b1),
 
         .out_data_o(wr_addr_g),
         .out_valid_o()
@@ -112,7 +112,7 @@ if (T_ASYNC) begin
             .rst_n_i(rd_rst_n_i),
 
             .in_data_i(wr_addr_s),
-            .in_valid_i('b1),
+            .in_valid_i(1'b1),
 
             .out_data_o(wr_addr_r),
             .out_valid_o()
@@ -128,7 +128,7 @@ if (T_ASYNC) begin
         .rst_n_i(rd_rst_n_i),
 
         .in_data_i(rd_addr_r),
-        .in_valid_i('b1),
+        .in_valid_i(1'b1),
 
         .out_data_o(rd_addr_g),
         .out_valid_o()
@@ -157,7 +157,7 @@ if (T_ASYNC) begin
             .rst_n_i(wr_rst_n_i),
 
             .in_data_i(rd_addr_s),
-            .in_valid_i('b1),
+            .in_valid_i(1'b1),
 
             .out_data_o(rd_addr_w),
             .out_valid_o()
@@ -188,7 +188,7 @@ ram_tp #(
     .wr_en_i(wr_en_i & ~wr_full_o),
     .wr_addr_i(wr_addr_w[$clog2(I_DEPTH)-1:0]),
     .wr_data_i(wr_data_i),
-    .wr_byteen_i('b1),
+    .wr_byteen_i({(I_WIDTH/8){1'b1}}),
 
     .rd_clk_i(rd_clk_i),
 
@@ -200,7 +200,7 @@ ram_tp #(
 always_ff @(posedge wr_clk_i or negedge wr_rst_n_i)
 begin
     if (!wr_rst_n_i) begin
-        wr_addr_w <= 'b0;
+        wr_addr_w <= 1'b0;
     end else begin
         wr_addr_w <= (wr_en_i & ~wr_full_o) ? wr_addr_w + 1'b1 : wr_addr_w;
     end
@@ -209,7 +209,7 @@ end
 always_ff @(posedge rd_clk_i or negedge rd_rst_n_i)
 begin
     if (!rd_rst_n_i) begin
-        rd_addr_r <= 'b0;
+        rd_addr_r <= 1'b0;
     end else begin
         rd_addr_r <= (rd_en_i & ~rd_empty_o) ? rd_addr_r + 1'b1 : rd_addr_r;
     end
