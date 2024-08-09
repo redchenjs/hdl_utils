@@ -35,12 +35,12 @@ module fifo #(
 
 logic [$clog2(I_DEPTH):0] wr_addr_w; // [Write Region] Write Address (Bin)
 logic [$clog2(I_DEPTH):0] wr_addr_g; // [Write Region] Write Address (Gray)
-logic [$clog2(I_DEPTH):0] wr_addr_s; // [Read  Region] Write Address (Gray)
+logic [$clog2(I_DEPTH):0] wr_addr_s; // [Read  Region] Write Address (Gray-Sync)
 logic [$clog2(I_DEPTH):0] wr_addr_r; // [Read  Region] Write Address (Bin)
 
 logic [$clog2(O_DEPTH):0] rd_addr_r; // [Read  Region] Read Address (Bin)
 logic [$clog2(O_DEPTH):0] rd_addr_g; // [Read  Region] Read Address (Gray)
-logic [$clog2(O_DEPTH):0] rd_addr_s; // [Write Region] Read Address (Gray)
+logic [$clog2(O_DEPTH):0] rd_addr_s; // [Write Region] Read Address (Gray-Sync)
 logic [$clog2(O_DEPTH):0] rd_addr_w; // [Write Region] Read Address (Bin)
 
 generate
@@ -74,10 +74,13 @@ generate
 endgenerate
 
 if (T_ASYNC) begin
+    logic [$clog2(I_DEPTH):0] wr_addr_d;
+    logic [$clog2(O_DEPTH):0] rd_addr_d;
+
     // [Write -> Read] Bin To Gray
     bin2gray #(
         .D_WIDTH($clog2(I_DEPTH)+1),
-        .REG_OUT(1)
+        .REG_OUT(0)
     ) bin2gray_w2r (
         .clk_i(wr_clk_i),
         .rst_n_i(wr_rst_n_i),
@@ -89,7 +92,17 @@ if (T_ASYNC) begin
         .out_valid_o()
     );
 
-    // [Write -> Read] Two-Stage Sync
+    // [Write -> Read] Sync
+    always_ff @(posedge wr_clk_i or negedge wr_rst_n_i)
+    begin
+        if (!wr_rst_n_i) begin
+            wr_addr_d <= {($clog2(I_DEPTH)+1){1'b0}};
+        end else begin
+            wr_addr_d <= wr_addr_g;
+        end
+    end
+
+    // [Write -> Read] CDC Sync
     data_sync #(
         .S_STAGE(2),
         .I_VALUE(0),
@@ -98,7 +111,7 @@ if (T_ASYNC) begin
         .clk_i(rd_clk_i),
         .rst_n_i(rd_rst_n_i),
 
-        .data_i(wr_addr_g),
+        .data_i(wr_addr_d),
         .data_o(wr_addr_s)
     );
 
@@ -122,7 +135,7 @@ if (T_ASYNC) begin
     // [Read -> Write] Bin To Gray
     bin2gray #(
         .D_WIDTH($clog2(O_DEPTH)+1),
-        .REG_OUT(1)
+        .REG_OUT(0)
     ) bin2gray_r2w (
         .clk_i(rd_clk_i),
         .rst_n_i(rd_rst_n_i),
@@ -134,7 +147,17 @@ if (T_ASYNC) begin
         .out_valid_o()
     );
 
-    // [Read -> Write] Two-Stage Sync
+    // [Read -> Write] Sync
+    always_ff @(posedge rd_clk_i or negedge rd_rst_n_i)
+    begin
+        if (!rd_rst_n_i) begin
+            rd_addr_d <= {($clog2(O_DEPTH)+1){1'b0}};
+        end else begin
+            rd_addr_d <= rd_addr_g;
+        end
+    end
+
+    // [Read -> Write] CDC Sync
     data_sync #(
         .S_STAGE(2),
         .I_VALUE(0),
@@ -143,7 +166,7 @@ if (T_ASYNC) begin
         .clk_i(wr_clk_i),
         .rst_n_i(wr_rst_n_i),
 
-        .data_i(rd_addr_g),
+        .data_i(rd_addr_d),
         .data_o(rd_addr_s)
     );
 
