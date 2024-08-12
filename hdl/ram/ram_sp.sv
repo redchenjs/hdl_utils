@@ -15,13 +15,12 @@ module ram_sp #(
     parameter BYTE_EN = 0,
     parameter REG_OUT = 1
 ) (
-    input logic rw_clk_i,
+    input logic                       rw_clk_i,
+    input logic [$clog2(D_DEPTH)-1:0] rw_addr_i,
 
     input logic                               wr_en_i,
     input logic                 [D_WIDTH-1:0] wr_data_i,
     input logic [(BYTE_EN?(D_WIDTH/8-1):0):0] wr_byteen_i,
-
-    input logic [$clog2(D_DEPTH)-1:0] rw_addr_i,
 
     input  logic               rd_en_i,
     output logic [D_WIDTH-1:0] rd_data_o
